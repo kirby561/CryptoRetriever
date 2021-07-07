@@ -1,0 +1,26 @@
+- Look at ticker price and history
+	o Graph
+	o Pick timeframe with the normal defaults: 24, 1m, 6m, 1y, 5y, all
+	o Save tickers for reference later
+	o Remember all viewed tickers (view by most viewed or in order of last access)
+	o Realtime updates? How do updates work?
+
+- Crypto support with all the same features
+
+- Sentiment analysis
+	o Get list of tickers mentioned on various sites:
+		. Subreddit: Investing, WallStreetBets
+		. News?
+	o Analyse sentiment of combined list
+	o Graph sentiment alongside each ticker (Note this means we need sentiment over time)
+		. Can we do this retroactively? Need to look at APIs.
+	o Need options for positive sentiment vs any sentiment (how popular or talked about is it)
+
+- Stock buying/selling strategies
+	o Execute stock buying strategies over a period of time. This needs a lot of fleshing out.
+	o Be able to reference prices, sentiment graphs, slopes?
+	
+- Windows
+	o Show graph of prices between date range
+	o "Peaks and Valleys" for buying/selling short term
+		- Specify criteria for identifying peaks. A peak is a relative maximum on the price curve, a valley is a relative minimum
