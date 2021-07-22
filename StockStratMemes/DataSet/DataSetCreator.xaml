@@ -31,7 +31,7 @@
             <TextBlock Margin="5" Text="Source" Foreground="White" FontSize="20" FontFamily="Arial Black" />
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <RadioButton Margin="10" VerticalContentAlignment="Center">
+                    <RadioButton Margin="10" VerticalContentAlignment="Center" Checked="OnSourceCoinbaseSelected">
                         <TextBlock Text="Coinbase" Foreground="White" FontSize="20" FontFamily="Arial" />
                     </RadioButton>
                 </StackPanel>
@@ -41,11 +41,18 @@
         <Grid Margin="15" Background="#3465a4" Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Margin="5" Text="Type" Foreground="White" FontSize="20" FontFamily="Arial Black" />
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="5">
+                <TextBlock Margin="5" Text="Asset" Foreground="White" FontSize="20" FontFamily="Arial Black" />
+                <ComboBox Margin="5" Name="_currencySelection" Text="Currency"></ComboBox>
+            </StackPanel>
+            
+            
+            <TextBlock Grid.Row="1" Margin="5" Text="Type" Foreground="White" FontSize="20" FontFamily="Arial Black" />
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="5">
                     <RadioButton Margin="5" VerticalContentAlignment="Center">
                         <TextBlock Text="Static" Foreground="White" FontSize="20" FontFamily="Arial" />
@@ -82,7 +89,7 @@
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
-            <Button Background="#3465a4" Foreground="White" Margin="5" Grid.Column="6" Content="Create" />
+            <Button Click="OnCreateClicked" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="6" Content="Create" />
             <Button Background="#3465a4" Foreground="White" Margin="5" Grid.Column="5" Content="Cancel" />
         </Grid>
     </Grid>

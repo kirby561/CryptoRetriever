@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Coinbase;
+using Coinbase.Models;
+using StockStratMemes.Source;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +18,21 @@ namespace StockStratMemes.DataSetView {
     public sealed partial class DataSetCreator : Window {
         public DataSetCreator() {
             this.InitializeComponent();
+        }
+
+        private void OnCreateClicked(object sender, RoutedEventArgs e) {
+          
+        }
+
+        private void OnSourceCoinbaseSelected(object sender, RoutedEventArgs e) {
+            CoinbaseSource source = new CoinbaseSource(SourceType.Static);
+
+            
+            AssetListResult result = source.GetAssetsAsync().GetAwaiter().GetResult();
+            
+            foreach (Asset asset in result.Result) {
+                Console.WriteLine(asset.ToString());
+            }
         }
     }
 }
