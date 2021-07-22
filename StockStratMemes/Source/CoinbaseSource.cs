@@ -35,7 +35,7 @@ namespace StockStratMemes.Source {
                         foreach (KeyValuePair<string, decimal> rate in result.Data.Rates) {
                             // The value given by the coinbase API is in eth/dollar. We want dollar/eth (Or whatever the currencies are)
                             decimal value = Decimal.Divide(1, rate.Value);
-                            assets.Add(new Asset(rate.Key, rate.Value, currency));
+                            assets.Add(new Asset(rate.Key, value, currency));
                         }
 
                         // Success

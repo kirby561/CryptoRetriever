@@ -16,7 +16,7 @@ namespace StockStratMemes.Source {
         Dynamic
     }
 
-    public class Asset {
+    public class Asset : IComparable<Asset> {
         public String Name { get; set; }
         public decimal Value { get; set; }
         public String Currency { get; set; }
@@ -28,7 +28,21 @@ namespace StockStratMemes.Source {
         }
 
         public override String ToString() {
-            return "Name: " + Name + " - Value: " + Value + " - Currency: " + Currency;
+            return Name + ": " + Value.ToString("0.##") + " " + Currency;
+        }
+
+        public int CompareTo(Asset other) {
+            int nameComparison = Name.CompareTo(other.Name);
+            if (nameComparison == 0) {
+                int currencyComparison = Currency.CompareTo(other.Currency);
+                if (currencyComparison == 0) {
+                    return Value.CompareTo(other.Value);
+                } else {
+                    return currencyComparison;
+                }
+            } else {
+                return nameComparison;
+            }
         }
     }
 
