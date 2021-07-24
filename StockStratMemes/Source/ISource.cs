@@ -7,13 +7,7 @@ using System.Threading.Tasks;
 namespace StockStratMemes.Source {
     public interface ISource {
         String GetName();
-        SourceType GetType();
         Task<AssetListResult> GetAssetsAsync();
-    }
-
-    public enum SourceType {
-        Static,
-        Dynamic
     }
 
     public class Asset : IComparable<Asset> {

@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace StockStratMemes.Source {
     public class CoinbaseSource : ISource {
-        private SourceType _type; // Unused for now.
-
-        public CoinbaseSource(SourceType type) {
-            _type = type;
+        public CoinbaseSource() {
+            // Nothing to do yet
         }
 
         public Task<AssetListResult> GetAssetsAsync() {
@@ -53,10 +51,6 @@ namespace StockStratMemes.Source {
 
         public string GetName() {
             return "Coinbase";
-        }
-
-        SourceType ISource.GetType() {
-            return _type;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -17,18 +18,36 @@ namespace StockStratMemes.DataSetView {
     /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class DataSetCreator : Window {
+
+        private Dictionary<String, ISource> _sources = new Dictionary<String, ISource>();
         private ISource _currentSource = null;
 
         public DataSetCreator() {
-            this.InitializeComponent();
+            InitializeComponent();
+
+            // Add all the sources
+            CoinbaseSource coinbaseSource = new CoinbaseSource();
+            _sources[coinbaseSource.GetName()] = coinbaseSource;
+
+            // Fill out the sources list
+            foreach (ISource source in _sources.Values) {
+                RadioButton sourceButton = new RadioButton();
+                sourceButton.Content = source.GetName();
+                sourceButton.Template = Resources["SourceSelectionTemplate"] as ControlTemplate;
+                _sourcePanel.Children.Add(sourceButton);
+            }
         }
 
         private void OnCreateClicked(object sender, RoutedEventArgs e) {
           
         }
 
-        private void OnSourceCoinbaseSelected(object sender, RoutedEventArgs e) {
-            CoinbaseSource source = new CoinbaseSource(SourceType.Static);
+        private void OnSourceSelected(object sender, RoutedEventArgs e) {
+            RadioButton element = sender as RadioButton;
+            String sourceName = (element.Content as TextBlock).Text;
+
+            
+            ISource source = _sources[sourceName];
             _currentSource = source;
             _currencySelection.IsEnabled = false;
             Task result = source.GetAssetsAsync().ContinueWith((action) => {

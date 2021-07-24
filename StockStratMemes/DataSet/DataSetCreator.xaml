@@ -8,6 +8,15 @@
     Width="800" Height="500"
     mc:Ignorable="d">
 
+    <Window.Resources>
+        <ControlTemplate TargetType="RadioButton" x:Key="SourceSelectionTemplate">
+            <RadioButton GroupName="SourceOptions" Margin="10" VerticalContentAlignment="Center" Checked="OnSourceSelected">
+                <TextBlock Text="{TemplateBinding Content}" Foreground="White" FontSize="20" FontFamily="Arial" />
+            </RadioButton>
+        </ControlTemplate>
+        
+    </Window.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -30,11 +39,7 @@
 
             <TextBlock Margin="5" Text="Source" Foreground="White" FontSize="20" FontFamily="Arial Black" />
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <RadioButton Margin="10" VerticalContentAlignment="Center" Checked="OnSourceCoinbaseSelected">
-                        <TextBlock Text="Coinbase" Foreground="White" FontSize="20" FontFamily="Arial" />
-                    </RadioButton>
-                </StackPanel>
+                <StackPanel Name="_sourcePanel" />
             </ScrollViewer>
         </Grid>
 
