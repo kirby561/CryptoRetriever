@@ -39,7 +39,7 @@ namespace StockStratMemes.DataSetView {
         }
 
         private void OnCreateClicked(object sender, RoutedEventArgs e) {
-          
+            MessageBox.Show("" + DataSet.Test());
         }
 
         private void OnSourceSelected(object sender, RoutedEventArgs e) {

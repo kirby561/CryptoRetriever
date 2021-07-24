@@ -77,6 +77,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DataSet\DataSet.cs" />
     <Compile Include="DataSet\DataSetCreator.xaml.cs">
       <DependentUpon>DataSetCreator.xaml</DependentUpon>
     </Compile>

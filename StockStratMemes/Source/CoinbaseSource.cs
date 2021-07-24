@@ -49,6 +49,8 @@ namespace StockStratMemes.Source {
             return listResultTask;
         }
 
+
+
         public string GetName() {
             return "Coinbase";
         }
