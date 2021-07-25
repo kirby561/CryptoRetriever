@@ -39,7 +39,11 @@ namespace StockStratMemes.DataSetView {
         }
 
         private void OnCreateClicked(object sender, RoutedEventArgs e) {
-            MessageBox.Show("" + DataSet.Test());
+            //MessageBox.Show("" + DataSet.Test());
+            if (_currentSource != null) {
+                Asset currentAsset = _currencySelection.SelectedItem as Asset;
+                _currentSource.GetPriceHistoryAsync(currentAsset, DateTime.Now - TimeSpan.FromDays(7));
+            }
         }
 
         private void OnSourceSelected(object sender, RoutedEventArgs e) {
@@ -54,7 +58,7 @@ namespace StockStratMemes.DataSetView {
                 // While we're here, sort the list if it was successful
                 // so we do it off the main thread.
                 if (action.Result.Succeeded) {
-                    action.Result.Result.Sort();
+                    action.Result.Value.Sort();
                 }
 
                 Dispatcher.InvokeAsync(() => {
@@ -66,7 +70,7 @@ namespace StockStratMemes.DataSetView {
 
                     if (listResult.Succeeded) {
                         _currencySelection.IsEnabled = true;
-                        _currencySelection.ItemsSource = listResult.Result;
+                        _currencySelection.ItemsSource = listResult.Value;
                         _currencySelection.SelectedIndex = 0;
                     } else {
                         // Error

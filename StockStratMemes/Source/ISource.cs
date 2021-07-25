@@ -8,6 +8,18 @@ namespace StockStratMemes.Source {
     public interface ISource {
         String GetName();
         Task<AssetListResult> GetAssetsAsync();
+        Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400);
+        Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400);
+    }
+
+    public class DateRange {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+
+        public DateRange(DateTime start, DateTime end) {
+            Start = start;
+            End = end;
+        }
     }
 
     public class Asset : IComparable<Asset> {
@@ -39,16 +51,31 @@ namespace StockStratMemes.Source {
             }
         }
     }
-
-    public class AssetListResult {
-        public List<Asset> Result { get; set; }
+    
+    public class Result<T> {
+        public T Value { get; set; }
         public bool Succeeded { get; set; }
         public String ErrorDetails { get; set; }
 
-        public AssetListResult() {
-            Result = null;
+        public Result() {
+            Value = default(T);
             Succeeded = false;
             ErrorDetails = "Unknown";
         }
+
+        public Result(T value) {
+            Value = value;
+            Succeeded = true;
+            ErrorDetails = "";
+        }
+
+        public Result(String errorDetails) {
+            Value = default(T);
+            Succeeded = false;
+            ErrorDetails = errorDetails;
+        }
     }
+    
+    public class AssetListResult : Result<List<Asset>> { }
+    public class DataSetResult : Result<DataSet> { }
 }

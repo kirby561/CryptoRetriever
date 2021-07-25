@@ -2,8 +2,12 @@
 using Coinbase.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
+using System.Windows;
 
 namespace StockStratMemes.Source {
     public class CoinbaseSource : ISource {
@@ -11,6 +15,10 @@ namespace StockStratMemes.Source {
             // Nothing to do yet
         }
 
+        /// <summary>
+        /// Gets the list of available assets on Coinbase asynchronously.
+        /// </summary>
+        /// <returns>Retuns a task that can be waited on to get the result of the request. It will either contain a list of Assets or an error.</returns>
         public Task<AssetListResult> GetAssetsAsync() {
             Task<AssetListResult> listResultTask = new Task<AssetListResult>(() => {
                 var client = new CoinbaseClient();
@@ -38,7 +46,7 @@ namespace StockStratMemes.Source {
 
                         // Success
                         listResult.Succeeded = true;
-                        listResult.Result = assets;
+                        listResult.Value = assets;
                     }
                 }).Wait();
 
@@ -49,10 +57,97 @@ namespace StockStratMemes.Source {
             return listResultTask;
         }
 
+        public Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample) {
+            Task<DataSetResult> result = new Task<DataSetResult>(() => {
+                // The coinbase library being used doesn't support coinbase pro
+                // which is the only way to get history. It's no problem though
+                // because it's a simple GET request of the following form:
+                // https://api.pro.coinbase.com/products/BTC-USD/candles?start=2021-01-10T12:00:00&end=2021-07-15T12:00:00&granularity=86400
 
+                String startUtc = range.Start.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
+                String endUtc = range.End.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
+                String product = asset.Name.ToUpper() + "-" + asset.Currency.ToUpper();
+                int granularity = secondsPerSample;
 
+                String url = "https://api.pro.coinbase.com/products/" + product + "/candles?start=" + startUtc + "&end=" + endUtc + "&granularity=" + granularity;
+                DataSetResult dataSetResult = new DataSetResult();
+                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                request.Method = "GET";
+                request.UserAgent = "CoinbaseClient/1.0";
+                
+                request.GetResponseAsync().ContinueWith((action) => {
+                    if (action.IsFaulted) {
+                        dataSetResult.Succeeded = false;
+                        dataSetResult.ErrorDetails = action.ToString();
+                    } else {
+                        Stream webStream = action.Result.GetResponseStream();
+                        var reader = new StreamReader(webStream);
+                        String data = reader.ReadToEnd();
+
+                        DataSet dataSet = ParseCoinbaseJsonToDataSet(data);
+
+                        // Fill out the result
+                        dataSetResult.Succeeded = true;
+                        dataSetResult.Value = dataSet;
+                    }
+                }).Wait();
+                
+                return dataSetResult;
+            });
+
+            result.Start();
+
+            return result;
+        }
+
+        public Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample) {
+            DateRange range = new DateRange(start, DateTime.Now);
+            return GetPriceHistoryAsync(asset, range, secondsPerSample);
+        }
+         
         public string GetName() {
             return "Coinbase";
+        }
+
+        private DataSet ParseCoinbaseJsonToDataSet(String json) {
+            // The data is sent back as JSON in the form:
+            //
+            // [0] (Furthest day)
+            //      [0] time bucket start time
+            //      [1] low lowest price during the bucket interval
+            //      [2] high highest price during the bucket interval
+            //      [3] open opening price (first trade) in the bucket interval
+            //      [4] close closing price (last trade) in the bucket interval
+            //      [5] volume volume of trading activity during the bucket interval
+            // [1] (Furthest day + granularity) ...
+            //
+            // See https://docs.pro.coinbase.com/#get-historic-rates
+            const int TimeBucketStartTimeIndex = 0;
+            const int LowestPriceIndex = 1;
+            const int HighestPriceIndex = 2;
+            const int OpeningPriceIndex = 3;
+            const int ClosingPriceIndex = 4;
+            const int TradingVolumeIndex = 5;
+
+            DataSet dataSet = new DataSet();
+
+            JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
+            dynamic jsonArr = jsonSerializer.Deserialize<dynamic>(json);
+            for (int i = 0; i < jsonArr.Length; i++) {
+                decimal timeBucketStartTime = jsonArr[i][TimeBucketStartTimeIndex];
+                decimal lowestPrice = jsonArr[i][LowestPriceIndex];
+                decimal highestPrice = jsonArr[i][HighestPriceIndex];
+                decimal openingPrice = jsonArr[i][OpeningPriceIndex];
+                decimal closingPrice = jsonArr[i][ClosingPriceIndex];
+                decimal tradingVolume = jsonArr[i][TradingVolumeIndex];
+
+                dataSet.Insert(
+                    new Point(
+                        Decimal.ToDouble(timeBucketStartTime), 
+                        Decimal.ToDouble(lowestPrice)));
+            }
+
+            return dataSet;
         }
     }
 }
