@@ -14,7 +14,11 @@
                 <TextBlock Text="{TemplateBinding Content}" Foreground="White" FontSize="20" FontFamily="Arial" />
             </RadioButton>
         </ControlTemplate>
-        
+        <ControlTemplate TargetType="RadioButton" x:Key="GranularitySelectionTemplate">
+            <RadioButton GroupName="GranularityOptions" Margin="10, 0, 0, 10" VerticalContentAlignment="Center" Checked="OnGranularitySelected">
+                <TextBlock Text="{TemplateBinding Content}" Foreground="White" FontSize="20" FontFamily="Arial" />
+            </RadioButton>
+        </ControlTemplate>
     </Window.Resources>
     
     <Grid>
@@ -54,17 +58,10 @@
                 <TextBlock Margin="5" Text="Asset" Foreground="White" FontSize="20" FontFamily="Arial Black" />
                 <ComboBox Margin="5" Name="_currencySelection" Text="Currency"></ComboBox>
             </StackPanel>
-            
-            
-            <TextBlock Grid.Row="1" Margin="5" Text="Type" Foreground="White" FontSize="20" FontFamily="Arial Black" />
+
+            <TextBlock Grid.Row="1" Margin="5" Text="Granularity (s)" Foreground="White" FontSize="20" FontFamily="Arial Black" />
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="5">
-                    <RadioButton Margin="5" VerticalContentAlignment="Center">
-                        <TextBlock Text="Static" Foreground="White" FontSize="20" FontFamily="Arial" />
-                    </RadioButton>
-                    <RadioButton Margin="5" VerticalContentAlignment="Center">
-                        <TextBlock Text="Live" Foreground="White" FontSize="20" FontFamily="Arial" />
-                    </RadioButton>
+                <StackPanel Name="_granularityPanel" Margin="5">
                 </StackPanel>
             </ScrollViewer>
         </Grid>
@@ -78,9 +75,9 @@
             </Grid.RowDefinitions>
 
             <TextBlock Margin="5" Text="From" Foreground="White" FontSize="20" FontFamily="Arial Black" />
-            <DatePicker Margin="5" Grid.Row="1" />
-            <TextBlock Margin="5" Grid.Row="2" Text="To" Foreground="White" FontSize="20" FontFamily="Arial Black" />
-            <DatePicker Margin="5" Grid.Row="3" />
+            <DatePicker Name="_startDatePicker" Margin="5" Grid.Row="1" />
+            <TextBlock Margin="5" Grid.Row="2" Text="To (Optional)" Foreground="White" FontSize="20" FontFamily="Arial Black" />
+            <DatePicker Name="_endDatePicker"  Margin="5" Grid.Row="3" />
         </Grid>
 
         <Grid Margin="15" Grid.Row="2" Grid.ColumnSpan="3" Height="50">

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace StockStratMemes.Source {
     public interface ISource {
         String GetName();
+        List<int> GetGranularityOptions();
         Task<AssetListResult> GetAssetsAsync();
         Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400);
         Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400);

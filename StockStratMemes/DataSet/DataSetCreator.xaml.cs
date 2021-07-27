@@ -21,6 +21,7 @@ namespace StockStratMemes.DataSetView {
 
         private Dictionary<String, ISource> _sources = new Dictionary<String, ISource>();
         private ISource _currentSource = null;
+        private int _selectedGranularity = -1;
 
         public DataSetCreator() {
             InitializeComponent();
@@ -38,18 +39,54 @@ namespace StockStratMemes.DataSetView {
             }
         }
 
+        private void UpdateGranularityOptions() {
+            _granularityPanel.Children.Clear();
+            _selectedGranularity = -1;
+
+            if (_currentSource == null)
+                return;
+            
+            foreach (int granularity in _currentSource.GetGranularityOptions()) {
+                RadioButton granularityButton = new RadioButton();
+                granularityButton.Content = "" + granularity;
+                granularityButton.Template = Resources["GranularitySelectionTemplate"] as ControlTemplate;
+                _granularityPanel.Children.Add(granularityButton);
+            }
+        }
+
         private void OnCreateClicked(object sender, RoutedEventArgs e) {
             //MessageBox.Show("" + DataSet.Test());
-            if (_currentSource != null) {
-                Asset currentAsset = _currencySelection.SelectedItem as Asset;
-                _currentSource.GetPriceHistoryAsync(currentAsset, DateTime.Now - TimeSpan.FromDays(7));
+
+            if (!_startDatePicker.SelectedDate.HasValue) {
+                MessageBox.Show("Please select a start date.");
+                return;
             }
+
+            DateTime startDate = _startDatePicker.SelectedDate.Value;
+            DateTime endDate = DateTime.Now;
+
+            if (_endDatePicker.SelectedDate.HasValue) {
+                endDate = _endDatePicker.SelectedDate.Value;
+            }
+
+            if (_currentSource != null) {
+                int granularity = _selectedGranularity;
+                Asset currentAsset = _currencySelection.SelectedItem as Asset;
+                DataSetResult result =_currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).GetAwaiter().GetResult();
+                MessageBox.Show(result.Value.Points.ToArray().ToString());
+            }
+        }
+
+        private void OnGranularitySelected(object sender, RoutedEventArgs e) {
+            RadioButton element = sender as RadioButton;
+            String selectedGranularityStr = (element.Content as TextBlock).Text;
+            int granularityInSeconds = int.Parse(selectedGranularityStr);
+            _selectedGranularity = granularityInSeconds;
         }
 
         private void OnSourceSelected(object sender, RoutedEventArgs e) {
             RadioButton element = sender as RadioButton;
             String sourceName = (element.Content as TextBlock).Text;
-
             
             ISource source = _sources[sourceName];
             _currentSource = source;
@@ -78,6 +115,9 @@ namespace StockStratMemes.DataSetView {
                     }
                 });
             });
+
+            // Fill out the available granularities too
+            UpdateGranularityOptions();
         }
     }
 }

@@ -12,7 +12,7 @@ using System.Windows;
 namespace StockStratMemes.Source {
     public class CoinbaseSource : ISource {
         public CoinbaseSource() {
-            // Nothing to do yet
+            // Nothing to do
         }
 
         /// <summary>
@@ -107,6 +107,27 @@ namespace StockStratMemes.Source {
          
         public string GetName() {
             return "Coinbase";
+        }
+
+        /// <summary>
+        /// Gets the options that can be used for granularity when getting the historic prices for an asset.
+        /// </summary>
+        /// <returns>A list of ints representing the possible granularities in seconds.</returns>
+        public List<int> GetGranularityOptions() {
+            var result = new List<int>();
+
+            // The following is taken from the Coinbase Pro documentation:
+            //  "The granularity field must be one of the following values: {60, 300, 900, 3600, 21600, 86400}"
+            //  https://docs.pro.coinbase.com/#get-historic-rates
+            result.AddRange(new int[] { 
+                60, 
+                300,
+                900, 
+                3600, 
+                21600, 
+                86400 });
+
+            return result;
         }
 
         private DataSet ParseCoinbaseJsonToDataSet(String json) {
