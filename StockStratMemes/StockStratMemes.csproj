@@ -85,11 +85,15 @@
     <Compile Include="DataSet\DataSetViewer.xaml.cs">
       <DependentUpon>DataSetViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EndlessProgressDialog.xaml.cs">
+      <DependentUpon>EndlessProgressDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Source\CoinbaseSource.cs" />
     <Compile Include="Source\ISource.cs" />
     <Compile Include="StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utility\JsonUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -126,6 +130,10 @@
     <Page Include="DataSet\DataSetViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EndlessProgressDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="StartWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -72,12 +72,23 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <TextBlock Margin="5" Text="From" Foreground="White" FontSize="20" FontFamily="Arial Black" />
             <DatePicker Name="_startDatePicker" Margin="5" Grid.Row="1" />
             <TextBlock Margin="5" Grid.Row="2" Text="To (Optional)" Foreground="White" FontSize="20" FontFamily="Arial Black" />
             <DatePicker Name="_endDatePicker"  Margin="5" Grid.Row="3" />
+            <TextBlock Margin="5" Grid.Row="4" Text="Output" Foreground="White" FontSize="20" FontFamily="Arial Black" />
+            <Grid Grid.Row="5" Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Name="_selectedOutput" />
+                <Button Name="_chooseOutputButton" Grid.Column="1" FontSize="20" FontFamily="Arial Black" Padding="5 0 5 0" Content="..." Click="OnChooseOutputButtonClicked" />
+            </Grid>
         </Grid>
 
         <Grid Margin="15" Grid.Row="2" Grid.ColumnSpan="3" Height="50">
@@ -92,7 +103,7 @@
             </Grid.ColumnDefinitions>
 
             <Button Click="OnCreateClicked" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="6" Content="Create" />
-            <Button Background="#3465a4" Foreground="White" Margin="5" Grid.Column="5" Content="Cancel" />
+            <Button Click="OnCancelButtonClicked" Name="_cancelButton" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="5" Content="Cancel" />
         </Grid>
     </Grid>
 </Window>

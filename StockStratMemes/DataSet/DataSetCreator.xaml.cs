@@ -1,5 +1,6 @@
 ﻿using Coinbase;
 using Coinbase.Models;
+using Microsoft.Win32;
 using StockStratMemes.Source;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -62,6 +64,11 @@ namespace StockStratMemes.DataSetView {
                 return;
             }
 
+            if (String.IsNullOrEmpty(_selectedOutput.Text)) {
+                MessageBox.Show("Please select an output file.");
+                return;
+            }
+
             DateTime startDate = _startDatePicker.SelectedDate.Value;
             DateTime endDate = DateTime.Now;
 
@@ -69,12 +76,39 @@ namespace StockStratMemes.DataSetView {
                 endDate = _endDatePicker.SelectedDate.Value;
             }
 
+            EndlessProgressDialog dialog = new EndlessProgressDialog();
             if (_currentSource != null) {
                 int granularity = _selectedGranularity;
                 Asset currentAsset = _currencySelection.SelectedItem as Asset;
-                DataSetResult result =_currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).GetAwaiter().GetResult();
-                MessageBox.Show(result.Value.Points.ToArray().ToString());
+                _currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).ContinueWith((Task<DataSetResult> taskResult) => {
+                    dialog.Dispatcher.InvokeAsync(() => {
+                        DataSetResult result = taskResult.Result;
+
+                        if (result.Succeeded) {
+                            JavaScriptSerializer serializer = new JavaScriptSerializer();
+                            try {
+                                String filePath = _selectedOutput.Text;
+                                String dir = Path.GetDirectoryName(filePath);
+                                Directory.CreateDirectory(dir);
+                                String json = serializer.Serialize(result.Value);
+                                json = JsonUtil.PoorMansJsonFormat(json);
+                                File.WriteAllText(filePath, json);
+                                dialog.Close();
+                                Close();
+                            } catch (Exception ex) {
+                                dialog.Close();
+                                MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + ex.Message);
+                            }
+                        } else {
+                            dialog.Close();
+                            MessageBox.Show("UH OH! " + result.ErrorDetails);
+                        }
+                    });
+                });
             }
+
+            // While we're saving, block the UI with a saving dialog:
+            dialog.ShowDialog();
         }
 
         private void OnGranularitySelected(object sender, RoutedEventArgs e) {
@@ -118,6 +152,46 @@ namespace StockStratMemes.DataSetView {
 
             // Fill out the available granularities too
             UpdateGranularityOptions();
+        }
+
+        private void OnChooseOutputButtonClicked(object sender, RoutedEventArgs e) {
+            SaveFileDialog saveFileDlg = new SaveFileDialog();
+
+            // Make a default name that is informative
+            String name = "";
+            if (_currentSource != null) {
+                name += _currentSource.GetName();
+            }
+
+            if (_currencySelection.SelectedIndex >= 0) {
+                Asset currentAsset = _currencySelection.SelectedItem as Asset;
+
+                if (currentAsset != null) {
+                    name += "_" + currentAsset.Name;
+                }
+            }
+
+            if (_startDatePicker.SelectedDate.HasValue) {
+                DateTime selectedDate = _startDatePicker.SelectedDate.Value;
+                name += "_from_" + selectedDate.ToShortDateString().Replace("/", "-");
+            }
+
+            // Initialize some defaults
+            saveFileDlg.FileName = name + ".dataset";
+            saveFileDlg.DefaultExt = "dataset";
+            saveFileDlg.Filter = "Dataset Files (*.dataset)|*.dataset";
+            saveFileDlg.AddExtension = true;
+
+            // Show it
+            Nullable<bool> result = saveFileDlg.ShowDialog();
+
+            if (result.HasValue && result.Value) {
+                _selectedOutput.Text = saveFileDlg.FileName;
+            }
+        }
+
+        private void OnCancelButtonClicked(object sender, RoutedEventArgs e) {
+            Close();
         }
     }
 }

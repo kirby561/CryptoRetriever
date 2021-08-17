@@ -16,5 +16,9 @@ namespace StockStratMemes.DataSetView {
         public DataSetViewer() {
             this.InitializeComponent();
         }
+
+        public void SetDataset(DataSet dataset) {
+
+        }
     }
 }
