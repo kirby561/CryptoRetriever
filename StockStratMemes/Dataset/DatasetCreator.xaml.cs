@@ -15,17 +15,17 @@ using System.Windows.Controls;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace StockStratMemes.Dataset2View {
+namespace StockStratMemes.DatasetView {
     /// <summary>
     /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class Dataset2Creator : Window {
+    public sealed partial class DatasetCreator : Window {
 
         private Dictionary<String, ISource> _sources = new Dictionary<String, ISource>();
         private ISource _currentSource = null;
         private int _selectedGranularity = -1;
 
-        public Dataset2Creator() {
+        public DatasetCreator() {
             InitializeComponent();
 
             // Add all the sources
@@ -80,9 +80,9 @@ namespace StockStratMemes.Dataset2View {
             if (_currentSource != null) {
                 int granularity = _selectedGranularity;
                 Asset currentAsset = _currencySelection.SelectedItem as Asset;
-                _currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).ContinueWith((Task<Dataset2Result> taskResult) => {
+                _currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).ContinueWith((Task<DatasetResult> taskResult) => {
                     dialog.Dispatcher.InvokeAsync(() => {
-                        Dataset2Result result = taskResult.Result;
+                        DatasetResult result = taskResult.Result;
 
                         if (result.Succeeded) {
                             JavaScriptSerializer serializer = new JavaScriptSerializer();

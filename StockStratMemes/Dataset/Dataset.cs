@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace StockStratMemes {
-    public class Dataset2 {
+    public class Dataset {
         /// <summary>
         /// The points are coordinates but they are ordered by X value.
         /// The approximate index can be retrieved by 
@@ -20,15 +20,15 @@ namespace StockStratMemes {
         /// </summary>
         public double Granularity { get; set; }
 
-        public Dataset2() {
+        public Dataset() {
             Points = new List<Point>();
         }
 
-        public Dataset2(List<Point> points) {
+        public Dataset(List<Point> points) {
             Points = points;
         }
 
-        public Dataset2(List<Point> points, double granularitySeconds) {
+        public Dataset(List<Point> points, double granularitySeconds) {
             Points = points;
             Granularity = granularitySeconds;
         }
@@ -134,7 +134,7 @@ namespace StockStratMemes {
 
         public static bool Test() {
             List<Point> expectedResult = new List<Point>();
-            Dataset2 dataSet = new Dataset2();
+            Dataset dataSet = new Dataset();
 
             Point p1 = new Point(1, 1);
             Point p2 = new Point(3, 6);

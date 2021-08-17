@@ -1,4 +1,4 @@
-﻿using StockStratMemes.Dataset2View;
+﻿using StockStratMemes.DatasetView;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -43,13 +43,13 @@ namespace StockStratMemes {
 
         private void OnCreateDatasetReleased(object sender, MouseButtonEventArgs e) {
             _createDatasetButton.Background = _buttonBackground;
-            _dataSetCreator = new Dataset2Creator();
+            _dataSetCreator = new DatasetCreator();
             _dataSetCreator.Show();
         }
 
         private void OnViewDatasetButtonPressed(object sender, MouseButtonEventArgs e) {
             _viewDatasetButton.Background = _buttonPressedBackground;
-            _dataSetViewer = new Dataset2Viewer();
+            _dataSetViewer = new DatasetViewer();
             _dataSetViewer.Show();
         }
 

@@ -57,8 +57,8 @@ namespace StockStratMemes.Source {
             return listResultTask;
         }
 
-        public Task<Dataset2Result> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample) {
-            Task<Dataset2Result> result = new Task<Dataset2Result>(() => {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample) {
+            Task<DatasetResult> result = new Task<DatasetResult>(() => {
                 // The coinbase library being used doesn't support coinbase pro
                 // which is the only way to get history. It's no problem though
                 // because it's a simple GET request of the following form:
@@ -70,7 +70,7 @@ namespace StockStratMemes.Source {
                 int granularity = secondsPerSample;
 
                 String url = "https://api.pro.coinbase.com/products/" + product + "/candles?start=" + startUtc + "&end=" + endUtc + "&granularity=" + granularity;
-                Dataset2Result dataSetResult = new Dataset2Result();
+                DatasetResult dataSetResult = new DatasetResult();
                 HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
                 request.Method = "GET";
                 request.UserAgent = "CoinbaseClient/1.0";
@@ -84,7 +84,7 @@ namespace StockStratMemes.Source {
                         var reader = new StreamReader(webStream);
                         String data = reader.ReadToEnd();
 
-                        Dataset2 dataSet = ParseCoinbaseJsonToDataset(data);
+                        Dataset dataSet = ParseCoinbaseJsonToDataset(data);
 
                         // Fill out the result
                         dataSetResult.Succeeded = true;
@@ -100,7 +100,7 @@ namespace StockStratMemes.Source {
             return result;
         }
 
-        public Task<Dataset2Result> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample) {
             DateRange range = new DateRange(start, DateTime.Now);
             return GetPriceHistoryAsync(asset, range, secondsPerSample);
         }
@@ -130,7 +130,7 @@ namespace StockStratMemes.Source {
             return result;
         }
 
-        private Dataset2 ParseCoinbaseJsonToDataset(String json) {
+        private Dataset ParseCoinbaseJsonToDataset(String json) {
             // The data is sent back as JSON in the form:
             //
             // [0] (Furthest day)
@@ -150,7 +150,7 @@ namespace StockStratMemes.Source {
             const int ClosingPriceIndex = 4;
             const int TradingVolumeIndex = 5;
 
-            Dataset2 dataSet = new Dataset2();
+            Dataset dataSet = new Dataset();
 
             JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
             dynamic jsonArr = jsonSerializer.Deserialize<dynamic>(json);

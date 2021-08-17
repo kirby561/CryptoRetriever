@@ -27,7 +27,7 @@
             <TextBlock  Text="Stock Strategy Memes" Foreground="White" FontFamily="Arial Black" FontSize="48" VerticalAlignment="Center" HorizontalAlignment="Center" />
         </Viewbox>
 
-        <!-- Create Data Set Button -->
+        <!-- Create Dataset Button -->
         <Grid Name="_createDatasetButton" MouseDown="OnCreateDatasetPressed" MouseUp="OnCreateDatasetReleased"  MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="1" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
@@ -35,11 +35,11 @@
             </Grid.RowDefinitions>
             <Image Grid.Row="0" Margin="25" Source="Images/data-storage.png" Width="Auto" Height="Auto" />
             <Viewbox Margin="10" Grid.Row="1" StretchDirection="DownOnly" Stretch="Uniform">
-                <TextBlock Text="Create Data Set" Foreground="White" FontFamily="Arial Black" FontSize="28" HorizontalAlignment="Center" />
+                <TextBlock Text="Create Dataset" Foreground="White" FontFamily="Arial Black" FontSize="28" HorizontalAlignment="Center" />
             </Viewbox>
         </Grid>
 
-        <!-- View Data Set Button -->
+        <!-- View Dataset Button -->
         <Grid Name="_viewDatasetButton" MouseDown="OnViewDatasetButtonPressed" MouseUp="OnViewDatasetButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="2" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
@@ -47,7 +47,7 @@
             </Grid.RowDefinitions>
             <Image Grid.Row="0" Margin="25" Source="Images/analytics.png" Width="Auto" Height="Auto" />
             <Viewbox Margin="10" Grid.Row="1" StretchDirection="DownOnly" Stretch="Uniform">
-                <TextBlock Text="View Data Set" Foreground="White" FontFamily="Arial Black" FontSize="28" HorizontalAlignment="Center" />
+                <TextBlock Text="View Dataset" Foreground="White" FontFamily="Arial Black" FontSize="28" HorizontalAlignment="Center" />
             </Viewbox>
         </Grid>
 

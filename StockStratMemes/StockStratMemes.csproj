@@ -78,12 +78,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Dataset2\Dataset2.cs" />
-    <Compile Include="Dataset2\Dataset2Creator.xaml.cs">
-      <DependentUpon>Dataset2Creator.xaml</DependentUpon>
+    <Compile Include="Dataset\Dataset.cs" />
+    <Compile Include="Dataset\DatasetCreator.xaml.cs">
+      <DependentUpon>DatasetCreator.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Dataset2\Dataset2Viewer.xaml.cs">
-      <DependentUpon>Dataset2Viewer.xaml</DependentUpon>
+    <Compile Include="Dataset\DatasetViewer.xaml.cs">
+      <DependentUpon>DatasetViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="EndlessProgressDialog.xaml.cs">
       <DependentUpon>EndlessProgressDialog.xaml</DependentUpon>
@@ -124,11 +124,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Dataset2\Dataset2Creator.xaml">
+    <Page Include="Dataset\DatasetCreator.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Dataset2\Dataset2Viewer.xaml">
+    <Page Include="Dataset\DatasetViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
