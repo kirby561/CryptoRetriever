@@ -9,8 +9,8 @@ namespace StockStratMemes.Source {
         String GetName();
         List<int> GetGranularityOptions();
         Task<AssetListResult> GetAssetsAsync();
-        Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400);
-        Task<DataSetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400);
+        Task<Dataset2Result> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400);
+        Task<Dataset2Result> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400);
     }
 
     public class DateRange {
@@ -78,5 +78,5 @@ namespace StockStratMemes.Source {
     }
     
     public class AssetListResult : Result<List<Asset>> { }
-    public class DataSetResult : Result<DataSet> { }
+    public class Dataset2Result : Result<Dataset2> { }
 }

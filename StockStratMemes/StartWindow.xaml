@@ -28,7 +28,7 @@
         </Viewbox>
 
         <!-- Create Data Set Button -->
-        <Grid Name="_createDataSetButton" MouseDown="OnCreateDataSetPressed" MouseUp="OnCreateDataSetReleased"  MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="1" Background="#729fcf">
+        <Grid Name="_createDatasetButton" MouseDown="OnCreateDatasetPressed" MouseUp="OnCreateDatasetReleased"  MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="1" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="Auto" />
@@ -40,7 +40,7 @@
         </Grid>
 
         <!-- View Data Set Button -->
-        <Grid Name="_viewDataSetButton" MouseDown="OnViewDataSetButtonPressed" MouseUp="OnViewDataSetButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="2" Background="#729fcf">
+        <Grid Name="_viewDatasetButton" MouseDown="OnViewDatasetButtonPressed" MouseUp="OnViewDatasetButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="2" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="Auto" />

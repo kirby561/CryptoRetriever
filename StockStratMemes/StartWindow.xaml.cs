@@ -1,4 +1,4 @@
-﻿using StockStratMemes.DataSetView;
+﻿using StockStratMemes.Dataset2View;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -37,24 +37,24 @@ namespace StockStratMemes {
             button.Background = _buttonBackground;
         }
 
-        private void OnCreateDataSetPressed(object sender, MouseButtonEventArgs e) {
-            _createDataSetButton.Background = _buttonPressedBackground;
+        private void OnCreateDatasetPressed(object sender, MouseButtonEventArgs e) {
+            _createDatasetButton.Background = _buttonPressedBackground;
         }
 
-        private void OnCreateDataSetReleased(object sender, MouseButtonEventArgs e) {
-            _createDataSetButton.Background = _buttonBackground;
-            _dataSetCreator = new DataSetCreator();
+        private void OnCreateDatasetReleased(object sender, MouseButtonEventArgs e) {
+            _createDatasetButton.Background = _buttonBackground;
+            _dataSetCreator = new Dataset2Creator();
             _dataSetCreator.Show();
         }
 
-        private void OnViewDataSetButtonPressed(object sender, MouseButtonEventArgs e) {
-            _viewDataSetButton.Background = _buttonPressedBackground;
-            _dataSetViewer = new DataSetViewer();
+        private void OnViewDatasetButtonPressed(object sender, MouseButtonEventArgs e) {
+            _viewDatasetButton.Background = _buttonPressedBackground;
+            _dataSetViewer = new Dataset2Viewer();
             _dataSetViewer.Show();
         }
 
-        private void OnViewDataSetButtonReleased(object sender, MouseButtonEventArgs e) {
-            _viewDataSetButton.Background = _buttonBackground;
+        private void OnViewDatasetButtonReleased(object sender, MouseButtonEventArgs e) {
+            _viewDatasetButton.Background = _buttonBackground;
         }
 
         private void OnExitButtonPressed(object sender, MouseButtonEventArgs e) {

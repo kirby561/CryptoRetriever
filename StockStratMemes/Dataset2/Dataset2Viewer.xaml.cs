@@ -8,16 +8,16 @@ using System.Windows;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace StockStratMemes.DataSetView {
+namespace StockStratMemes.Dataset2View {
     /// <summary>
     /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class DataSetViewer : Window {
-        public DataSetViewer() {
+    public sealed partial class Dataset2Viewer : Window {
+        public Dataset2Viewer() {
             this.InitializeComponent();
         }
 
-        public void SetDataset(DataSet dataset) {
+        public void SetDataset(Dataset2 dataset) {
 
         }
     }

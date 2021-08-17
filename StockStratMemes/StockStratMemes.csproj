@@ -78,12 +78,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DataSet\DataSet.cs" />
-    <Compile Include="DataSet\DataSetCreator.xaml.cs">
-      <DependentUpon>DataSetCreator.xaml</DependentUpon>
+    <Compile Include="Dataset2\Dataset2.cs" />
+    <Compile Include="Dataset2\Dataset2Creator.xaml.cs">
+      <DependentUpon>Dataset2Creator.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DataSet\DataSetViewer.xaml.cs">
-      <DependentUpon>DataSetViewer.xaml</DependentUpon>
+    <Compile Include="Dataset2\Dataset2Viewer.xaml.cs">
+      <DependentUpon>Dataset2Viewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="EndlessProgressDialog.xaml.cs">
       <DependentUpon>EndlessProgressDialog.xaml</DependentUpon>
@@ -112,6 +112,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -123,11 +124,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="DataSet\DataSetCreator.xaml">
+    <Page Include="Dataset2\Dataset2Creator.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DataSet\DataSetViewer.xaml">
+    <Page Include="Dataset2\Dataset2Viewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
