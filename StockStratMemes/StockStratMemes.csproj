@@ -85,6 +85,8 @@
     <Compile Include="Dataset\DatasetViewer.xaml.cs">
       <DependentUpon>DatasetViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dataset\GraphController.cs" />
+    <Compile Include="Dataset\GraphRenderer.cs" />
     <Compile Include="EndlessProgressDialog.xaml.cs">
       <DependentUpon>EndlessProgressDialog.xaml</DependentUpon>
     </Compile>

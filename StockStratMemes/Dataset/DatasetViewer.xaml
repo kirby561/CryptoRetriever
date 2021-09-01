@@ -9,6 +9,6 @@
     mc:Ignorable="d">
 
     <Grid>
-        
+        <Canvas SizeChanged="OnGraphSizeChanged" Name="_graphCanvas" Background="White" />
     </Grid>
 </Window>

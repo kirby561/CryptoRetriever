@@ -95,6 +95,11 @@ namespace StockStratMemes.DatasetView {
                                 File.WriteAllText(filePath, json);
                                 dialog.Close();
                                 Close();
+
+                                // Open a dataset viewer
+                                DatasetViewer viewer = new DatasetViewer();
+                                viewer.SetDataset(result.Value);
+                                viewer.Show();
                             } catch (Exception ex) {
                                 dialog.Close();
                                 MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + ex.Message);
