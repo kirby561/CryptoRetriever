@@ -67,6 +67,7 @@ namespace StockStratMemes {
         }
 
         public void Draw() {
+            _canvas.Children.Clear();
             DrawData();
             DrawAxis();
         }
@@ -77,49 +78,81 @@ namespace StockStratMemes {
                     p.Y * scale.Height);
         }
 
+        private Point TransformPoint(Point p, Size scale) {
+            p.X -= _renderParams.Domain.Start;
+            p.Y -= _renderParams.Range.Start;
+
+            p = ScalePoint(p, scale);
+
+            // Flip about the Y axis since positive is down
+            p.Y *= -1;
+
+            // Translate by the height to push it into view
+            p.Y += _renderParams.CanvasSizePx.Height;
+
+            return p;
+        }
+
         private void DrawData() {
-            _canvas.Children.Clear();
             SolidColorBrush brush = new SolidColorBrush(_renderParams.LineOptions.Color);
 
             double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
             double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
             Size scale = new Size(xScale, yScale);
-            for (int i = 0; i < _renderParams.Dataset.Points.Count - 1; i++) {
-                Point p1Orig = _renderParams.Dataset.Points[i];
-                Point p2Orig = _renderParams.Dataset.Points[i + 1];
-                Point p1 = new Point(p1Orig.X, p1Orig.Y);
-                Point p2 = new Point(p2Orig.X, p2Orig.Y);
 
-                p1.X -= _renderParams.Domain.Start;
-                p2.X -= _renderParams.Domain.Start;
-                p1.Y -= _renderParams.Range.Start;
-                p2.Y -= _renderParams.Range.Start;
+            StreamGeometry geometry = new StreamGeometry();
+            using (StreamGeometryContext stream = geometry.Open()) {
+                if (_renderParams.Dataset.Points.Count > 0) {
+                    Point p1Orig = _renderParams.Dataset.Points[0];
+                    Point p1 = new Point(p1Orig.X, p1Orig.Y);
+                    p1 = TransformPoint(p1, scale);
+                    stream.BeginFigure(p1, false, false);
+                } else {
+                    return; // Nothing to draw
+                }
 
-                p1 = ScalePoint(p1, scale);
-                p2 = ScalePoint(p2, scale);
+                for (int i = 1; i < _renderParams.Dataset.Points.Count; i++) {
+                    Point pOrig = _renderParams.Dataset.Points[i];
+                    Point p = new Point(pOrig.X, pOrig.Y);
+                    p = TransformPoint(p, scale);
+                    stream.LineTo(p, true, true);
+                }
 
-                // Flip about the Y axis since positive is down
-                p1.Y *= -1;
-                p2.Y *= -1;
-
-                // Translate by the height to push it into view
-                p1.Y += _renderParams.CanvasSizePx.Height;
-                p2.Y += _renderParams.CanvasSizePx.Height;
-
-                Line line = new Line();
-                line.Fill = brush;
-                line.Stroke = brush;
-                line.StrokeThickness = _renderParams.LineOptions.Thickness;
-                line.X1 = p1.X;
-                line.Y1 = p1.Y;
-                line.X2 = p2.X;
-                line.Y2 = p2.Y;
-                _canvas.Children.Add(line);
+                geometry.Freeze();
+                Path path = new Path();
+                path.Stroke = brush;
+                path.StrokeThickness = _renderParams.LineOptions.Thickness;
+                path.Data = geometry;
+                Canvas.SetLeft(path, 0);
+                Canvas.SetTop(path, 0);
+                Canvas.SetRight(path, 0);
+                Canvas.SetBottom(path, 0);
+                _canvas.Children.Add(path);
             }
         }
 
         private void DrawAxis() {
+            double axisWidthPx = 3;
+            SolidColorBrush brush = new SolidColorBrush(Colors.Black);
+            Line xAxis = new Line();
+            xAxis.Fill = brush;
+            xAxis.Stroke = brush;
+            xAxis.StrokeThickness = axisWidthPx;
+            xAxis.X1 = 0;
+            xAxis.Y1 = _renderParams.CanvasSizePx.Height;
+            xAxis.X2 = _renderParams.CanvasSizePx.Width;
+            xAxis.Y2 = xAxis.Y1;
+            _canvas.Children.Add(xAxis);
 
+            Line yAxis = new Line();
+            yAxis.Fill = brush;
+            yAxis.Stroke = brush;
+            yAxis.StrokeThickness = axisWidthPx;
+            yAxis.X1 = 0;
+            yAxis.Y1 = 0;
+            yAxis.X2 = 0;
+            yAxis.Y2 = _renderParams.CanvasSizePx.Height;
+            _canvas.Children.Add(yAxis);
         }
     }
 
