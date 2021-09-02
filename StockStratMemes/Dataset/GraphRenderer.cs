@@ -16,11 +16,37 @@ namespace StockStratMemes {
     class GraphRenderer {
         private Canvas _canvas;
         private RenderParams _renderParams = new RenderParams();
-        private RenderParams lastDrawParams = null;
+        private Geometry _datasetGeometry;
+        private Path _datasetPath;
 
         public GraphRenderer(Canvas canvas, Dataset dataset) {
             _canvas = canvas;
             _renderParams.Dataset = dataset;
+
+            // Initialize a geometry for the dataset
+            StreamGeometry geometry = new StreamGeometry();
+            using (StreamGeometryContext stream = geometry.Open()) {
+                if (_renderParams.Dataset.Points.Count > 0) {
+                    Point p1 = _renderParams.Dataset.Points[0];
+                    stream.BeginFigure(p1, false, false);
+                } else {
+                    return; // Nothing to draw
+                }
+
+                for (int i = 1; i < _renderParams.Dataset.Points.Count; i++) {
+                    Point p = _renderParams.Dataset.Points[i];
+                    stream.LineTo(p, true, true);
+                }
+
+                _datasetGeometry = geometry;
+
+                _datasetPath = new Path();
+                _datasetPath.Data = geometry;
+                Canvas.SetLeft(_datasetPath, 0);
+                Canvas.SetTop(_datasetPath, 0);
+                Canvas.SetRight(_datasetPath, 0);
+                Canvas.SetBottom(_datasetPath, 0);
+            }
 
             // Start the domain/range to fit the data
             InitializeDomainAndRange();
@@ -97,32 +123,11 @@ namespace StockStratMemes {
             //     are starting at the top of the screen and should be starting at the bottom of the screen
             layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
 
-            StreamGeometry geometry = new StreamGeometry();
-            geometry.Transform = new MatrixTransform(layoutTransform);
-            using (StreamGeometryContext stream = geometry.Open()) {
-                if (_renderParams.Dataset.Points.Count > 0) {
-                    Point p1 = _renderParams.Dataset.Points[0];
-                    stream.BeginFigure(p1, false, false);
-                } else {
-                    return; // Nothing to draw
-                }
+            _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
+            _datasetPath.Stroke = brush;
+            _datasetPath.StrokeThickness = _renderParams.LineOptions.Thickness;
 
-                for (int i = 1; i < _renderParams.Dataset.Points.Count; i++) {
-                    Point p = _renderParams.Dataset.Points[i];
-                    stream.LineTo(p, true, true);
-                }
-
-                geometry.Freeze();
-                Path path = new Path();
-                path.Stroke = brush;
-                path.StrokeThickness = _renderParams.LineOptions.Thickness;
-                path.Data = geometry;
-                Canvas.SetLeft(path, 0);
-                Canvas.SetTop(path, 0);
-                Canvas.SetRight(path, 0);
-                Canvas.SetBottom(path, 0);
-                _canvas.Children.Add(path);
-            }
+            _canvas.Children.Add(_datasetPath);
         }
 
         private void DrawAxis() {
