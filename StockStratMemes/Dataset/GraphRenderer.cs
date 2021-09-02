@@ -78,43 +78,37 @@ namespace StockStratMemes {
                     p.Y * scale.Height);
         }
 
-        private Point TransformPoint(Point p, Size scale) {
-            p.X -= _renderParams.Domain.Start;
-            p.Y -= _renderParams.Range.Start;
-
-            p = ScalePoint(p, scale);
-
-            // Flip about the Y axis since positive is down
-            p.Y *= -1;
-
-            // Translate by the height to push it into view
-            p.Y += _renderParams.CanvasSizePx.Height;
-
-            return p;
-        }
-
         private void DrawData() {
             SolidColorBrush brush = new SolidColorBrush(_renderParams.LineOptions.Color);
 
             double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
             double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
-            Size scale = new Size(xScale, yScale);
+
+            Matrix layoutTransform = new Matrix();
+
+            // Shift the curve to 0 so the first point starts at the top left
+            layoutTransform.Translate(-_renderParams.Domain.Start, -_renderParams.Range.Start);
+
+            // Now map left to right on the curve to left to right on the screen. The -yScale is to flip
+            //     the coordinates since the canvas has 0, 0 at the top left and positive is down.
+            layoutTransform.Scale(xScale, -yScale);
+
+            // Now shift the whole curve down by the height of the canvas since our coordinates at this point
+            //     are starting at the top of the screen and should be starting at the bottom of the screen
+            layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
 
             StreamGeometry geometry = new StreamGeometry();
+            geometry.Transform = new MatrixTransform(layoutTransform);
             using (StreamGeometryContext stream = geometry.Open()) {
                 if (_renderParams.Dataset.Points.Count > 0) {
-                    Point p1Orig = _renderParams.Dataset.Points[0];
-                    Point p1 = new Point(p1Orig.X, p1Orig.Y);
-                    p1 = TransformPoint(p1, scale);
+                    Point p1 = _renderParams.Dataset.Points[0];
                     stream.BeginFigure(p1, false, false);
                 } else {
                     return; // Nothing to draw
                 }
 
                 for (int i = 1; i < _renderParams.Dataset.Points.Count; i++) {
-                    Point pOrig = _renderParams.Dataset.Points[i];
-                    Point p = new Point(pOrig.X, pOrig.Y);
-                    p = TransformPoint(p, scale);
+                    Point p = _renderParams.Dataset.Points[i];
                     stream.LineTo(p, true, true);
                 }
 
