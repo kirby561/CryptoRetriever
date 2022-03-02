@@ -82,6 +82,7 @@
     <Compile Include="Dataset\DatasetCreator.xaml.cs">
       <DependentUpon>DatasetCreator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dataset\DatasetReader.cs" />
     <Compile Include="Dataset\DatasetViewer.xaml.cs">
       <DependentUpon>DatasetViewer.xaml</DependentUpon>
     </Compile>

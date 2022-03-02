@@ -8,7 +8,7 @@ namespace StockStratMemes {
         /// 
         /// It puts newlines after object declarations and endings as well as between properties.
         /// </summary>
-        /// <param name="input">The stirng to format (this is read only)</param>
+        /// <param name="input">The string to format (this is read only)</param>
         /// <returns>Returns a new formatted string.</returns>
         public static String PoorMansJsonFormat(String input) {
             input = input.Insert(input.IndexOf("{") + 1, Environment.NewLine + "\t");

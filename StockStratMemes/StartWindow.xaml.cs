@@ -3,6 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Win32;
+using System;
+using StockStratMemes.Source;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -19,7 +22,7 @@ namespace StockStratMemes {
         private static Color _buttonPressedColor = Color.FromArgb(0xff, 0xad, 0xd8, 0xe6);
         private static SolidColorBrush _buttonPressedBackground = new SolidColorBrush(_buttonPressedColor);
 
-        private Window _dataSetViewer;
+        private DatasetViewer _dataSetViewer;
         private Window _dataSetCreator;
 
         public StartWindow() {
@@ -49,8 +52,28 @@ namespace StockStratMemes {
 
         private void OnViewDatasetButtonPressed(object sender, MouseButtonEventArgs e) {
             _viewDatasetButton.Background = _buttonPressedBackground;
-            _dataSetViewer = new DatasetViewer();
-            _dataSetViewer.Show();
+
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.DefaultExt = ".dataset";
+            openFileDialog.Filter = "Datasets (.dataset)|*.dataset";
+
+            // Open the dialog
+            Nullable<bool> result = openFileDialog.ShowDialog();
+
+            // Process open file dialog box results
+            if (result.Value) {
+                string filename = openFileDialog.FileName;
+
+                // Check if the dataset file exists
+                Result<Dataset> datasetResult = DatasetReader.ReadFile(filename);
+                if (datasetResult.Succeeded) {
+                    _dataSetViewer = new DatasetViewer();
+                    _dataSetViewer.SetDataset(datasetResult.Value);
+                    _dataSetViewer.Show();
+                } else {
+                    MessageBox.Show(datasetResult.ErrorDetails);
+                }
+            }
         }
 
         private void OnViewDatasetButtonReleased(object sender, MouseButtonEventArgs e) {

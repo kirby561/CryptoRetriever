@@ -57,8 +57,6 @@ namespace StockStratMemes.DatasetView {
         }
 
         private void OnCreateClicked(object sender, RoutedEventArgs e) {
-            //MessageBox.Show("" + DataSet.Test());
-
             if (!_startDatePicker.SelectedDate.HasValue) {
                 MessageBox.Show("Please select a start date.");
                 return;

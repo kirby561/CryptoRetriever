@@ -63,6 +63,9 @@ namespace StockStratMemes.Source {
                 // which is the only way to get history. It's no problem though
                 // because it's a simple GET request of the following form:
                 // https://api.pro.coinbase.com/products/BTC-USD/candles?start=2021-01-10T12:00:00&end=2021-07-15T12:00:00&granularity=86400
+                                
+                // According to the API documentation, the response can contain a maximum of 300 candles (datapoints).
+                // so we need to split the request up into multiple.
 
                 String startUtc = range.Start.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
                 String endUtc = range.End.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
