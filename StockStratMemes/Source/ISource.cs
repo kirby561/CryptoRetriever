@@ -77,6 +77,13 @@ namespace StockStratMemes.Source {
         }
     }
     
-    public class AssetListResult : Result<List<Asset>> { }
-    public class DatasetResult : Result<Dataset> { }
+    public class AssetListResult : Result<List<Asset>> {
+        public AssetListResult() : base() { }
+        public AssetListResult(List<Asset> value) : base(value) { }
+    }
+
+    public class DatasetResult : Result<Dataset> { 
+        public DatasetResult() : base() { }
+        public DatasetResult(Dataset value) : base(value) { }
+    }
 }

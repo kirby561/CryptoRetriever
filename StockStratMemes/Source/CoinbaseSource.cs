@@ -57,45 +57,76 @@ namespace StockStratMemes.Source {
             return listResultTask;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange fullRange, int secondsPerSample) {
             Task<DatasetResult> result = new Task<DatasetResult>(() => {
                 // The coinbase library being used doesn't support coinbase pro
                 // which is the only way to get history. It's no problem though
                 // because it's a simple GET request of the following form:
-                // https://api.pro.coinbase.com/products/BTC-USD/candles?start=2021-01-10T12:00:00&end=2021-07-15T12:00:00&granularity=86400
-                                
+                //    https://api.pro.coinbase.com/products/BTC-USD/candles?start=2021-01-10T12:00:00&end=2021-07-15T12:00:00&granularity=86400
+
                 // According to the API documentation, the response can contain a maximum of 300 candles (datapoints).
                 // so we need to split the request up into multiple.
+                const int maxSamplesPerRequest = 300; // This is defined by the API
+                const double precisionErrorOffset = 0.001; // The range in seconds should always be an integer but add a bit in case of precision error in the double.
+                long secondsInRange = (long)((fullRange.End - fullRange.Start).TotalSeconds + precisionErrorOffset);
+                long numSamples = secondsInRange / secondsPerSample;
+                long numRequests = numSamples / maxSamplesPerRequest;
+                if (numSamples % maxSamplesPerRequest > 0)
+                    numRequests++;
 
-                String startUtc = range.Start.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
-                String endUtc = range.End.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
-                String product = asset.Name.ToUpper() + "-" + asset.Currency.ToUpper();
-                int granularity = secondsPerSample;
+                // Create an empty dataset (but not null) and result to keep track of the combined result
+                DatasetResult combinedDatasetResult = new DatasetResult(new Dataset());
 
-                String url = "https://api.pro.coinbase.com/products/" + product + "/candles?start=" + startUtc + "&end=" + endUtc + "&granularity=" + granularity;
-                DatasetResult dataSetResult = new DatasetResult();
-                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
-                request.Method = "GET";
-                request.UserAgent = "CoinbaseClient/1.0";
-                
-                request.GetResponseAsync().ContinueWith((action) => {
-                    if (action.IsFaulted) {
-                        dataSetResult.Succeeded = false;
-                        dataSetResult.ErrorDetails = action.ToString();
+                // Run a separate request for each piece of the full date range.
+                for (int i = 0; i < numRequests; i++) {
+                    DateTime start = fullRange.Start.AddSeconds(i * maxSamplesPerRequest * secondsPerSample);
+                    DateTime end = start.AddSeconds(maxSamplesPerRequest * secondsPerSample - 1); // -1 because we don't want duplicate samples on the edges of each range
+
+                    if (end > fullRange.End)
+                        end = fullRange.End;
+
+                    String startUtc = start.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
+                    String endUtc = end.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
+                    String product = asset.Name.ToUpper() + "-" + asset.Currency.ToUpper();
+                    int granularity = secondsPerSample;
+
+                    String url = "https://api.pro.coinbase.com/products/" + product + "/candles?start=" + startUtc + "&end=" + endUtc + "&granularity=" + granularity;
+                    DatasetResult datasetResult = new DatasetResult();
+                    HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                    request.Method = "GET";
+                    request.UserAgent = "CoinbaseClient/1.0";
+
+                    request.GetResponseAsync().ContinueWith((action) => {
+                        if (action.IsFaulted) {
+                            datasetResult.Succeeded = false;
+                            datasetResult.ErrorDetails = action.ToString();
+                        } else {
+                            Stream webStream = action.Result.GetResponseStream();
+                            var reader = new StreamReader(webStream);
+                            String data = reader.ReadToEnd();
+
+                            Dataset dataset = ParseCoinbaseJsonToDataset(data);
+
+                            // Fill out the result
+                            datasetResult.Succeeded = true;
+                            datasetResult.Value = dataset;
+                        }
+                    }).Wait();
+
+                    if (datasetResult.Succeeded) {
+                        // The combined result starts as successful so just add these samples to it.
+                        // Since the samples are increasing in time, each add should be O(1). The underlying 
+                        // array was presized earlier.
+                        combinedDatasetResult.Value.Add(datasetResult.Value);
                     } else {
-                        Stream webStream = action.Result.GetResponseStream();
-                        var reader = new StreamReader(webStream);
-                        String data = reader.ReadToEnd();
-
-                        Dataset dataSet = ParseCoinbaseJsonToDataset(data);
-
-                        // Fill out the result
-                        dataSetResult.Succeeded = true;
-                        dataSetResult.Value = dataSet;
+                        // If any of the subrequests fail, the whole operation is lost. We have
+                        // failed our house and our country. We should be ashamed.
+                        combinedDatasetResult.Succeeded = false;
+                        combinedDatasetResult.ErrorDetails = datasetResult.ErrorDetails;
                     }
-                }).Wait();
-                
-                return dataSetResult;
+                }               
+
+                return combinedDatasetResult;
             });
 
             result.Start();

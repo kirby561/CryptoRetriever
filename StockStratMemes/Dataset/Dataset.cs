@@ -24,6 +24,10 @@ namespace StockStratMemes {
             Points = new List<Point>();
         }
 
+        public Dataset(int initialSize) {
+            Points = new List<Point>(initialSize);
+        }
+
         public Dataset(List<Point> points) {
             Points = points;
         }
@@ -55,6 +59,19 @@ namespace StockStratMemes {
                 // Binary search the spot from here
                 Points.Insert(BinarySearchForX(point.X), point);
             }
+        }
+
+        /// <summary>
+        /// Adds the given dataset to the end of this dataset.
+        /// Does not assume any partiuclar ordering.
+        /// </summary>
+        /// <param name="other">The other dataset to add.</param>
+        public void Add(Dataset other) {
+            // If the other set is empty or null we're done
+            if (other.Points == null || other.Points.Count == 0)
+                return;
+
+            Points.AddRange(other.Points);
         }
 
         /// <summary>
