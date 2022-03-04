@@ -15,6 +15,14 @@ namespace StockStratMemes.Source {
             // Nothing to do
         }
 
+        public string GetName() {
+            return "Coinbase";
+        }
+
+        public String GetNote() {
+            return "Note: The granularities for Coinbase are aligned on UTC time boundaries not local time so it's possible the edges of the date range selected will be missing because the UTC time is ahead or behind the local time.";
+        }
+
         /// <summary>
         /// Gets the list of available assets on Coinbase asynchronously.
         /// </summary>
@@ -137,10 +145,6 @@ namespace StockStratMemes.Source {
         public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample) {
             DateRange range = new DateRange(start, DateTime.Now);
             return GetPriceHistoryAsync(asset, range, secondsPerSample);
-        }
-         
-        public string GetName() {
-            return "Coinbase";
         }
 
         /// <summary>

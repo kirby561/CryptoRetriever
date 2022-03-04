@@ -67,11 +67,13 @@ namespace StockStratMemes.DatasetView {
                 return;
             }
 
-            DateTime startDate = _startDatePicker.SelectedDate.Value;
+            DateTime pickedStartDate = _startDatePicker.SelectedDate.Value;
+            DateTime startDate = new DateTime(pickedStartDate.Year, pickedStartDate.Month, pickedStartDate.Day, 0, 0, 0, DateTimeKind.Local);
             DateTime endDate = DateTime.Now;
 
             if (_endDatePicker.SelectedDate.HasValue) {
-                endDate = _endDatePicker.SelectedDate.Value;
+                DateTime pickedEndDate = _endDatePicker.SelectedDate.Value;
+                endDate = new DateTime(pickedEndDate.Year, pickedEndDate.Month, pickedEndDate.Day, 0, 0, 0, DateTimeKind.Local);
             }
 
             EndlessProgressDialog dialog = new EndlessProgressDialog();
@@ -128,6 +130,7 @@ namespace StockStratMemes.DatasetView {
             ISource source = _sources[sourceName];
             _currentSource = source;
             _currencySelection.IsEnabled = false;
+            _sourceNoteTextBlock.Text = source.GetNote();
             Task result = source.GetAssetsAsync().ContinueWith((action) => {
                 // While we're here, sort the list if it was successful
                 // so we do it off the main thread.

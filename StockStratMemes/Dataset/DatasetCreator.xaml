@@ -52,6 +52,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="1*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <StackPanel Margin="5">
@@ -64,6 +65,8 @@
                 <StackPanel Name="_granularityPanel" Margin="5">
                 </StackPanel>
             </ScrollViewer>
+
+            <TextBlock Name="_sourceNoteTextBlock" Grid.Row="3" Margin="5" Text="" TextWrapping="Wrap" Foreground="White" FontSize="12" FontFamily="Arial" />
         </Grid>
 
         <Grid Margin="15" Background="#3465a4" Grid.Row="1" Grid.Column="2">

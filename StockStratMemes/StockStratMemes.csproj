@@ -91,7 +91,10 @@
     <Compile Include="EndlessProgressDialog.xaml.cs">
       <DependentUpon>EndlessProgressDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Source\Asset.cs" />
     <Compile Include="Source\CoinbaseSource.cs" />
+    <Compile Include="Utility\Result.cs" />
+    <Compile Include="Utility\DateRange.cs" />
     <Compile Include="Source\ISource.cs" />
     <Compile Include="StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>

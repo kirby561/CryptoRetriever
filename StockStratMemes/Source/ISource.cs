@@ -5,85 +5,53 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace StockStratMemes.Source {
+    /// <summary>
+    /// A source represents an interface to something that can provide asset prices for stock or crypto.
+    /// The interface must provide basic information like its name, granularity of the data it will return,
+    /// the list of assets it can provide price information for, and the price history of an asset itself.
+    /// </summary>
     public interface ISource {
+        /// <summary>
+        /// The name of the source that will be displayed to the user.
+        /// </summary>
+        /// <returns>The name of the source as a string.</returns>
         String GetName();
+
+        /// <summary>
+        /// A note that will be displayed when the source is selected where you can add some details
+        /// or caveats about how the data will be returned.
+        /// </summary>
+        /// <returns>A note to display as a string.</returns>
+        String GetNote(); 
+
+        /// <summary>
+        /// Gets the available granularities (time between samples) for this source.
+        /// </summary>
+        /// <returns>Returns a list of granularities in seconds.</returns>
         List<int> GetGranularityOptions();
+
+        /// <summary>
+        /// Asynchronously fetches the list of assets for this source from the server.
+        /// </summary>
+        /// <returns>Returns a task to wait for the result. The task will contain a list of the assets or indicate that the request failed with details.</returns>
         Task<AssetListResult> GetAssetsAsync();
+
+        /// <summary>
+        /// Gets the price history of the given asset within the given date range.
+        /// </summary>
+        /// <param name="asset">The asset to request (see GetAssetsAsync)</param>
+        /// <param name="range">A date range to request the assets from in local time.</param>
+        /// <param name="secondsPerSample">The number of seconds between samples (Must be one returned from GetGranularityOptions)</param>
+        /// <returns>Returns a task that can be waited on for the result. The result will be a dataset of (UTC timestamp, Asset Value) samples.</returns>
         Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400);
+
+        /// <summary>
+        /// Gets the price history of the given asset within the given date range.
+        /// </summary>
+        /// <param name="asset">The asset to request (see GetAssetsAsync)</param>
+        /// <param name="start">The start of the range to get samples from. The end of the range will be DateTime.Now.</param>
+        /// <param name="secondsPerSample">The number of seconds between samples (Must be one returned from GetGranularityOptions)</param>
+        /// <returns>Returns a task that can be waited on for the result. The result will be a dataset of (UTC timestamp, Asset Value) samples.</returns>
         Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400);
-    }
-
-    public class DateRange {
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-
-        public DateRange(DateTime start, DateTime end) {
-            Start = start;
-            End = end;
-        }
-    }
-
-    public class Asset : IComparable<Asset> {
-        public String Name { get; set; }
-        public decimal Value { get; set; }
-        public String Currency { get; set; }
-
-        public Asset(String name, decimal value, String currency) {
-            Name = name;
-            Value = value;
-            Currency = currency;
-        }
-
-        public override String ToString() {
-            return Name + ": " + Value.ToString("0.##") + " " + Currency;
-        }
-
-        public int CompareTo(Asset other) {
-            int nameComparison = Name.CompareTo(other.Name);
-            if (nameComparison == 0) {
-                int currencyComparison = Currency.CompareTo(other.Currency);
-                if (currencyComparison == 0) {
-                    return Value.CompareTo(other.Value);
-                } else {
-                    return currencyComparison;
-                }
-            } else {
-                return nameComparison;
-            }
-        }
-    }
-    
-    public class Result<T> {
-        public T Value { get; set; }
-        public bool Succeeded { get; set; }
-        public String ErrorDetails { get; set; }
-
-        public Result() {
-            Value = default(T);
-            Succeeded = false;
-            ErrorDetails = "Unknown";
-        }
-
-        public Result(T value) {
-            Value = value;
-            Succeeded = true;
-            ErrorDetails = "";
-        }
-
-        public Result(String errorDetails) {
-            Value = default(T);
-            Succeeded = false;
-            ErrorDetails = errorDetails;
-        }
-    }
-    
-    public class AssetListResult : Result<List<Asset>> {
-        public AssetListResult() : base() { }
-        public AssetListResult(List<Asset> value) : base(value) { }
-    }
-
-    public class DatasetResult : Result<Dataset> { 
-        public DatasetResult() : base() { }
-        public DatasetResult(Dataset value) : base(value) { }
     }
 }
