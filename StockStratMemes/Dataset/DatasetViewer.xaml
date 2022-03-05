@@ -9,6 +9,20 @@
     mc:Ignorable="d">
 
     <Grid>
-        <Canvas SizeChanged="OnGraphSizeChanged" Name="_graphCanvas" Background="White" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- First row -->
+        <Menu Name="_menu">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Export" Click="OnExportClicked" />
+                <MenuItem Header="_Close" Click="OnCloseClicked" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Second row -->
+        <Canvas Grid.Row="1" SizeChanged="OnGraphSizeChanged" Name="_graphCanvas" Background="White" />
     </Grid>
 </Window>

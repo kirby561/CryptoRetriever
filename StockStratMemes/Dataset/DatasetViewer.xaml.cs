@@ -5,12 +5,9 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StockStratMemes.DatasetView {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// Used to view datasets and manipulate or export them.
     /// </summary>
     public sealed partial class DatasetViewer : Window {
         private Dataset _dataset;
@@ -28,6 +25,29 @@ namespace StockStratMemes.DatasetView {
 
         private void OnGraphSizeChanged(object sender, SizeChangedEventArgs e) {
 
+        }
+
+        private void OnExportClicked(object sender, RoutedEventArgs e) {
+            ExportDatasetOptionsDialog exportOptionsWindow = new ExportDatasetOptionsDialog();
+            exportOptionsWindow.SetDataset(_dataset);
+            bool? result = exportOptionsWindow.ShowDialog();
+            if (result == true) {
+                ExportDatasetOptions options = exportOptionsWindow.GetOptions();
+                ExportDataset(_dataset, options);
+            }
+        }
+
+        private void ExportDataset(Dataset dataset, ExportDatasetOptions options) {
+            using (StreamWriter stream = new StreamWriter(options.FilePath)) {
+                stream.WriteLine(options.GetDateHeader() + ", Price ($)");
+                for (int i = 0; i < dataset.Points.Count; i++) {
+                    stream.WriteLine(options.FormatDateString(dataset.Points[i].X) + ", " + dataset.Points[i].Y);
+                }
+            }
+        }
+
+        private void OnCloseClicked(object sender, RoutedEventArgs e) {
+            Close();
         }
     }
 }

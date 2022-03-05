@@ -86,6 +86,10 @@
     <Compile Include="Dataset\DatasetViewer.xaml.cs">
       <DependentUpon>DatasetViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dataset\ExportDatasetOptions.cs" />
+    <Compile Include="Dataset\ExportDatasetOptionsDialog.xaml.cs">
+      <DependentUpon>ExportDatasetOptionsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dataset\GraphController.cs" />
     <Compile Include="Dataset\GraphRenderer.cs" />
     <Compile Include="EndlessProgressDialog.xaml.cs">
@@ -137,6 +141,10 @@
     <Page Include="Dataset\DatasetViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dataset\ExportDatasetOptionsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EndlessProgressDialog.xaml">
       <SubType>Designer</SubType>

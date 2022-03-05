@@ -105,8 +105,8 @@
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
-            <Button Click="OnCreateClicked" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="6" Content="Create" />
-            <Button Click="OnCancelButtonClicked" Name="_cancelButton" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="5" Content="Cancel" />
+            <Button Click="OnCancelButtonClicked" Name="_cancelButton" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="6" Content="Cancel" />
+            <Button Click="OnCreateClicked" Background="#3465a4" Foreground="White" Margin="5" Grid.Column="5" Content="Create" />
         </Grid>
     </Grid>
 </Window>
