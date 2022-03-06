@@ -12,6 +12,7 @@ namespace StockStratMemes.DatasetView {
     public sealed partial class DatasetViewer : Window {
         private Dataset _dataset;
         private GraphRenderer _renderer;
+        private GraphController _graphController;
 
         public DatasetViewer() {
             this.InitializeComponent();
@@ -20,7 +21,9 @@ namespace StockStratMemes.DatasetView {
         public void SetDataset(Dataset dataset) {
             _dataset = dataset;
             _renderer = new GraphRenderer(_graphCanvas, _dataset);
-            _renderer.Draw();
+            _renderer.UpdateAll();
+
+            _graphController = new GraphController(_renderer);
         }
 
         private void OnGraphSizeChanged(object sender, SizeChangedEventArgs e) {
@@ -48,6 +51,18 @@ namespace StockStratMemes.DatasetView {
 
         private void OnCloseClicked(object sender, RoutedEventArgs e) {
             Close();
+        }
+
+        private void OnMouseEntered(object sender, System.Windows.Input.MouseEventArgs e) {
+            _graphController.OnMouseEntered();
+        }
+
+        private void OnMouseLeft(object sender, System.Windows.Input.MouseEventArgs e) {
+            _graphController.OnMouseLeft();
+        }
+
+        private void OnMouseMoved(object sender, System.Windows.Input.MouseEventArgs e) {
+            _graphController.OnMouseMoved(e.GetPosition(_graphCanvas));
         }
     }
 }

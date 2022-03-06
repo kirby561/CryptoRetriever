@@ -149,6 +149,36 @@ namespace StockStratMemes {
             return new DataResult(result);
         }
 
+        /// <summary>
+        /// Gets the X value closest to the given x value in this dataset.
+        /// Returns an error if the dataset is empty.
+        /// 
+        /// Note: This assumes the dataset is in order!
+        /// </summary>
+        /// <param name="xValue">The x value to compare.</param>
+        /// <returns>Returns a result containing the closest X value or an error if the dataset is empty.</returns>
+        public DataResult GetClosestXTo(double xValue) {
+            if (Points == null || Points.Count == 0)
+                return new DataResult("There are no points in the dataset.");
+
+            if (Points.Count == 1)
+                return new DataResult(Points[0].X);
+
+            // The closest point will be the insertion point or the one after
+            int left = BinarySearchForX(xValue);
+            int right = left + 1;
+
+            if (right >= Points.Count)
+                return new DataResult(Points[left].X);
+
+            double leftDist = Math.Abs(xValue - Points[left].X);
+            double rightDist = Math.Abs(Points[right].X - xValue);
+            if (leftDist < rightDist)
+                return new DataResult(Points[left].X);
+            else
+                return new DataResult(Points[right].X);
+        }
+
         public static bool Test() {
             List<Point> expectedResult = new List<Point>();
             Dataset dataSet = new Dataset();

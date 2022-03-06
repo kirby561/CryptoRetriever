@@ -13,11 +13,28 @@ namespace StockStratMemes {
     /// Renders a dataset to the given canvas with some options.
     /// Can be controlled with mouse or touch input using a GraphController.
     /// </summary>
-    class GraphRenderer {
+    public class GraphRenderer {
         private Canvas _canvas;
         private RenderParams _renderParams = new RenderParams();
+        
+        // Mouse hover dependencies
+        private Point _mouseHoverPointPx;
+        private bool _mouseHoverPointEnabled = false;
+        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Colors.Teal, 10, 2, 14.0);
+        private Ellipse _hoverPointEllipse;
+        private TextBlock _hoverPointText;
+
+        // Drawing pieces
         private Geometry _datasetGeometry;
         private Path _datasetPath;
+        private Line _xAxis;
+        private Line _yAxis;
+
+        // Calculated transforms
+        //     Pixel space is from the top left of the canvas in pixels, down is positive.
+        //     Data space is the data's coordinate system.
+        private Matrix _dataToPixelSpaceTransform;
+        private Matrix _pixelToDataSpaceTransform;
 
         public GraphRenderer(Canvas canvas, Dataset dataset) {
             _canvas = canvas;
@@ -54,12 +71,32 @@ namespace StockStratMemes {
             _canvas.LayoutUpdated += OnCanvasLayoutUpdates;
         }
 
+        /// <summary>
+        /// Sets and enables (if not already enabled) the mouse hover point.
+        /// This is the mouse location. The mouse hover point will be translated
+        /// to the Y value of the closest X value in the dataset.
+        /// </summary>
+        /// <param name="pointPx">The mouse hover point in pixels.</param>
+        public void SetMouseHoverPoint(Point pointPx) {
+            _mouseHoverPointPx = pointPx;
+            _mouseHoverPointEnabled = true;
+            UpdateHoverPoint();
+        }
+
+        /// <summary>
+        /// Disables and hides the mouse hover point.
+        /// </summary>
+        public void DisableMouseHoverPoint() {
+            _mouseHoverPointEnabled = false;
+            UpdateHoverPoint();
+        }
+
         private void OnCanvasLayoutUpdates(object sender, EventArgs e) {
             if (_canvas.ActualWidth == _renderParams.CanvasSizePx.Width && _canvas.ActualHeight == _renderParams.CanvasSizePx.Height)
                 return;
 
             _renderParams.CanvasSizePx = new Size(_canvas.ActualWidth, _canvas.ActualHeight);
-            Draw();
+            UpdateAll();
         }
 
         private void InitializeDomainAndRange() {
@@ -79,32 +116,42 @@ namespace StockStratMemes {
             SetDomain(minX, maxX);
             SetRange(minY, maxY);
 
-            Draw();
+            UpdateAll();
         }
 
+        /// <summary>
+        /// Sets the domain of the X axis. The coordinate system is the dataset's coordinates.
+        /// </summary>
+        /// <param name="start">The start of the axis (lower number).</param>
+        /// <param name="end">The end of the axis (higher number).</param>
         public void SetDomain(double start, double end) {
             _renderParams.Domain.Start = start;
             _renderParams.Domain.End = end;
         }
 
+        /// <summary>
+        /// Sets the range of the Y axis. The coordinate system is the dataset's coordinates.
+        /// </summary>
+        /// <param name="start">The start of the axis (Lower number).</param>
+        /// <param name="end">The end of the axis (Higher number).</param>
         public void SetRange(double start, double end) {
             _renderParams.Range.Start = start;
             _renderParams.Range.End = end;
         }
 
-        public void Draw() {
-            _canvas.Children.Clear();
-            DrawData();
-            DrawAxis();
+        /// <summary>
+        /// Updates all the graphics to reflect the current state
+        /// </summary>
+        public void UpdateAll() {
+            UpdateData();
+            UpdateAxis();
+            UpdateHoverPoint();
         }
 
-        private Point ScalePoint(Point p, Size scale) {
-            return new Point(
-                    p.X * scale.Width,
-                    p.Y * scale.Height);
-        }
+        private void UpdateData() {
+            if (_datasetPath != null)
+                _canvas.Children.Remove(_datasetPath);
 
-        private void DrawData() {
             SolidColorBrush brush = new SolidColorBrush(_renderParams.LineOptions.Color);
 
             double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
@@ -123,35 +170,141 @@ namespace StockStratMemes {
             //     are starting at the top of the screen and should be starting at the bottom of the screen
             layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
 
-            _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
+            _dataToPixelSpaceTransform = CloneMatrix(layoutTransform);
+            _pixelToDataSpaceTransform = CloneMatrix(layoutTransform);
+            if (_pixelToDataSpaceTransform.HasInverse)
+                _pixelToDataSpaceTransform.Invert();
+
+            _datasetGeometry.Transform = new MatrixTransform(layoutTransform); ;
             _datasetPath.Stroke = brush;
             _datasetPath.StrokeThickness = _renderParams.LineOptions.Thickness;
 
             _canvas.Children.Add(_datasetPath);
         }
 
-        private void DrawAxis() {
+        private void UpdateAxis() {
+            if (_xAxis != null)
+                _canvas.Children.Remove(_xAxis);
+            if (_yAxis != null)
+                _canvas.Children.Remove(_yAxis);
+
             double axisWidthPx = 3;
             SolidColorBrush brush = new SolidColorBrush(Colors.Black);
-            Line xAxis = new Line();
-            xAxis.Fill = brush;
-            xAxis.Stroke = brush;
-            xAxis.StrokeThickness = axisWidthPx;
-            xAxis.X1 = 0;
-            xAxis.Y1 = _renderParams.CanvasSizePx.Height;
-            xAxis.X2 = _renderParams.CanvasSizePx.Width;
-            xAxis.Y2 = xAxis.Y1;
-            _canvas.Children.Add(xAxis);
+            _xAxis = new Line();
+            _xAxis.Fill = brush;
+            _xAxis.Stroke = brush;
+            _xAxis.StrokeThickness = axisWidthPx;
+            _xAxis.X1 = 0;
+            _xAxis.Y1 = _renderParams.CanvasSizePx.Height;
+            _xAxis.X2 = _renderParams.CanvasSizePx.Width;
+            _xAxis.Y2 = _xAxis.Y1;
+            _canvas.Children.Add(_xAxis);
 
-            Line yAxis = new Line();
-            yAxis.Fill = brush;
-            yAxis.Stroke = brush;
-            yAxis.StrokeThickness = axisWidthPx;
-            yAxis.X1 = 0;
-            yAxis.Y1 = 0;
-            yAxis.X2 = 0;
-            yAxis.Y2 = _renderParams.CanvasSizePx.Height;
-            _canvas.Children.Add(yAxis);
+            _yAxis = new Line();
+            _yAxis.Fill = brush;
+            _yAxis.Stroke = brush;
+            _yAxis.StrokeThickness = axisWidthPx;
+            _yAxis.X1 = 0;
+            _yAxis.Y1 = 0;
+            _yAxis.X2 = 0;
+            _yAxis.Y2 = _renderParams.CanvasSizePx.Height;
+            _canvas.Children.Add(_yAxis);
+        }
+
+        /// <summary>
+        /// Updates the graphics for the hover point (the point highlighted when you hover
+        /// the mouse over the graph).
+        /// </summary>
+        private void UpdateHoverPoint() {
+            // Everything is null or nothing is.
+            // Null everything out after so we can enable/disable the feature.
+            if (_hoverPointText != null) {
+                _canvas.Children.Remove(_hoverPointText);
+                _canvas.Children.Remove(_hoverPointEllipse);
+                _hoverPointEllipse = null;
+                _hoverPointText = null;
+            }
+
+            // If we're not enabled, we're done
+            if (!_mouseHoverPointEnabled)
+                return;
+
+            // First get the mouse location in data space // ?? TODO: Check that mouse point isnt changed
+            Point mousePositionInDataSpace = _pixelToDataSpaceTransform.Transform(_mouseHoverPointPx);
+
+            // Get the data's Y point from here
+            Dataset dataset = _renderParams.Dataset;
+            DataResult closestX = dataset.GetClosestXTo(mousePositionInDataSpace.X);
+            if (closestX.Succeeded) {
+                DataResult yValue = dataset.ValueAt(closestX.Result);
+                if (yValue.Succeeded) {
+                    mousePositionInDataSpace.X = closestX.Result;
+                    mousePositionInDataSpace.Y = yValue.Result;
+                } else {
+                    // Invalid location in the dataset so dont highlight anything
+                    return;
+                }
+            } else {
+                // Invalid location in the dataset so dont highlight anything
+                return;
+            }
+
+            // Transform back into pixel space for display
+            Point highlightPointPx = _dataToPixelSpaceTransform.Transform(mousePositionInDataSpace);
+
+            _hoverPointEllipse = new Ellipse();
+            _hoverPointEllipse.Width = _hoverPointOptions.Size;
+            _hoverPointEllipse.Height = _hoverPointOptions.Size;
+            _hoverPointEllipse.Stroke = new SolidColorBrush(_hoverPointOptions.Color);
+            _hoverPointEllipse.StrokeThickness = _hoverPointOptions.StrokeThickness;
+            Canvas.SetLeft(_hoverPointEllipse, highlightPointPx.X - _hoverPointOptions.Size / 2.0);
+            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);
+            _canvas.Children.Add(_hoverPointEllipse);
+
+            _hoverPointText = new TextBlock();
+            _hoverPointText.Text = "(" + mousePositionInDataSpace.X + ", " + mousePositionInDataSpace.Y + ")";
+            _hoverPointText.FontSize = _hoverPointOptions.FontSize;
+            _hoverPointText.FontWeight = FontWeights.Bold;
+            _hoverPointText.Foreground = new SolidColorBrush(_hoverPointOptions.Color);
+            Canvas.SetLeft(_hoverPointText, highlightPointPx.X + _hoverPointOptions.Size);
+            Canvas.SetTop(_hoverPointText, highlightPointPx.Y + _hoverPointOptions.Size);
+            _canvas.Children.Add(_hoverPointText);
+        }
+
+        private Matrix CloneMatrix(Matrix input) {
+            return new Matrix(
+                input.M11,
+                input.M12,
+                input.M21,
+                input.M22,
+                input.OffsetX,
+                input.OffsetY
+            );
+        }
+    }
+
+    class HoverPointOptions {
+        public Color Color { get; set; }
+        public double Size { get; set; } // In Pixels
+        public double StrokeThickness { get; set; } // In Pixels
+        public double FontSize { get; set; }
+
+        public HoverPointOptions(Color color, double size, double strokeThickness, double fontSize) {
+            Color = color;
+            Size = size;
+            StrokeThickness = strokeThickness;
+            FontSize = fontSize;
+        }
+
+        public HoverPointOptions Clone() {
+            return new HoverPointOptions(Color, Size, StrokeThickness, FontSize);
+        }
+
+        public bool IsEqual(HoverPointOptions other) {
+            return other.Color.Equals(Color) && 
+                other.Size == Size &&
+                other.StrokeThickness == StrokeThickness &&
+                other.FontSize == FontSize;
         }
     }
 
