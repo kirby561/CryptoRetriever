@@ -27,7 +27,7 @@ namespace StockStratMemes {
         }
 
         public String FormatDateString(double utcSeconds) {
-            DateTime unixStart = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            DateTime unixStart = DateTimeConstant.UnixStart;
             switch (DateStringFormat) {
                 case ExportDateStringFormat.UtcTimestamp:
                     return "" + (long)Math.Round(utcSeconds);

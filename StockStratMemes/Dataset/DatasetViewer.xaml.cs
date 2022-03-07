@@ -21,6 +21,9 @@ namespace StockStratMemes.DatasetView {
         public void SetDataset(Dataset dataset) {
             _dataset = dataset;
             _renderer = new GraphRenderer(_graphCanvas, _dataset);
+            // Set the formatters for how to display the timestamps and values. These could be
+            // configurable in the future and also could depend on the currency that is being used.
+            _renderer.SetCoordinateFormatters(new TimestampToDateFormatter(), new DollarFormatter());
             _renderer.UpdateAll();
 
             _graphController = new GraphController(_renderer);
@@ -63,6 +66,21 @@ namespace StockStratMemes.DatasetView {
 
         private void OnMouseMoved(object sender, System.Windows.Input.MouseEventArgs e) {
             _graphController.OnMouseMoved(e.GetPosition(_graphCanvas));
+        }
+    }
+
+    class DollarFormatter : ICoordinateFormatter {
+        public string Format(double coordinate) {
+            return "$" + ((decimal)coordinate).ToString("N");
+        }
+    }
+
+    class TimestampToDateFormatter : ICoordinateFormatter {
+        public string Format(double coordinate) {
+            long utcTimestampSeconds = (long)Math.Round(coordinate);
+            DateTime unixStart = DateTimeConstant.UnixStart;
+            DateTime localDateTime = unixStart.AddSeconds(utcTimestampSeconds).ToLocalTime();
+            return localDateTime.ToString("G");
         }
     }
 }

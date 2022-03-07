@@ -37,6 +37,10 @@ namespace StockStratMemes {
         private Matrix _dataToPixelSpaceTransform;
         private Matrix _pixelToDataSpaceTransform;
 
+        // Converters for displaying coordinates to the user
+        private ICoordinateFormatter _xCoordFormatter = null;
+        private ICoordinateFormatter _yCoordFormatter = null;
+
         public GraphRenderer(Canvas canvas, Dataset dataset) {
             _canvas = canvas;
             _renderParams.Dataset = dataset;
@@ -70,6 +74,18 @@ namespace StockStratMemes {
             InitializeDomainAndRange();
 
             _canvas.LayoutUpdated += OnCanvasLayoutUpdates;
+        }
+
+        /// <summary>
+        /// Sets formatters that are used when displaying x or y coordinates to the user.
+        /// This can be used to convert/display the units they are in, add a dollar symbol, 
+        /// control the number of decimal places, etc..
+        /// </summary>
+        /// <param name="xFormatter">The formatter to use when displaying an x coordinate (or null for none).</param>
+        /// <param name="yFormatter">The formatter to use when displaying a y coordinate (or null for none).</param>
+        public void SetCoordinateFormatters(ICoordinateFormatter xFormatter, ICoordinateFormatter yFormatter) {
+            _xCoordFormatter = xFormatter;
+            _yCoordFormatter = yFormatter;
         }
 
         /// <summary>
@@ -264,8 +280,14 @@ namespace StockStratMemes {
             Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);
             _canvas.Children.Add(_hoverPointEllipse);
 
+            String xCoordinate = "" + mousePositionInDataSpace.X;
+            if (_xCoordFormatter != null) 
+                xCoordinate = _xCoordFormatter.Format(mousePositionInDataSpace.X);
+            String yCoordinate = "" + mousePositionInDataSpace.Y;
+            if (_yCoordFormatter != null)
+                yCoordinate = _yCoordFormatter.Format(mousePositionInDataSpace.Y);
             _hoverPointText = new TextBlock();
-            _hoverPointText.Text = "(" + mousePositionInDataSpace.X + ", " + mousePositionInDataSpace.Y + ")";
+            _hoverPointText.Text = "(" + xCoordinate + ", " + yCoordinate + ")";
             _hoverPointText.FontSize = _hoverPointOptions.FontSize;
             _hoverPointText.FontWeight = FontWeights.Bold;
             _hoverPointText.Foreground = new SolidColorBrush(Colors.White);// _hoverPointOptions.Color);
