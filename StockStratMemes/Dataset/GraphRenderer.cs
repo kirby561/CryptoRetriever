@@ -20,9 +20,10 @@ namespace StockStratMemes {
         // Mouse hover dependencies
         private Point _mouseHoverPointPx;
         private bool _mouseHoverPointEnabled = false;
-        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Colors.Teal, 10, 2, 14.0);
+        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Color.FromRgb(0xff, 0x22, 0x22), 10, 2, 14.0);
         private Ellipse _hoverPointEllipse;
         private TextBlock _hoverPointText;
+        private Rectangle _hoverPointTextBackground;
 
         // Drawing pieces
         private Geometry _datasetGeometry;
@@ -221,15 +222,17 @@ namespace StockStratMemes {
             if (_hoverPointText != null) {
                 _canvas.Children.Remove(_hoverPointText);
                 _canvas.Children.Remove(_hoverPointEllipse);
-                _hoverPointEllipse = null;
+                _canvas.Children.Remove(_hoverPointTextBackground);
                 _hoverPointText = null;
+                _hoverPointEllipse = null;
+                _hoverPointTextBackground = null;
             }
 
             // If we're not enabled, we're done
             if (!_mouseHoverPointEnabled)
                 return;
 
-            // First get the mouse location in data space // ?? TODO: Check that mouse point isnt changed
+            // First get the mouse location in data space
             Point mousePositionInDataSpace = _pixelToDataSpaceTransform.Transform(_mouseHoverPointPx);
 
             // Get the data's Y point from here
@@ -265,10 +268,44 @@ namespace StockStratMemes {
             _hoverPointText.Text = "(" + mousePositionInDataSpace.X + ", " + mousePositionInDataSpace.Y + ")";
             _hoverPointText.FontSize = _hoverPointOptions.FontSize;
             _hoverPointText.FontWeight = FontWeights.Bold;
-            _hoverPointText.Foreground = new SolidColorBrush(_hoverPointOptions.Color);
-            Canvas.SetLeft(_hoverPointText, highlightPointPx.X + _hoverPointOptions.Size);
-            Canvas.SetTop(_hoverPointText, highlightPointPx.Y + _hoverPointOptions.Size);
-            _canvas.Children.Add(_hoverPointText);
+            _hoverPointText.Foreground = new SolidColorBrush(Colors.White);// _hoverPointOptions.Color);
+
+            // Measure the text so we can position it. This is valid because the canvas will not impose
+            // any constraints on it so it can use all the space it needs.
+            _hoverPointText.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+            double textWidth = _hoverPointText.DesiredSize.Width;
+            double textHeight = _hoverPointText.DesiredSize.Height;
+
+            double textVerticalOffset = 10;
+            double textLeftPx = highlightPointPx.X - textWidth / 2.0;
+            double textTopPx = highlightPointPx.Y - textHeight - textVerticalOffset - _hoverPointOptions.Size;
+
+            // Clamp the left/right/top/bottom of the text to the canvas
+            double canvasPadding = 5;
+            if (textLeftPx < canvasPadding)
+                textLeftPx = canvasPadding;
+            if (textLeftPx + textWidth + canvasPadding > _canvas.ActualWidth)
+                textLeftPx -= (textLeftPx + textWidth + canvasPadding) - _canvas.ActualWidth;
+            if (textTopPx < canvasPadding)
+                textTopPx = canvasPadding;
+            if (textTopPx + textHeight + canvasPadding > _canvas.ActualHeight)
+                textTopPx -= (textTopPx + textHeight + canvasPadding) - _canvas.ActualHeight;
+            
+            Canvas.SetLeft(_hoverPointText, textLeftPx);
+            Canvas.SetTop(_hoverPointText, textTopPx);
+
+            double backgroundPadding = 5.0;
+            double cornerRadius = 5;
+            _hoverPointTextBackground = new Rectangle();
+            _hoverPointTextBackground.Width = backgroundPadding * 2 + textWidth;
+            _hoverPointTextBackground.Height = backgroundPadding * 2 + textHeight;
+            _hoverPointTextBackground.Fill = new SolidColorBrush(Color.FromArgb(0xaa, 0, 0, 0));
+            _hoverPointTextBackground.RadiusX = cornerRadius;
+            _hoverPointTextBackground.RadiusY = cornerRadius;
+            Canvas.SetLeft(_hoverPointTextBackground, textLeftPx - backgroundPadding);
+            Canvas.SetTop(_hoverPointTextBackground, textTopPx - backgroundPadding);
+            _canvas.Children.Add(_hoverPointTextBackground);
+            _canvas.Children.Add(_hoverPointText); // Add the text after the background so it is in front
         }
 
         private Matrix CloneMatrix(Matrix input) {
@@ -353,7 +390,7 @@ namespace StockStratMemes {
         public Range Domain { get; set; } = new Range();
         public Range Range { get; set; } = new Range();
         public Size CanvasSizePx { get; set; } = new Size();
-        public LineOptions LineOptions { get; set; } = new LineOptions(Colors.Blue, 1.0);
+        public LineOptions LineOptions { get; set; } = new LineOptions(Color.FromRgb(0x22, 0x44, 0xff), 1.0);
 
         public RenderParams Clone() {
             RenderParams clone = new RenderParams();
