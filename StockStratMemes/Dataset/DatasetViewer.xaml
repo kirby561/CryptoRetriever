@@ -23,6 +23,16 @@
         </Menu>
 
         <!-- Second row -->
-        <Canvas Grid.Row="1" SizeChanged="OnGraphSizeChanged" MouseEnter="OnMouseEntered"  MouseLeave="OnMouseLeft" MouseMove="OnMouseMoved" Name="_graphCanvas" Background="White" />
+        <Canvas 
+            Grid.Row="1" 
+            Name="_graphCanvas" 
+            Background="White"
+            SizeChanged="OnGraphSizeChanged" 
+            MouseEnter="OnMouseEntered" 
+            MouseLeave="OnMouseLeft" 
+            MouseMove="OnMouseMoved"
+            MouseUp="OnMouseUp"
+            MouseDown="OnMouseDown"
+            MouseWheel="OnMouseWheel" />
     </Grid>
 </Window>

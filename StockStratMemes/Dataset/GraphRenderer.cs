@@ -41,6 +41,10 @@ namespace StockStratMemes {
         private ICoordinateFormatter _xCoordFormatter = null;
         private ICoordinateFormatter _yCoordFormatter = null;
 
+        // Keep track of the bounding box
+        private Range _boundingDomain;
+        private Range _boundingRange;
+
         public GraphRenderer(Canvas canvas, Dataset dataset) {
             _canvas = canvas;
             _renderParams.Dataset = dataset;
@@ -69,6 +73,11 @@ namespace StockStratMemes {
                 Canvas.SetRight(_datasetPath, 0);
                 Canvas.SetBottom(_datasetPath, 0);
             }
+
+            SolidColorBrush brush = new SolidColorBrush(_renderParams.LineOptions.Color);
+            _datasetPath.Stroke = brush;
+            _datasetPath.StrokeThickness = _renderParams.LineOptions.Thickness;
+            _datasetPath.IsHitTestVisible = false;
 
             // Start the domain/range to fit the data
             InitializeDomainAndRange();
@@ -130,6 +139,9 @@ namespace StockStratMemes {
                 if (p.Y > maxY) maxY = p.Y;
             }
 
+            _boundingDomain = new Range(minX, maxX);
+            _boundingRange = new Range(minY, maxY);
+
             SetDomain(minX, maxX);
             SetRange(minY, maxY);
 
@@ -156,6 +168,41 @@ namespace StockStratMemes {
             _renderParams.Range.End = end;
         }
 
+        /// <returns>Returns the min/max X of the full dataset.</returns>
+        public Range GetBoundingDomain() {
+            return _boundingDomain;
+        }
+
+        /// <returns>Returns the min/max Y of the full dataset.</returns>
+        public Range GetBoundingRange() {
+            return _boundingRange;
+        }
+
+        public Matrix GetDataToPixelSpaceTransform() {
+            return _dataToPixelSpaceTransform;
+        }
+
+        public Matrix GetPixelToDataSpaceTransform() {
+            return _pixelToDataSpaceTransform;
+        }
+
+        public Range GetDomain() {
+            return _renderParams.Domain;
+        }
+
+        public Range GetRange() {
+            return _renderParams.Range;
+        }
+
+        public Dataset GetDataset() {
+            return _renderParams.Dataset;
+        }
+
+        public bool IsZoomedOut() {
+            return GetDomain().IsEqual(_boundingDomain) && 
+                GetRange().IsEqual(_boundingRange);
+        }
+
         /// <summary>
         /// Updates all the graphics to reflect the current state
         /// </summary>
@@ -168,8 +215,6 @@ namespace StockStratMemes {
         private void UpdateData() {
             if (_datasetPath != null)
                 _canvas.Children.Remove(_datasetPath);
-
-            SolidColorBrush brush = new SolidColorBrush(_renderParams.LineOptions.Color);
 
             double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
             double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
@@ -187,14 +232,12 @@ namespace StockStratMemes {
             //     are starting at the top of the screen and should be starting at the bottom of the screen
             layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
 
-            _dataToPixelSpaceTransform = CloneMatrix(layoutTransform);
-            _pixelToDataSpaceTransform = CloneMatrix(layoutTransform);
+            _dataToPixelSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
+            _pixelToDataSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
             if (_pixelToDataSpaceTransform.HasInverse)
                 _pixelToDataSpaceTransform.Invert();
 
-            _datasetGeometry.Transform = new MatrixTransform(layoutTransform); ;
-            _datasetPath.Stroke = brush;
-            _datasetPath.StrokeThickness = _renderParams.LineOptions.Thickness;
+            _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
             _canvas.Children.Add(_datasetPath);
         }
@@ -215,6 +258,7 @@ namespace StockStratMemes {
             _xAxis.Y1 = _renderParams.CanvasSizePx.Height;
             _xAxis.X2 = _renderParams.CanvasSizePx.Width;
             _xAxis.Y2 = _xAxis.Y1;
+            _xAxis.IsHitTestVisible = false;
             _canvas.Children.Add(_xAxis);
 
             _yAxis = new Line();
@@ -225,6 +269,7 @@ namespace StockStratMemes {
             _yAxis.Y1 = 0;
             _yAxis.X2 = 0;
             _yAxis.Y2 = _renderParams.CanvasSizePx.Height;
+            _yAxis.IsHitTestVisible = false;
             _canvas.Children.Add(_yAxis);
         }
 
@@ -276,8 +321,9 @@ namespace StockStratMemes {
             _hoverPointEllipse.Height = _hoverPointOptions.Size;
             _hoverPointEllipse.Stroke = new SolidColorBrush(_hoverPointOptions.Color);
             _hoverPointEllipse.StrokeThickness = _hoverPointOptions.StrokeThickness;
+            _hoverPointEllipse.IsHitTestVisible = false;
             Canvas.SetLeft(_hoverPointEllipse, highlightPointPx.X - _hoverPointOptions.Size / 2.0);
-            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);
+            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);            
             _canvas.Children.Add(_hoverPointEllipse);
 
             String xCoordinate = "" + mousePositionInDataSpace.X;
@@ -291,6 +337,7 @@ namespace StockStratMemes {
             _hoverPointText.FontSize = _hoverPointOptions.FontSize;
             _hoverPointText.FontWeight = FontWeights.Bold;
             _hoverPointText.Foreground = new SolidColorBrush(Colors.White);// _hoverPointOptions.Color);
+            _hoverPointText.IsHitTestVisible = false;
 
             // Measure the text so we can position it. This is valid because the canvas will not impose
             // any constraints on it so it can use all the space it needs.
@@ -326,19 +373,9 @@ namespace StockStratMemes {
             _hoverPointTextBackground.RadiusY = cornerRadius;
             Canvas.SetLeft(_hoverPointTextBackground, textLeftPx - backgroundPadding);
             Canvas.SetTop(_hoverPointTextBackground, textTopPx - backgroundPadding);
+            _hoverPointTextBackground.IsHitTestVisible = false;
             _canvas.Children.Add(_hoverPointTextBackground);
             _canvas.Children.Add(_hoverPointText); // Add the text after the background so it is in front
-        }
-
-        private Matrix CloneMatrix(Matrix input) {
-            return new Matrix(
-                input.M11,
-                input.M12,
-                input.M21,
-                input.M22,
-                input.OffsetX,
-                input.OffsetY
-            );
         }
     }
 
@@ -385,7 +422,7 @@ namespace StockStratMemes {
         }
     }
 
-    class Range {
+    public class Range {
         public double Start { get; set; } = 0.0;
         public double End { get; set; } = 0.0;
 

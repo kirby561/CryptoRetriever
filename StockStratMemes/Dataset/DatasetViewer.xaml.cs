@@ -67,6 +67,18 @@ namespace StockStratMemes.DatasetView {
         private void OnMouseMoved(object sender, System.Windows.Input.MouseEventArgs e) {
             _graphController.OnMouseMoved(e.GetPosition(_graphCanvas));
         }
+
+        private void OnMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e) {
+            _graphController.OnMouseWheel(e.Delta, e.GetPosition(_graphCanvas));
+        }
+
+        private void OnMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            _graphController.OnMouseUp(e.GetPosition(_graphCanvas));
+        }
+
+        private void OnMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            _graphController.OnMouseDown(e.GetPosition(_graphCanvas));
+        }
     }
 
     class DollarFormatter : ICoordinateFormatter {

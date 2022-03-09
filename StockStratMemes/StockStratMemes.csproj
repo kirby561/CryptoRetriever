@@ -99,6 +99,7 @@
     <Compile Include="Source\CoinbaseSource.cs" />
     <Compile Include="Utility\DateTimeConstant.cs" />
     <Compile Include="Utility\ICoordinateFormatter.cs" />
+    <Compile Include="Utility\MatrixUtil.cs" />
     <Compile Include="Utility\Result.cs" />
     <Compile Include="Utility\DateRange.cs" />
     <Compile Include="Source\ISource.cs" />
@@ -106,6 +107,7 @@
       <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utility\JsonUtil.cs" />
+    <Compile Include="Utility\User32Helper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
