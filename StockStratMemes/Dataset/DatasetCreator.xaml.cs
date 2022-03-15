@@ -31,6 +31,8 @@ namespace StockStratMemes.DatasetView {
             // Add all the sources
             CoinbaseSource coinbaseSource = new CoinbaseSource();
             _sources[coinbaseSource.GetName()] = coinbaseSource;
+            CoinGeckoSource coinGeckoSource = new CoinGeckoSource();
+            _sources[coinGeckoSource.GetName()] = coinGeckoSource;
 
             // Fill out the sources list
             foreach (ISource source in _sources.Values) {
@@ -47,7 +49,7 @@ namespace StockStratMemes.DatasetView {
 
             if (_currentSource == null)
                 return;
-            
+
             foreach (int granularity in _currentSource.GetGranularityOptions()) {
                 RadioButton granularityButton = new RadioButton();
                 granularityButton.Content = "" + granularity;
@@ -118,7 +120,11 @@ namespace StockStratMemes.DatasetView {
 
         private void OnGranularitySelected(object sender, RoutedEventArgs e) {
             RadioButton element = sender as RadioButton;
-            String selectedGranularityStr = (element.Content as TextBlock).Text;
+            // It can either be a string or a TextBlock depending on when it's called
+            String selectedGranularityStr = element.Content as String;
+            if (selectedGranularityStr == null) {
+                selectedGranularityStr = (element.Content as TextBlock).Text;
+            }
             int granularityInSeconds = int.Parse(selectedGranularityStr);
             _selectedGranularity = granularityInSeconds;
         }

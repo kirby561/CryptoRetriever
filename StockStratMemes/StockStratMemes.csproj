@@ -97,6 +97,7 @@
     </Compile>
     <Compile Include="Source\Asset.cs" />
     <Compile Include="Source\CoinbaseSource.cs" />
+    <Compile Include="Source\CoinGeckoSource.cs" />
     <Compile Include="Utility\DateTimeConstant.cs" />
     <Compile Include="Utility\ICoordinateFormatter.cs" />
     <Compile Include="Utility\MatrixUtil.cs" />

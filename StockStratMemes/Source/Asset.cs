@@ -6,11 +6,19 @@ namespace StockStratMemes.Source {
         public String Name { get; set; }
         public decimal Value { get; set; }
         public String Currency { get; set; }
+        public String Id { get; set; } = null; // Optional
 
         public Asset(String name, decimal value, String currency) {
             Name = name;
             Value = value;
             Currency = currency;
+        }
+
+        public Asset(String name, decimal value, String currency, String id) {
+            Name = name;
+            Value = value;
+            Currency = currency;
+            Id = id;
         }
 
         public override String ToString() {
