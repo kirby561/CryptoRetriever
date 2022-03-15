@@ -67,9 +67,13 @@ namespace StockStratMemes {
                 // Check if the dataset file exists
                 Result<Dataset> datasetResult = DatasetReader.ReadFile(filename);
                 if (datasetResult.Succeeded) {
-                    _dataSetViewer = new DatasetViewer();
-                    _dataSetViewer.SetDataset(datasetResult.Value);
-                    _dataSetViewer.Show();
+                    if (datasetResult.Value.Points.Count > 0) {
+                        _dataSetViewer = new DatasetViewer();
+                        _dataSetViewer.SetDataset(datasetResult.Value);
+                        _dataSetViewer.Show();
+                    } else {
+                        MessageBox.Show("The dataset is empty.");
+                    }
                 } else {
                     MessageBox.Show(datasetResult.ErrorDetails);
                 }
