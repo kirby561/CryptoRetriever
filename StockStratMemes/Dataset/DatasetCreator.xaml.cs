@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -50,12 +52,33 @@ namespace StockStratMemes.DatasetView {
             if (_currentSource == null)
                 return;
 
+            RadioButton oneDayGranularity = null;
             foreach (int granularity in _currentSource.GetGranularityOptions()) {
                 RadioButton granularityButton = new RadioButton();
-                granularityButton.Content = "" + granularity;
-                granularityButton.Template = Resources["GranularitySelectionTemplate"] as ControlTemplate;
+                granularityButton.Margin = new Thickness(10, 0, 0, 10);
+                granularityButton.VerticalContentAlignment = VerticalAlignment.Center;
+                granularityButton.Checked += OnGranularitySelected;
+
+                TextBlock granularityContent = new TextBlock();
+                granularityContent.Foreground = new SolidColorBrush(Colors.White);
+                granularityContent.FontSize = 20;
+                granularityContent.FontFamily = new FontFamily("Arial");
+                granularityContent.Text = GetUserGranularityString(granularity);
+                granularityButton.Content = granularityContent;
+                granularityButton.Tag = granularity;
                 _granularityPanel.Children.Add(granularityButton);
+
+                int oneDayInSeconds = 86400;
+                if (granularity == oneDayInSeconds)
+                    oneDayGranularity = granularityButton;
             }
+
+            // Select one day by default if available.
+            // Otherwise just pick the first one.
+            if (oneDayGranularity != null)
+                oneDayGranularity.IsChecked = true;
+            else
+                (_granularityPanel.Children[0] as RadioButton).IsChecked = true;
         }
 
         private void OnCreateClicked(object sender, RoutedEventArgs e) {
@@ -119,13 +142,8 @@ namespace StockStratMemes.DatasetView {
         }
 
         private void OnGranularitySelected(object sender, RoutedEventArgs e) {
-            RadioButton element = sender as RadioButton;
-            // It can either be a string or a TextBlock depending on when it's called
-            String selectedGranularityStr = element.Content as String;
-            if (selectedGranularityStr == null) {
-                selectedGranularityStr = (element.Content as TextBlock).Text;
-            }
-            int granularityInSeconds = int.Parse(selectedGranularityStr);
+            FrameworkElement element = sender as FrameworkElement;
+            int granularityInSeconds = (int)element.Tag; // We store the granularity in the tag of each control
             _selectedGranularity = granularityInSeconds;
         }
 
@@ -204,6 +222,44 @@ namespace StockStratMemes.DatasetView {
 
         private void OnCancelButtonClicked(object sender, RoutedEventArgs e) {
             Close();
+        }
+
+        /// <summary>
+        /// Makes a prettified string of the given number of seconds for the user.
+        /// </summary>
+        /// <param name="granularitySeconds">The number of seconds.</param>
+        /// <returns></returns>
+        private String GetUserGranularityString(int granularitySeconds) {
+            TimeSpan timeSpan = new TimeSpan(0, 0, granularitySeconds);
+
+            String result = "";
+            if (timeSpan.Days > 0)
+                result = ExtendGranularityString(result, timeSpan.Days, "Day");
+            if (timeSpan.Hours > 0)
+                result = ExtendGranularityString(result, timeSpan.Hours, "Hour");
+            if (timeSpan.Minutes > 0)
+                result = ExtendGranularityString(result, timeSpan.Minutes, "Minute");
+            if (timeSpan.Seconds > 0)
+                result = ExtendGranularityString(result, timeSpan.Seconds, "Second");
+
+            return result;
+        }
+
+        /// <summary>
+        /// Extends the granularity string adding a comma and/or an S as appropriate.
+        /// </summary>
+        /// <param name="existingString">The existing string.</param>
+        /// <param name="count">The number of the label.</param>
+        /// <param name="label">The label (Day, Hour, Minute, Second)</param>
+        /// <returns>Returns the extended string.</returns>
+        private String ExtendGranularityString(String existingString, int count, String label) {
+            String newString = existingString;
+            if (!String.IsNullOrEmpty(newString))
+                newString += ", ";
+            newString += count + " " + label;
+            if (count != 1)
+                newString += "s";
+            return newString;
         }
     }
 }
