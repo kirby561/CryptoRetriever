@@ -298,16 +298,11 @@ namespace StockStratMemes {
 
             // Get the data's Y point from here
             Dataset dataset = _renderParams.Dataset;
-            DataResult closestX = dataset.GetClosestXTo(mousePositionInDataSpace.X);
-            if (closestX.Succeeded) {
-                DataResult yValue = dataset.ValueAt(closestX.Result);
-                if (yValue.Succeeded) {
-                    mousePositionInDataSpace.X = closestX.Result;
-                    mousePositionInDataSpace.Y = yValue.Result;
-                } else {
-                    // Invalid location in the dataset so dont highlight anything
-                    return;
-                }
+            double closestX = dataset.GetClosestXTo(mousePositionInDataSpace.X);
+            DataResult yValue = dataset.ValueAt(closestX);
+            if (yValue.Succeeded) {
+                mousePositionInDataSpace.X = closestX;
+                mousePositionInDataSpace.Y = yValue.Result;
             } else {
                 // Invalid location in the dataset so dont highlight anything
                 return;

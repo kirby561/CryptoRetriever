@@ -151,92 +151,30 @@ namespace StockStratMemes {
 
         /// <summary>
         /// Gets the X value closest to the given x value in this dataset.
-        /// Returns an error if the dataset is empty.
+        /// It is an error to call this on an empty dataset.
         /// 
         /// Note: This assumes the dataset is in order!
         /// </summary>
         /// <param name="xValue">The x value to compare.</param>
-        /// <returns>Returns a result containing the closest X value or an error if the dataset is empty.</returns>
-        public DataResult GetClosestXTo(double xValue) {
-            if (Points == null || Points.Count == 0)
-                return new DataResult("There are no points in the dataset.");
-
+        /// <returns>Returns the closest X value in this dataset.</returns>
+        public double GetClosestXTo(double xValue) {
             if (Points.Count == 1)
-                return new DataResult(Points[0].X);
+                return Points[0].X;
 
-            // The closest point will be the insertion point or the one after
-            int left = BinarySearchForX(xValue);
-            int right = left + 1;
+            // BinarySearchForX gets the closest value to the right of the point
+            // so the closest will be the returned point or the one to the left.
+            int right = BinarySearchForX(xValue);
+            int left = right - 1;
 
-            if (right >= Points.Count)
-                return new DataResult(Points[left].X);
+            if (left < 0)
+                return Points[right].X;
 
             double leftDist = Math.Abs(xValue - Points[left].X);
             double rightDist = Math.Abs(Points[right].X - xValue);
             if (leftDist < rightDist)
-                return new DataResult(Points[left].X);
+                return Points[left].X;
             else
-                return new DataResult(Points[right].X);
-        }
-
-        public static bool Test() {
-            List<Point> expectedResult = new List<Point>();
-            Dataset dataSet = new Dataset();
-
-            Point p1 = new Point(1, 1);
-            Point p2 = new Point(3, 6);
-            Point p3 = new Point(5, 0);
-            Point p4 = new Point(7, 0);
-
-            // Test adding the first element
-            //  Should be just p2
-            expectedResult.Add(p2);
-            dataSet.Insert(p2);
-            if (!AreListsEqual(expectedResult, dataSet.Points)) return false;
-
-            // Test adding an element less than it on the left end
-            //  Should be p1, p2
-            expectedResult.Insert(0, p1);
-            dataSet.Insert(p1);
-            if (!AreListsEqual(expectedResult, dataSet.Points)) return false;
-
-            // Test adding an element more than it on the right end
-            //  Should be p1, p2, p4
-            expectedResult.Add(p4);
-            dataSet.Insert(p4);
-            if (!AreListsEqual(expectedResult, dataSet.Points)) return false;
-
-            // Test adding one in the middle
-            //  Should be p1, p2, p3, p4
-            expectedResult.Insert(2, p3);
-            dataSet.Insert(p3);
-            if (!AreListsEqual(expectedResult, dataSet.Points)) return false;
-
-            double expectedValueAt2 = 3.5;
-            double valueAt2 = dataSet.ValueAt(2).Result;
-            if (!IsApproxEqual(expectedValueAt2, valueAt2)) return false;
-
-            double expectedValueAt2p5 = 4.75;
-            double valueAt2p5 = dataSet.ValueAt(2.5).Result;
-            if (!IsApproxEqual(expectedValueAt2p5, valueAt2p5)) return false;
-
-            return true;
-        }
-
-        private static bool IsApproxEqual(double n1, double n2, double epsilon = 0.0001) {
-            return Math.Abs(n1 - n2) <= epsilon;
-        }
-
-        private static bool AreListsEqual(List<Point> list1, List<Point> list2) {
-            if (list1.Count != list2.Count)
-                return false;
-
-            for (int i = 0; i < list1.Count; i++) {
-                if (list1[i] != list2[i])
-                    return false;
-            }
-
-            return true;
+                return Points[right].X;
         }
     }
 
