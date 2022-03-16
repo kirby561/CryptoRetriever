@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoRetriever", "CryptoRetriever\CryptoRetriever.csproj", "{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{95AF590A-5A57-4D3C-A3E2-953969CCA554}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase", "CryptoRetriever\Source\ThirdParty\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj", "{84171815-34EE-4435-9E01-E4E88AD4C501}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84171815-34EE-4435-9E01-E4E88AD4C501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84171815-34EE-4435-9E01-E4E88AD4C501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84171815-34EE-4435-9E01-E4E88AD4C501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84171815-34EE-4435-9E01-E4E88AD4C501}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{84171815-34EE-4435-9E01-E4E88AD4C501} = {95AF590A-5A57-4D3C-A3E2-953969CCA554}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {252A450C-17DF-439F-83C0-9D8EB19F11A4}
+	EndGlobalSection
+EndGlobal
