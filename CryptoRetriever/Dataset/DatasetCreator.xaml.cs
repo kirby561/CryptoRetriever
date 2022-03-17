@@ -14,7 +14,8 @@ using System.Windows.Media;
 
 namespace CryptoRetriever.DatasetView {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// A window that lets users grab a dataset from a list of sources that are displayed
+    /// for the selected currency in a selected date range and spaced at a selected granularity.
     /// </summary>
     public sealed partial class DatasetCreator : Window {
 
@@ -131,9 +132,11 @@ namespace CryptoRetriever.DatasetView {
                                 dialog.Close();
                                 Close();
 
+
                                 // Open a dataset viewer
                                 DatasetViewer viewer = new DatasetViewer();
-                                viewer.SetDataset(result.Value);
+                                String filename = Path.GetFileName(filePath);
+                                viewer.SetDataset(filename, result.Value);
                                 viewer.Show();
                             } catch (Exception ex) {
                                 dialog.Close();

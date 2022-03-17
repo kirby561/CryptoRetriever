@@ -8,6 +8,7 @@
     Left="100"
     Top="100"
     Width="1800" Height="1000"
+    Name="_window"
     mc:Ignorable="d">
 
     <Grid>

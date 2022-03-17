@@ -18,7 +18,8 @@ namespace CryptoRetriever.DatasetView {
             this.InitializeComponent();
         }
 
-        public void SetDataset(Dataset dataset) {
+        public void SetDataset(String name, Dataset dataset) {
+            _window.Title = name;
             _dataset = dataset;
             _renderer = new GraphRenderer(_graphCanvas, _dataset);
             // Set the formatters for how to display the timestamps and values. These could be

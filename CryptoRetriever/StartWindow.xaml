@@ -7,6 +7,7 @@
         x:Class="CryptoRetriever.StartWindow"
         mc:Ignorable="d"
         Background="#00001a"
+        Title="Crypto Retriever"
         Width="800" Height="500">
     <Grid>
         <Grid.RowDefinitions>

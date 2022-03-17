@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using System;
 using CryptoRetriever.Source;
+using System.IO;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -62,14 +63,15 @@ namespace CryptoRetriever {
 
             // Process open file dialog box results
             if (result.Value) {
-                string filename = openFileDialog.FileName;
+                string filePath = openFileDialog.FileName;
 
                 // Check if the dataset file exists
-                Result<Dataset> datasetResult = DatasetReader.ReadFile(filename);
+                Result<Dataset> datasetResult = DatasetReader.ReadFile(filePath);
                 if (datasetResult.Succeeded) {
                     if (datasetResult.Value.Points.Count > 0) {
                         _dataSetViewer = new DatasetViewer();
-                        _dataSetViewer.SetDataset(datasetResult.Value);
+                        String filename = Path.GetFileName(filePath);
+                        _dataSetViewer.SetDataset(filename, datasetResult.Value);
                         _dataSetViewer.Show();
                     } else {
                         MessageBox.Show("The dataset is empty.");

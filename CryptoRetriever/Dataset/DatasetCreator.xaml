@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="#00001a"
     Width="800" Height="500"
+    Title="Create Dataset"
     mc:Ignorable="d">
 
     <Window.Resources>

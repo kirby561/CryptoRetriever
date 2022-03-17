@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Background="#00001a"
         WindowStyle="None"
-        Title="Please wait" Height="200" Width="300" ResizeMode="NoResize">
+        Title="Saving..." Height="200" Width="300" ResizeMode="NoResize">
     <Grid>
         <TextBlock Name="_text" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Saving..." Foreground="White" FontSize="20" FontFamily="Arial" />
     </Grid>
