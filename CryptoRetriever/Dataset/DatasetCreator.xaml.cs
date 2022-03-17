@@ -96,6 +96,21 @@ namespace CryptoRetriever.DatasetView {
                 endDate = new DateTime(pickedEndDate.Year, pickedEndDate.Month, pickedEndDate.Day, 0, 0, 0, DateTimeKind.Local);
             }
 
+            if (startDate > endDate) {
+                MessageBox.Show("The start date must be before the end date.");
+                return;
+            }
+
+            if (startDate > DateTime.Now) {
+                MessageBox.Show("The start date cannot be in the future.");
+                return;
+            }
+
+            if (endDate > DateTime.Now) {
+                MessageBox.Show("The end date cannot be in the future.");
+                return;
+            }
+
             EndlessProgressDialog dialog = new EndlessProgressDialog();
             if (_currentSource != null) {
                 int granularity = _selectedGranularity;
@@ -104,7 +119,7 @@ namespace CryptoRetriever.DatasetView {
                     dialog.Dispatcher.InvokeAsync(() => {
                         DatasetResult result = taskResult.Result;
 
-                        if (result.Succeeded) {
+                        if (result.Succeeded && result.Value.Points.Count > 0) {
                             JavaScriptSerializer serializer = new JavaScriptSerializer();
                             try {
                                 String filePath = _selectedOutput.Text;
@@ -126,7 +141,14 @@ namespace CryptoRetriever.DatasetView {
                             }
                         } else {
                             dialog.Close();
-                            MessageBox.Show("UH OH! " + result.ErrorDetails);
+
+                            // If we succeeded and we're here it means there were no points in the dataset
+                            if (result.Succeeded) {
+                                MessageBox.Show("UH OH! The dataset did not have any points!");
+                            } else {
+                                // Else there was an error
+                                MessageBox.Show("UH OH! " + result.ErrorDetails);
+                            }
                         }
                     });
                 });
