@@ -49,6 +49,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <Win32Resource>
+    </Win32Resource>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>CryptoRetriever.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -163,10 +170,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\analytics.png" />
+    <Resource Include="CryptoRetriever.ico" />
     <Content Include="Images\analytics.svg" />
     <Resource Include="Images\cross.png" />
     <Content Include="Images\cross.svg" />
     <Resource Include="Images\data-storage.png" />
+    <Resource Include="Images\CryptoRetriever.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Content Include="Images\data-storage.svg" />
   </ItemGroup>
   <ItemGroup>
