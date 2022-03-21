@@ -1,21 +1,29 @@
-﻿using System;
+﻿using KFSO.UI.DockablePanels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CryptoRetriever.DatasetView {
     /// <summary>
     /// Used to view datasets and manipulate or export them.
     /// </summary>
     public sealed partial class DatasetViewer : Window {
+        // Allow any panel to dock anywhere in this window
+        private DockManager _dockManager = new DockManager();
         private Dataset _dataset;
         private GraphRenderer _renderer;
         private GraphController _graphController;
 
         public DatasetViewer() {
             this.InitializeComponent();
+
+            _dockManager.UseDockManagerForTree(this);
+            _dockPanelSpotLeft.ChildrenChanged += OnStationChildrenChanged;
+            _dockPanelSpotRight.ChildrenChanged += OnStationChildrenChanged;
         }
 
         public void SetDataset(String name, Dataset dataset) {
@@ -79,6 +87,24 @@ namespace CryptoRetriever.DatasetView {
 
         private void OnMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             _graphController.OnMouseDown(e.GetPosition(_graphCanvas));
+        }
+
+        private void OnStationChildrenChanged(DockStation station) {
+            List<DockablePanel> panels = station.GetDockedPanels();
+            // Make the panels auto-hide when there's no children in them.
+            if (panels.Count == 0) {
+                Grid parent = station.Parent as Grid;
+                parent.ColumnDefinitions[Grid.GetColumn(station)].Width = new GridLength(0, GridUnitType.Auto);
+            }
+        }
+
+        private void OnAxisVisibleCheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+            
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.IsAxisEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
         }
     }
 

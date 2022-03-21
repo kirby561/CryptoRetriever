@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Newtonsoft.Json;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -121,17 +121,14 @@ namespace CryptoRetriever.DatasetView {
                         DatasetResult result = taskResult.Result;
 
                         if (result.Succeeded && result.Value.Points.Count > 0) {
-                            JavaScriptSerializer serializer = new JavaScriptSerializer();
                             try {
                                 String filePath = _selectedOutput.Text;
                                 String dir = Path.GetDirectoryName(filePath);
                                 Directory.CreateDirectory(dir);
-                                String json = serializer.Serialize(result.Value);
-                                json = JsonUtil.PoorMansJsonFormat(json);
+                                String json = JsonConvert.SerializeObject(result.Value, Formatting.Indented);
                                 File.WriteAllText(filePath, json);
                                 dialog.Close();
                                 Close();
-
 
                                 // Open a dataset viewer
                                 DatasetViewer viewer = new DatasetViewer();

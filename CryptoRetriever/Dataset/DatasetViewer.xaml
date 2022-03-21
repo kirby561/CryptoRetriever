@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:kfso="clr-namespace:KFSO.UI.DockablePanels;assembly=DockablePanels"
     Background="#00001a"
     Left="100"
     Top="100"
@@ -16,9 +17,17 @@
             <RowDefinition Height="22" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" /> <!-- For Dockable Panels -->
+            <ColumnDefinition Width="2" /> <!-- GridSplitter -->
+            <ColumnDefinition Width="*" /> <!-- For the main graph -->
+            <ColumnDefinition Width="2" /> <!-- GridSplitter -->
+            <ColumnDefinition Width="Auto" /> <!-- For Dockable Panels -->
+        </Grid.ColumnDefinitions>
 
         <!-- First row -->
-        <Menu Name="_menu">
+        
+        <Menu Name="_menu" Grid.ColumnSpan="5">
             <MenuItem Header="_File">
                 <MenuItem Header="_Export" Click="OnExportClicked" />
                 <MenuItem Header="_Close" Click="OnCloseClicked" />
@@ -26,8 +35,24 @@
         </Menu>
 
         <!-- Second row -->
+
+        <kfso:DockStation x:Name="_dockPanelSpotLeft" Grid.Row="1" Grid.Column="0" MinWidth="0" MinHeight="1" Background="#cccccc">
+            <kfso:DockablePanel TitleText="Options">
+                <kfso:DockablePanel.HostedContent>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#cccccc" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                            <CheckBox IsChecked="True" Content="Show Axis" Checked="OnAxisVisibleCheckboxChecked" Unchecked="OnAxisVisibleCheckboxChecked" Margin="5" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </kfso:DockablePanel.HostedContent>
+            </kfso:DockablePanel>
+        </kfso:DockStation>
+
+        <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" />
+
         <Canvas 
             Grid.Row="1" 
+            Grid.Column="2"
             Name="_graphCanvas" 
             Background="White"
             ClipToBounds="true"
@@ -38,5 +63,9 @@
             MouseUp="OnMouseUp"
             MouseDown="OnMouseDown"
             MouseWheel="OnMouseWheel" />
+
+        <GridSplitter Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch" />
+
+        <kfso:DockStation x:Name="_dockPanelSpotRight" Grid.Row="1" Grid.Column="4" MinWidth="0" MinHeight="1" Background="#cccccc" />
     </Grid>
 </Window>

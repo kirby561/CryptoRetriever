@@ -30,6 +30,7 @@ namespace CryptoRetriever {
         private Path _datasetPath;
         private Line _xAxis;
         private Line _yAxis;
+        private bool _isAxisEnabled = true;
 
         // Calculated transforms
         //     Pixel space is from the top left of the canvas in pixels, down is positive.
@@ -83,6 +84,19 @@ namespace CryptoRetriever {
             InitializeDomainAndRange();
 
             _canvas.LayoutUpdated += OnCanvasLayoutUpdates;
+        }
+
+        /// <summary>
+        /// True when the axis is being drawn, false to hide it.
+        /// </summary>
+        public bool IsAxisEnabled {
+            get {
+                return _isAxisEnabled;
+            }
+            set {
+                _isAxisEnabled = value;
+                UpdateAxis();
+            }
         }
 
         /// <summary>
@@ -247,6 +261,9 @@ namespace CryptoRetriever {
                 _canvas.Children.Remove(_xAxis);
             if (_yAxis != null)
                 _canvas.Children.Remove(_yAxis);
+
+            if (!IsAxisEnabled)
+                return; // Don't draw the axis
 
             double axisWidthPx = 3;
             SolidColorBrush brush = new SolidColorBrush(Colors.Black);

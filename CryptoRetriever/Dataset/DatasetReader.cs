@@ -1,11 +1,8 @@
 ﻿using CryptoRetriever.Source;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace CryptoRetriever {
     class DatasetReader {
@@ -27,11 +24,9 @@ namespace CryptoRetriever {
                 return new Result<Dataset>("The dataset is empty.");
             }
 
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-
             Dataset dataset = null;
             try {
-                dataset = serializer.Deserialize<Dataset>(datasetText);
+                dataset = JsonConvert.DeserializeObject<Dataset>(datasetText);
             } catch (Exception ex) {
                 return new Result<Dataset>("There was an error in the formatting of the dataset. Exception: " + ex.Message);
             }
