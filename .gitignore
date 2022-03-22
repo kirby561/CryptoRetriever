@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/CryptoRetriever/bin/Debug
+/packages/Newtonsoft.Json.12.0.3
+/CryptoRetriever/obj/Debug
