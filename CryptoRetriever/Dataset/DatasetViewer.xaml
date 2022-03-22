@@ -51,7 +51,7 @@
             </kfso:DockablePanel>
         </kfso:DockStation>
 
-        <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" />
+        <GridSplitter Name="_leftGridSplitter" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" />
 
         <Canvas 
             Grid.Row="1" 
@@ -67,7 +67,7 @@
             MouseDown="OnMouseDown"
             MouseWheel="OnMouseWheel" />
 
-        <GridSplitter Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch" />
+        <GridSplitter Name="_rightGridSplitter" Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch" />
 
         <kfso:DockStation x:Name="_dockPanelSpotRight" Grid.Row="1" Grid.Column="4" MinWidth="0" MinHeight="1" Background="#cccccc" />
     </Grid>

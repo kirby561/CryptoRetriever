@@ -100,12 +100,20 @@ namespace CryptoRetriever.DatasetView {
         }
 
         private void OnStationChildrenChanged(DockStation station) {
+            bool enableSplitter = true;
             List<DockablePanel> panels = station.GetDockedPanels();
             // Make the panels auto-hide when there's no children in them.
             if (panels.Count == 0) {
                 Grid parent = station.Parent as Grid;
                 parent.ColumnDefinitions[Grid.GetColumn(station)].Width = new GridLength(0, GridUnitType.Auto);
+
+                enableSplitter = false;
             }
+
+            if (station == _dockPanelSpotLeft)
+                _leftGridSplitter.IsEnabled = enableSplitter;
+            else if (station == _dockPanelSpotRight)
+                _rightGridSplitter.IsEnabled = enableSplitter;
         }
 
         private void OnAxisVisibleCheckboxChecked(object sender, RoutedEventArgs e) {
