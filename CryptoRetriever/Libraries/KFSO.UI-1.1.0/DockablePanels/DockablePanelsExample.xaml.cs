@@ -39,5 +39,21 @@ namespace KFSO.UI.DockablePanels {
                 parent.ColumnDefinitions[Grid.GetColumn(station)].Width = new GridLength(0, GridUnitType.Auto);
             }
         }
+
+        private void OnCloseClicked(object sender, RoutedEventArgs e) {
+            Close();
+        }
+
+        private void OnViewControlsClicked(object sender, RoutedEventArgs e) {
+            if (!_controlsPanel.IsShown) {
+                _controlsPanel.Dock(_dockPanelSpot);
+            }
+        }
+
+        private void OnViewOptionsClicked(object sender, RoutedEventArgs e) {
+            if (!_optionsPanel.IsShown) {
+                _optionsPanel.Dock(_dockPanelSpot);
+            }
+        }
     }
 }

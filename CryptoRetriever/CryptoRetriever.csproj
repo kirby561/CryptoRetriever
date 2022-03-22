@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="Libraries\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj" />
-    <ProjectReference Include="Libraries\KFSO.UI-1.0.0\DockablePanels\DockablePanels.csproj" />
+    <ProjectReference Include="Libraries\KFSO.UI-1.1.0\DockablePanels\DockablePanels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KFSO.UI.DockablePanels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Dockable Panels Example" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
@@ -21,11 +21,16 @@
 
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5">
             <MenuItem Header="_File">
+                <MenuItem Header="_Close" Click="OnCloseClicked" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem IsChecked="{Binding IsShown, ElementName=_controlsPanel}" Header="_Controls" Click="OnViewControlsClicked" />
+                <MenuItem IsChecked="{Binding IsShown, ElementName=_optionsPanel}" Header="_Options" Click="OnViewOptionsClicked" />
             </MenuItem>
         </Menu>
 
         <local:DockStation x:Name="_dockPanelSpot" Grid.Row="1" Grid.Column="0" MinWidth="0" MinHeight="1" Background="Red">
-            <local:DockablePanel TitleText="Controls">
+            <local:DockablePanel x:Name="_controlsPanel" TitleText="Controls">
                 <local:DockablePanel.HostedContent>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#cccccc" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
@@ -36,7 +41,7 @@
                     </ScrollViewer>
                 </local:DockablePanel.HostedContent>
             </local:DockablePanel>
-            <local:DockablePanel TitleText="Options">
+            <local:DockablePanel x:Name="_optionsPanel" TitleText="Options">
                 <local:DockablePanel.HostedContent>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#cccccc" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">

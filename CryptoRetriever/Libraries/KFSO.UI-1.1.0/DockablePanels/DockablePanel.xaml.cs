@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,6 +35,17 @@ namespace KFSO.UI.DockablePanels {
 
         public DockablePanel() {
             InitializeComponent();
+
+            Loaded += DockablePanel_Loaded;
+            Unloaded += DockablePanel_Unloaded;
+        }
+
+        private void DockablePanel_Loaded(object sender, RoutedEventArgs e) {
+            IsShown = true;
+        }
+
+        private void DockablePanel_Unloaded(object sender, RoutedEventArgs e) {
+            IsShown = false;
         }
 
         /// <summary>
@@ -43,6 +55,39 @@ namespace KFSO.UI.DockablePanels {
         /// panel is docked to if it is not set before then.
         /// </summary>
         public DockManager DockManager { get; set; }
+
+        /// <summary>
+        /// Returns true if this panel is either being shown in a docking station
+        /// or in a floating window. Returns false if it is not currently shown.
+        /// 
+        /// This is a dependency property.
+        /// </summary>
+        public bool IsShown {
+            get {
+                return (bool)GetValue(IsShownProperty);
+            }
+            private set {
+                SetValue(IsShownProperty, value);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if this panel is docked, false otherwise.
+        /// </summary>
+        public bool IsDocked {
+            get {
+                return IsShown && _floatingWindow == null;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if this panel is in a floating window, false otherwise.
+        /// </summary>
+        public bool IsFloating {
+            get {
+                return IsShown && _floatingWindow != null;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the content to display in this DockablePanel.
@@ -124,16 +169,7 @@ namespace KFSO.UI.DockablePanels {
                         _panelStartPositionScreen = PointToScreen(new Point(0, 0));
                         Point panelStartPositionWpf = ScreenCoordinateToWpfCoordinate(_panelStartPositionScreen);
 
-                        // Undock from the parent
-                        Undock();
-
-                        // Break out the panel into its own window and continue dragging
-                        _floatingWindow = new DockablePanelWindow();
-                        _floatingWindow.HostedPanel = this;
-                        _floatingWindow.Left = panelStartPositionWpf.X;
-                        _floatingWindow.Top = panelStartPositionWpf.Y;
-                        _floatingWindow.Title = TitleText;
-                        _floatingWindow.Show();
+                        ShowFloatingWindow(panelStartPositionWpf);
 
                         // Capture the mouse so that you can't lose the window while dragging and we will get
                         // the mouse up event when done.
@@ -176,6 +212,39 @@ namespace KFSO.UI.DockablePanels {
         }
 
         /// <summary>
+        /// Shows this panel in a floating window.
+        /// If it's docked into a station it is undocked first.
+        /// <param name="startPositionWpf">The starting position in WPF coordinates.</param>
+        /// </summary>
+        public void ShowFloatingWindow(Point startPositionWpf) {
+            if (IsFloating)
+                return;
+
+            // Undock from the parent
+            Undock();
+
+            // Break out the panel into its own window and continue dragging
+            _floatingWindow = new DockablePanelWindow();
+            _floatingWindow.HostedPanel = this;
+            _floatingWindow.Left = startPositionWpf.X;
+            _floatingWindow.Top = startPositionWpf.Y;
+            _floatingWindow.Title = TitleText;
+            _floatingWindow.Closed += _floatingWindow_Closed;
+            _floatingWindow.Show();
+        }
+
+        private void _floatingWindow_Closed(object sender, EventArgs e) {
+            // Make sure the window is null when closed.
+            _floatingWindow = null;
+
+            // Make sure we have no parent
+            Panel parent = Parent as Panel;
+            if (parent != null) {
+                parent.Children.Remove(this);
+            }
+        }
+
+        /// <summary>
         /// Docks this panel into the given station.
         /// </summary>
         /// <param name="station">The station to dock with.</param>
@@ -200,6 +269,9 @@ namespace KFSO.UI.DockablePanels {
         /// Removes this panel from its parent.
         /// </summary>
         private void Undock() {
+            if (!IsDocked)
+                return;
+
             // Remove this panel from its current parent
             DockStation station = Parent as DockStation;
             station.Undock(this);
@@ -233,5 +305,8 @@ namespace KFSO.UI.DockablePanels {
                 parentPanel.Children.Remove(this);
             }
         }
+
+        public static readonly DependencyProperty IsShownProperty =
+            DependencyProperty.Register("IsShown", typeof(bool), typeof(DockablePanel), new PropertyMetadata(true));
     }
 }

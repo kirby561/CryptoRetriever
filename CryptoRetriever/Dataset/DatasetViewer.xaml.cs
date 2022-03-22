@@ -65,6 +65,16 @@ namespace CryptoRetriever.DatasetView {
             Close();
         }
 
+        private void OnShowGraphOptionsPanelClick(object sender, RoutedEventArgs e) {
+            // Check if it's displayed already
+            if (!_optionsPanel.IsShown) {
+                _optionsPanel.Dock(_dockPanelSpotLeft);
+            } else {
+                // Try to bring it in to view
+                FocusWindowOfElement(_optionsPanel);
+            }
+        }
+
         private void OnMouseEntered(object sender, System.Windows.Input.MouseEventArgs e) {
             _graphController.OnMouseEntered();
         }
@@ -105,6 +115,25 @@ namespace CryptoRetriever.DatasetView {
             CheckBox checkbox = sender as CheckBox;
             bool? isChecked = checkbox.IsChecked;
             _renderer.IsAxisEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
+        /// <summary>
+        /// Focuses the window the given element is in. This can be used to bring
+        /// it into view if it is behind other windows (such as a floating dockable panel
+        /// that is behind the main window).
+        /// </summary>
+        /// <param name="element">The element to find and focus the window of</param>
+        private void FocusWindowOfElement(FrameworkElement element) {
+            FrameworkElement parent = element.Parent as FrameworkElement;
+            while (parent != null) {
+                Window window = parent as Window;
+                if (window != null) {
+                    window.Focus();
+                    return;
+                }
+
+                parent = parent.Parent as FrameworkElement;
+            }
         }
     }
 
