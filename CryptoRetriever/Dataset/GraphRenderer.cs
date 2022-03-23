@@ -16,11 +16,11 @@ namespace CryptoRetriever {
     public class GraphRenderer {
         private Canvas _canvas;
         private RenderParams _renderParams = new RenderParams();
-        
+
         // Mouse hover dependencies
         private Point _mouseHoverPointPx;
         private bool _mouseHoverPointEnabled = false;
-        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Color.FromRgb(0xff, 0x22, 0x22), 10, 2, 14.0);
+        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Colors.Green, 10, 2, 14.0);
         private Ellipse _hoverPointEllipse;
         private TextBlock _hoverPointText;
         private Rectangle _hoverPointTextBackground;
@@ -30,6 +30,9 @@ namespace CryptoRetriever {
         private Path _datasetPath;
         private Line _xAxis;
         private Line _yAxis;
+        private TextBlock _xAxisLabel;
+        private TextBlock _yAxisLabel;
+        private List<Grid> _graphTicks = new List<Grid>();
 
         // Calculated transforms
         //     Pixel space is from the top left of the canvas in pixels, down is positive.
@@ -127,10 +130,10 @@ namespace CryptoRetriever {
 
         private void InitializeDomainAndRange() {
             // Iterate over the dataset and get the max/min in each dimension
-            double minX = Double.PositiveInfinity;
-            double maxX = Double.NegativeInfinity;
-            double minY = Double.PositiveInfinity;
-            double maxY = Double.NegativeInfinity;
+            double minX = double.PositiveInfinity;
+            double maxX = double.NegativeInfinity;
+            double minY = double.PositiveInfinity;
+            double maxY = double.NegativeInfinity;
 
             foreach (Point p in _renderParams.Dataset.Points) {
                 if (p.X < minX) minX = p.X;
@@ -199,7 +202,7 @@ namespace CryptoRetriever {
         }
 
         public bool IsZoomedOut() {
-            return GetDomain().IsEqual(_boundingDomain) && 
+            return GetDomain().IsEqual(_boundingDomain) &&
                 GetRange().IsEqual(_boundingRange);
         }
 
@@ -207,22 +210,127 @@ namespace CryptoRetriever {
         /// Updates all the graphics to reflect the current state
         /// </summary>
         public void UpdateAll() {
-            UpdateData();
+
             UpdateAxis();
+            UpdateData();
             UpdateHoverPoint();
         }
 
-        private void UpdateData() {
+        private void UpdateAxis() {
+            // Setup axis lines
+            if (_xAxis != null)
+            {
+                _canvas.Children.Remove(_xAxis);
+                _canvas.Children.Remove(_xAxisLabel);
+                for (int i = 0; i < _graphTicks.Count; i++)
+                {
+                    _canvas.Children.Remove(_graphTicks[0]);
+                }
+                _canvas.Children.Clear();
+            }
+
+            if (_yAxis != null)
+            {
+                _canvas.Children.Remove(_yAxis);
+                _canvas.Children.Remove(_yAxisLabel);
+            }         
+
+            double axisWidthPx = 3;
+            SolidColorBrush brush = new SolidColorBrush(Colors.Green);
+
+            // Setup axis
+            _xAxis = new Line();
+
+            _xAxis.Fill = brush;
+            _xAxis.Stroke = brush;
+            _xAxis.StrokeThickness = axisWidthPx;
+            _xAxis.X1 = 50;
+            _xAxis.Y1 = _renderParams.CanvasSizePx.Height - 100;
+            _xAxis.X2 = _renderParams.CanvasSizePx.Width - 50;
+            _xAxis.Y2 = _xAxis.Y1;
+            _xAxis.IsHitTestVisible = false;
+
+            //Canvas.SetLeft(_xAxis, _xAxisLabel.DesiredSize.Width);
+            _canvas.Children.Add(_xAxis);
+
+            _yAxis = new Line();
+            _yAxis.Fill = brush;
+            _yAxis.Stroke = brush;
+            _yAxis.StrokeThickness = axisWidthPx;
+            _yAxis.X1 = _xAxis.X1 + 50;
+            _yAxis.Y1 = 50;
+            _yAxis.X2 = _yAxis.X1;
+            _yAxis.Y2 = _xAxis.Y1 + 50;
+            _yAxis.IsHitTestVisible = false;
+
+            //Canvas.SetLeft(_yAxis, _xAxisLabel.DesiredSize.Width + 50);
+            _canvas.Children.Add(_yAxis);
+
+            // Setup axis labels
+            _xAxisLabel = new TextBlock()
+            {
+                FontSize = 24,
+                Foreground = brush,
+                Text = "Date/Time (EST)",
+                TextWrapping = TextWrapping.Wrap
+
+            };
+
+            _xAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Canvas.SetLeft(_xAxisLabel, ((_xAxis.X2 - _yAxis.X1) / 2) - (_xAxisLabel.DesiredSize.Width / 2) + 100);
+            Canvas.SetBottom(_xAxisLabel, 10);
+            _canvas.Children.Add(_xAxisLabel);
+
+            _yAxisLabel = new TextBlock()
+            {
+                FontSize = 24,
+                Foreground = brush,
+                RenderTransform = new RotateTransform(270),
+                Text = "Price (USD)",
+                TextWrapping = TextWrapping.Wrap
+
+            };
+
+            _yAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Canvas.SetLeft(_yAxisLabel, 10);
+            Canvas.SetTop(_yAxisLabel, ((_xAxis.Y1 - _yAxis.Y1) / 2) + (_yAxisLabel.DesiredSize.Width / 2) + 50);
+            _canvas.Children.Add(_yAxisLabel);
+
+            // Setup axis ticks w/ labels
+            //      x-axis
+			for (int i = 0; i < _renderParams.Dataset.Points.Count; i++)
+			{
+				Grid graphTick = CreateGraphTick("Test", 12, brush, new SolidColorBrush(Colors.White), true, true);
+                //Grid graphTick = CreateGraphTick(new SolidColorBrush(Colors.White), _xCoordFormatter.Format(_renderParams.Dataset.Points[i].X), 16, true);
+                Canvas.SetLeft(graphTick, _yAxis.X1 + ((_xAxis.X2 - _yAxis.X2) / (_renderParams.Dataset.Points.Count) * (i + 1)));
+				Canvas.SetTop(graphTick, _xAxis.Y1 - 8);
+				_canvas.Children.Add(graphTick);
+			}
+            //      y-axis (max 10 ticks for now)
+            for (int i = 0; i < 10; i++)
+			{
+                //int scale = 
+			}
+
+		}
+
+        private void UpdateData()
+        {
             if (_datasetPath != null)
                 _canvas.Children.Remove(_datasetPath);
 
-            double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
-            double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
+            //double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
+            double xInterval = (_xAxis.X2 - _yAxis.X1) / _renderParams.Dataset.Points.Count;
+            double xScale = (xInterval * (_renderParams.Dataset.Points.Count - 1)) / (_renderParams.Domain.End - _renderParams.Domain.Start);
+            //double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
+            double yInterval = (_xAxis.Y1 - _yAxis.Y1) / 15;
+            double yScale = (yInterval * 13) / (_renderParams.Range.End - _renderParams.Range.Start);
 
             Matrix layoutTransform = new Matrix();
 
             // Shift the curve to 0 so the first point starts at the top left
             layoutTransform.Translate(-_renderParams.Domain.Start, -_renderParams.Range.Start);
+            //layoutTransform.Translate(-_renderParams.Domain.Start + _xAxisLabel.DesiredSize.Width + 50, -_renderParams.Range.Start + _yAxis.Y1);
 
             // Now map left to right on the curve to left to right on the screen. The -yScale is to flip
             //     the coordinates since the canvas has 0, 0 at the top left and positive is down.
@@ -230,7 +338,8 @@ namespace CryptoRetriever {
 
             // Now shift the whole curve down by the height of the canvas since our coordinates at this point
             //     are starting at the top of the screen and should be starting at the bottom of the screen
-            layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
+            //layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
+            layoutTransform.Translate(_yAxis.X1 + xInterval, _xAxis.Y1 - yInterval);
 
             _dataToPixelSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
             _pixelToDataSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
@@ -240,37 +349,6 @@ namespace CryptoRetriever {
             _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
             _canvas.Children.Add(_datasetPath);
-        }
-
-        private void UpdateAxis() {
-            if (_xAxis != null)
-                _canvas.Children.Remove(_xAxis);
-            if (_yAxis != null)
-                _canvas.Children.Remove(_yAxis);
-
-            double axisWidthPx = 3;
-            SolidColorBrush brush = new SolidColorBrush(Colors.Black);
-            _xAxis = new Line();
-            _xAxis.Fill = brush;
-            _xAxis.Stroke = brush;
-            _xAxis.StrokeThickness = axisWidthPx;
-            _xAxis.X1 = 0;
-            _xAxis.Y1 = _renderParams.CanvasSizePx.Height;
-            _xAxis.X2 = _renderParams.CanvasSizePx.Width;
-            _xAxis.Y2 = _xAxis.Y1;
-            _xAxis.IsHitTestVisible = false;
-            _canvas.Children.Add(_xAxis);
-
-            _yAxis = new Line();
-            _yAxis.Fill = brush;
-            _yAxis.Stroke = brush;
-            _yAxis.StrokeThickness = axisWidthPx;
-            _yAxis.X1 = 0;
-            _yAxis.Y1 = 0;
-            _yAxis.X2 = 0;
-            _yAxis.Y2 = _renderParams.CanvasSizePx.Height;
-            _yAxis.IsHitTestVisible = false;
-            _canvas.Children.Add(_yAxis);
         }
 
         /// <summary>
@@ -318,11 +396,11 @@ namespace CryptoRetriever {
             _hoverPointEllipse.StrokeThickness = _hoverPointOptions.StrokeThickness;
             _hoverPointEllipse.IsHitTestVisible = false;
             Canvas.SetLeft(_hoverPointEllipse, highlightPointPx.X - _hoverPointOptions.Size / 2.0);
-            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);            
+            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);
             _canvas.Children.Add(_hoverPointEllipse);
 
             String xCoordinate = "" + mousePositionInDataSpace.X;
-            if (_xCoordFormatter != null) 
+            if (_xCoordFormatter != null)
                 xCoordinate = _xCoordFormatter.Format(mousePositionInDataSpace.X);
             String yCoordinate = "" + mousePositionInDataSpace.Y;
             if (_yCoordFormatter != null)
@@ -354,7 +432,7 @@ namespace CryptoRetriever {
                 textTopPx = canvasPadding;
             if (textTopPx + textHeight + canvasPadding > _canvas.ActualHeight)
                 textTopPx -= (textTopPx + textHeight + canvasPadding) - _canvas.ActualHeight;
-            
+
             Canvas.SetLeft(_hoverPointText, textLeftPx);
             Canvas.SetTop(_hoverPointText, textTopPx);
 
@@ -371,6 +449,45 @@ namespace CryptoRetriever {
             _hoverPointTextBackground.IsHitTestVisible = false;
             _canvas.Children.Add(_hoverPointTextBackground);
             _canvas.Children.Add(_hoverPointText); // Add the text after the background so it is in front
+        }
+
+        private Grid CreateGraphTick(string text, double fontSize, Brush lineColor, Brush textColor, bool showTick, bool isXAxis)
+        {
+            Grid grid = new Grid();
+            Line line = new Line()
+            {
+                Fill = lineColor,
+                Stroke = lineColor,
+                StrokeThickness = 1,
+                X1 = 0,
+                X2 = 0,
+                Y1 = 0,
+                Y2 = 16
+            };
+            
+            TextBlock textBlock = new TextBlock()
+            {
+                FontSize = fontSize,
+                Foreground = textColor,
+                RenderTransform = new RotateTransform(45),
+                RenderTransformOrigin = new Point(0.25, 0.25),
+                Text = text,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            grid.RowDefinitions.Add(new RowDefinition());
+            grid.RowDefinitions.Add(new RowDefinition());
+
+            Grid.SetRow(line, 0);
+            Grid.SetRow(textBlock, 1);
+
+            grid.Children.Add(line);
+            grid.Children.Add(textBlock);
+
+            if (!showTick)
+                line.Visibility = Visibility.Hidden;
+
+            return grid;
         }
     }
 
@@ -392,7 +509,7 @@ namespace CryptoRetriever {
         }
 
         public bool IsEqual(HoverPointOptions other) {
-            return other.Color.Equals(Color) && 
+            return other.Color.Equals(Color) &&
                 other.Size == Size &&
                 other.StrokeThickness == StrokeThickness &&
                 other.FontSize == FontSize;
@@ -402,7 +519,7 @@ namespace CryptoRetriever {
     class LineOptions {
         public Color Color { get; set; }
         public double Thickness { get; set; }
- 
+
         public LineOptions(Color color, double thickness) {
             Color = color;
             Thickness = thickness;
@@ -444,7 +561,7 @@ namespace CryptoRetriever {
         public Range Domain { get; set; } = new Range();
         public Range Range { get; set; } = new Range();
         public Size CanvasSizePx { get; set; } = new Size();
-        public LineOptions LineOptions { get; set; } = new LineOptions(Color.FromRgb(0x22, 0x44, 0xff), 1.0);
+        public LineOptions LineOptions { get; set; } = new LineOptions(Colors.White, 1.0);
 
         public RenderParams Clone() {
             RenderParams clone = new RenderParams();
@@ -467,4 +584,5 @@ namespace CryptoRetriever {
                 other.LineOptions.IsEqual(LineOptions);
         }
     }
+
 }
