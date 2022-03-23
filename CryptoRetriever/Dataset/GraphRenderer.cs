@@ -247,7 +247,10 @@ namespace CryptoRetriever {
             {
                 _canvas.Children.Remove(_yAxis);
                 _canvas.Children.Remove(_yAxisLabel);
-            }         
+            }
+
+            if (!IsAxisEnabled)
+                return; // Don't draw the axis
 
             double axisWidthPx = 3;
             SolidColorBrush brush = new SolidColorBrush(Colors.Green);
@@ -363,40 +366,7 @@ namespace CryptoRetriever {
             _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
             _canvas.Children.Add(_datasetPath);
-        }
-
-        private void UpdateAxis() {
-            if (_xAxis != null)
-                _canvas.Children.Remove(_xAxis);
-            if (_yAxis != null)
-                _canvas.Children.Remove(_yAxis);
-            if (!IsAxisEnabled)
-                return; // Don't draw the axis
-
-            double axisWidthPx = 3;
-            SolidColorBrush brush = new SolidColorBrush(Colors.Black);
-            _xAxis = new Line();
-            _xAxis.Fill = brush;
-            _xAxis.Stroke = brush;
-            _xAxis.StrokeThickness = axisWidthPx;
-            _xAxis.X1 = 0;
-            _xAxis.Y1 = _renderParams.CanvasSizePx.Height;
-            _xAxis.X2 = _renderParams.CanvasSizePx.Width;
-            _xAxis.Y2 = _xAxis.Y1;
-            _xAxis.IsHitTestVisible = false;
-            _canvas.Children.Add(_xAxis);
-
-            _yAxis = new Line();
-            _yAxis.Fill = brush;
-            _yAxis.Stroke = brush;
-            _yAxis.StrokeThickness = axisWidthPx;
-            _yAxis.X1 = 0;
-            _yAxis.Y1 = 0;
-            _yAxis.X2 = 0;
-            _yAxis.Y2 = _renderParams.CanvasSizePx.Height;
-            _yAxis.IsHitTestVisible = false;
-            _canvas.Children.Add(_yAxis);
-        }
+        }       
 
         /// <summary>
         /// Updates the graphics for the hover point (the point highlighted when you hover
