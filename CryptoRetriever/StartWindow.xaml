@@ -7,6 +7,7 @@
         x:Class="CryptoRetriever.StartWindow"
         mc:Ignorable="d"
         Background="#00001a"
+        Title="Crypto Retriever"
         Width="800" Height="500">
     <Grid>
         <Grid.RowDefinitions>
@@ -24,7 +25,11 @@
         </Grid.ColumnDefinitions>
 
         <Viewbox Margin="10" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" StretchDirection="DownOnly" Stretch="Uniform">
-            <TextBlock  Text="Crypto Retriever" Foreground="White" FontFamily="Arial Black" FontSize="48" VerticalAlignment="Center" HorizontalAlignment="Center" />
+            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                <TextBlock  Text="Crypto" Foreground="White" FontFamily="Arial Black" FontSize="240" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                <Image Margin="35" Source="Images/CryptoRetriever.png" Width="Auto" Height="Auto" />       
+                <TextBlock  Text="Retriever" Foreground="White" FontFamily="Arial Black" FontSize="240" VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </StackPanel>
         </Viewbox>
 
         <!-- Create Dataset Button -->

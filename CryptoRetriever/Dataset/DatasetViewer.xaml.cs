@@ -1,24 +1,33 @@
-﻿using System;
+﻿using KFSO.UI.DockablePanels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CryptoRetriever.DatasetView {
     /// <summary>
     /// Used to view datasets and manipulate or export them.
     /// </summary>
     public sealed partial class DatasetViewer : Window {
+        // Allow any panel to dock anywhere in this window
+        private DockManager _dockManager = new DockManager();
         private Dataset _dataset;
         private GraphRenderer _renderer;
         private GraphController _graphController;
 
         public DatasetViewer() {
             this.InitializeComponent();
+
+            _dockManager.UseDockManagerForTree(this);
+            _dockPanelSpotLeft.ChildrenChanged += OnStationChildrenChanged;
+            _dockPanelSpotRight.ChildrenChanged += OnStationChildrenChanged;
         }
 
-        public void SetDataset(Dataset dataset) {
+        public void SetDataset(String name, Dataset dataset) {
+            _window.Title = name;
             _dataset = dataset;
             _renderer = new GraphRenderer(_graphCanvas, _dataset);
             // Set the formatters for how to display the timestamps and values. These could be
@@ -56,6 +65,16 @@ namespace CryptoRetriever.DatasetView {
             Close();
         }
 
+        private void OnShowGraphOptionsPanelClick(object sender, RoutedEventArgs e) {
+            // Check if it's displayed already
+            if (!_optionsPanel.IsShown) {
+                _optionsPanel.Dock(_dockPanelSpotLeft);
+            } else {
+                // Try to bring it in to view
+                FocusWindowOfElement(_optionsPanel);
+            }
+        }
+
         private void OnMouseEntered(object sender, System.Windows.Input.MouseEventArgs e) {
             _graphController.OnMouseEntered();
         }
@@ -78,6 +97,51 @@ namespace CryptoRetriever.DatasetView {
 
         private void OnMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             _graphController.OnMouseDown(e.GetPosition(_graphCanvas));
+        }
+
+        private void OnStationChildrenChanged(DockStation station) {
+            bool enableSplitter = true;
+            List<DockablePanel> panels = station.GetDockedPanels();
+            // Make the panels auto-hide when there's no children in them.
+            if (panels.Count == 0) {
+                Grid parent = station.Parent as Grid;
+                parent.ColumnDefinitions[Grid.GetColumn(station)].Width = new GridLength(0, GridUnitType.Auto);
+
+                enableSplitter = false;
+            }
+
+            if (station == _dockPanelSpotLeft)
+                _leftGridSplitter.IsEnabled = enableSplitter;
+            else if (station == _dockPanelSpotRight)
+                _rightGridSplitter.IsEnabled = enableSplitter;
+        }
+
+        private void OnAxisVisibleCheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+            
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.IsAxisEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
+        /// <summary>
+        /// Focuses the window the given element is in. This can be used to bring
+        /// it into view if it is behind other windows (such as a floating dockable panel
+        /// that is behind the main window).
+        /// </summary>
+        /// <param name="element">The element to find and focus the window of</param>
+        private void FocusWindowOfElement(FrameworkElement element) {
+            FrameworkElement parent = element.Parent as FrameworkElement;
+            while (parent != null) {
+                Window window = parent as Window;
+                if (window != null) {
+                    window.Focus();
+                    return;
+                }
+
+                parent = parent.Parent as FrameworkElement;
+            }
         }
     }
 

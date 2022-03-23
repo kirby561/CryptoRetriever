@@ -1,12 +1,12 @@
 ﻿using Coinbase;
 using Coinbase.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows;
 
 namespace CryptoRetriever.Source {
@@ -84,6 +84,7 @@ namespace CryptoRetriever.Source {
 
                 // Create an empty dataset (but not null) and result to keep track of the combined result
                 DatasetResult combinedDatasetResult = new DatasetResult(new Dataset());
+                combinedDatasetResult.Value.Granularity = secondsPerSample;
 
                 // Run a separate request for each piece of the full date range.
                 for (int i = 0; i < numRequests; i++) {
@@ -190,9 +191,8 @@ namespace CryptoRetriever.Source {
 
             Dataset dataSet = new Dataset();
 
-            JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
-            dynamic jsonArr = jsonSerializer.Deserialize<dynamic>(json);
-            for (int i = 0; i < jsonArr.Length; i++) {
+            dynamic jsonArr = JsonConvert.DeserializeObject<dynamic>(json);
+            for (int i = 0; i < jsonArr.Count; i++) {
                 decimal timeBucketStartTime = jsonArr[i][TimeBucketStartTimeIndex];
                 decimal lowestPrice = jsonArr[i][LowestPriceIndex];
                 decimal highestPrice = jsonArr[i][HighestPriceIndex];

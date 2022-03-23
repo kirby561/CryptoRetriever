@@ -4,17 +4,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Newtonsoft.Json;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace CryptoRetriever.DatasetView {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// A window that lets users grab a dataset from a list of sources that are displayed
+    /// for the selected currency in a selected date range and spaced at a selected granularity.
     /// </summary>
     public sealed partial class DatasetCreator : Window {
 
@@ -96,6 +97,21 @@ namespace CryptoRetriever.DatasetView {
                 endDate = new DateTime(pickedEndDate.Year, pickedEndDate.Month, pickedEndDate.Day, 0, 0, 0, DateTimeKind.Local);
             }
 
+            if (startDate > endDate) {
+                MessageBox.Show("The start date must be before the end date.");
+                return;
+            }
+
+            if (startDate > DateTime.Now) {
+                MessageBox.Show("The start date cannot be in the future.");
+                return;
+            }
+
+            if (endDate > DateTime.Now) {
+                MessageBox.Show("The end date cannot be in the future.");
+                return;
+            }
+
             EndlessProgressDialog dialog = new EndlessProgressDialog();
             if (_currentSource != null) {
                 int granularity = _selectedGranularity;
@@ -104,21 +120,20 @@ namespace CryptoRetriever.DatasetView {
                     dialog.Dispatcher.InvokeAsync(() => {
                         DatasetResult result = taskResult.Result;
 
-                        if (result.Succeeded) {
-                            JavaScriptSerializer serializer = new JavaScriptSerializer();
+                        if (result.Succeeded && result.Value.Points.Count > 0) {
                             try {
                                 String filePath = _selectedOutput.Text;
                                 String dir = Path.GetDirectoryName(filePath);
                                 Directory.CreateDirectory(dir);
-                                String json = serializer.Serialize(result.Value);
-                                json = JsonUtil.PoorMansJsonFormat(json);
+                                String json = JsonConvert.SerializeObject(result.Value, Formatting.Indented);
                                 File.WriteAllText(filePath, json);
                                 dialog.Close();
                                 Close();
 
                                 // Open a dataset viewer
                                 DatasetViewer viewer = new DatasetViewer();
-                                viewer.SetDataset(result.Value);
+                                String filename = Path.GetFileName(filePath);
+                                viewer.SetDataset(filename, result.Value);
                                 viewer.Show();
                             } catch (Exception ex) {
                                 dialog.Close();
@@ -126,7 +141,14 @@ namespace CryptoRetriever.DatasetView {
                             }
                         } else {
                             dialog.Close();
-                            MessageBox.Show("UH OH! " + result.ErrorDetails);
+
+                            // If we succeeded and we're here it means there were no points in the dataset
+                            if (result.Succeeded) {
+                                MessageBox.Show("UH OH! The dataset did not have any points!");
+                            } else {
+                                // Else there was an error
+                                MessageBox.Show("UH OH! " + result.ErrorDetails);
+                            }
                         }
                     });
                 });

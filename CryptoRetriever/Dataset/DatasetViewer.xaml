@@ -5,29 +5,59 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:CryptoRetriever="clr-namespace:CryptoRetriever"
     x:Class="CryptoRetriever.DatasetView.DatasetViewer"
+    xmlns:kfso="clr-namespace:KFSO.UI.DockablePanels;assembly=DockablePanels"
     Background="#00001a"
     Left="10"
     Top="10"
     Width="1800" Height="1000"
+    Name="_window"
     mc:Ignorable="d">
 
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="22" />
-			<RowDefinition Height="*" />
-		</Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" /> <!-- For Dockable Panels -->
+            <ColumnDefinition Width="2" /> <!-- GridSplitter -->
+            <ColumnDefinition Width="*" /> <!-- For the main graph -->
+            <ColumnDefinition Width="2" /> <!-- GridSplitter -->
+            <ColumnDefinition Width="Auto" /> <!-- For Dockable Panels -->
+        </Grid.ColumnDefinitions>
 
-		<!-- First row -->
-		<Menu x:Name="_menu">
-			<MenuItem Header="_File">
-				<MenuItem Header="_Export" Click="OnExportClicked" />
-				<MenuItem Header="_Close" Click="OnCloseClicked" />
-			</MenuItem>
-		</Menu>
+        <!-- First row -->
+        
+        <Menu Name="_menu" Grid.ColumnSpan="5">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Export" Click="OnExportClicked" />
+                <MenuItem Header="_Close" Click="OnCloseClicked" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem IsChecked="{Binding IsShown, ElementName=_optionsPanel}" Header="Graph Options" Click="OnShowGraphOptionsPanelClick" />
+            </MenuItem>
+        </Menu>
 
-		<Canvas 
+        <!-- Second row -->
+
+        <kfso:DockStation x:Name="_dockPanelSpotLeft" Grid.Row="1" Grid.Column="0" MinWidth="0" MinHeight="1" Background="#cccccc">
+            <kfso:DockablePanel x:Name="_optionsPanel" TitleText="Graph Options">
+                <kfso:DockablePanel.HostedContent>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#cccccc" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                            <CheckBox IsChecked="True" Content="Show Axis" Checked="OnAxisVisibleCheckboxChecked" Unchecked="OnAxisVisibleCheckboxChecked" Margin="5" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </kfso:DockablePanel.HostedContent>
+            </kfso:DockablePanel>
+        </kfso:DockStation>
+
+        <GridSplitter Name="_leftGridSplitter" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" />
+
+        <Canvas 
             Grid.Row="1" 
-            x:Name="_graphCanvas" 
+            Grid.Column="2"
+            Name="_graphCanvas"
             Background="#222222"
             ClipToBounds="true"
             SizeChanged="OnGraphSizeChanged" 
@@ -37,66 +67,10 @@
             MouseUp="OnMouseUp"
             MouseDown="OnMouseDown"
             MouseWheel="OnMouseWheel">
-			<!--<Label BorderBrush="White" BorderThickness="0" Canvas.Left="414" Canvas.Top="126">
-				<Label.Content>
-					<Grid>
-						<Grid.RowDefinitions>
-							<RowDefinition />
-							<RowDefinition />
-						</Grid.RowDefinitions>
-						<Label Grid.Row="0">
-							<Label.Content>
-								<Line Grid.Row="0" X1="0" X2="0" Y1="0" Y2="50" Fill="White" Stroke="White" StrokeThickness="3" />
-							</Label.Content>
-						</Label>
-						<TextBlock Grid.Row="1" Text="Test" FontSize="24" Foreground="White" RenderTransformOrigin="0.5,0.5">
-							<TextBlock.RenderTransform>
-								<TransformGroup>
-									<ScaleTransform/>
-									<SkewTransform/>
-									<RotateTransform Angle="90"/>
-									<TranslateTransform/>
-								</TransformGroup>
-							</TextBlock.RenderTransform>
-
-						</TextBlock>
-					</Grid>
-				</Label.Content>
-			</Label>-->
-			<!--<Canvas>
-				-->
-			<!--<Line X1="0" X2="0" Y1="0" Y2="50" Fill="White" Stroke="White" StrokeThickness="1" />-->
-			<!--
-				<StackPanel Orientation="Vertical">
-					<Label HorizontalContentAlignment="Left">
-						<Label.Content>
-							<Line Grid.Row="0" X1="0" X2="0" Y1="0" Y2="50" Fill="White" Stroke="White" StrokeThickness="1" />
-						</Label.Content>
-					</Label>
-					-->
-			<!--<TextBlock Grid.Row="1" Text="Test" FontSize="24" Foreground="White" />-->
-			<!--
-				</StackPanel>
-				
-				
-			</Canvas>-->
-			<!--<Grid>
-				<Grid.RowDefinitions>
-					<RowDefinition />
-					<RowDefinition />
-				</Grid.RowDefinitions>
-				<Line Grid.Row="0" X1="0" X2="0" Y1="0" Y2="50" Fill="White" Stroke="White" StrokeThickness="1" />
-				<TextBlock Grid.Row="1" Text="Test" FontSize="24" Foreground="White" RenderTransformOrigin="0.25,0.25" >
-					<TextBlock.RenderTransform>
-						<TransformGroup>
-							<ScaleTransform/>
-							<SkewTransform/>
-							<RotateTransform Angle="90"/>
-							<TranslateTransform/>
-						</TransformGroup>
-					</TextBlock.RenderTransform>
-				</TextBlock>
-			</Grid>-->
 		</Canvas>
+
+        <GridSplitter Name="_rightGridSplitter" Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch" />
+        
+        <kfso:DockStation x:Name="_dockPanelSpotRight" Grid.Row="1" Grid.Column="4" MinWidth="0" MinHeight="1" Background="#cccccc" />
 	</Grid>
 </Window>

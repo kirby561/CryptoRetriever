@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoRetriever", "CryptoRetriever\CryptoRetriever.csproj", "{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoRetriever", "CryptoRetriever\CryptoRetriever.csproj", "{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{95AF590A-5A57-4D3C-A3E2-953969CCA554}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{02944ABB-5DE6-4A4B-9EF2-5D4A8B883A87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase", "CryptoRetriever\Source\ThirdParty\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj", "{84171815-34EE-4435-9E01-E4E88AD4C501}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase", "CryptoRetriever\Libraries\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj", "{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockablePanels", "CryptoRetriever\Libraries\KFSO.UI-1.1.0\DockablePanels\DockablePanels.csproj", "{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,22 +17,27 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6038B6A8-B0A7-4FB7-92F4-0A6D96F153D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{84171815-34EE-4435-9E01-E4E88AD4C501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{84171815-34EE-4435-9E01-E4E88AD4C501}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{84171815-34EE-4435-9E01-E4E88AD4C501}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{84171815-34EE-4435-9E01-E4E88AD4C501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{84171815-34EE-4435-9E01-E4E88AD4C501} = {95AF590A-5A57-4D3C-A3E2-953969CCA554}
+		{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE} = {02944ABB-5DE6-4A4B-9EF2-5D4A8B883A87}
+		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67} = {02944ABB-5DE6-4A4B-9EF2-5D4A8B883A87}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {252A450C-17DF-439F-83C0-9D8EB19F11A4}
+		SolutionGuid = {999A23D0-761F-4D5A-9F7F-7608D1BCFB44}
 	EndGlobalSection
 EndGlobal

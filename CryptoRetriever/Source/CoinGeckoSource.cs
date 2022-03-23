@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +7,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows;
 
 namespace CryptoRetriever.Source {
@@ -147,10 +147,9 @@ namespace CryptoRetriever.Source {
         /// <returns></returns>
         private List<Asset> ParseCoinGeckoJsonToAssetList(String json) {
             var result = new List<Asset>();
-            
-            JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
-            dynamic jsonArray = jsonSerializer.Deserialize<dynamic>(json);
-            for (int i = 0; i < jsonArray.Length; i++) {
+
+            dynamic jsonArray = JsonConvert.DeserializeObject<dynamic>(json);
+            for (int i = 0; i < jsonArray.Count; i++) {
                 String id = jsonArray[i]["id"];
                 String symbol = jsonArray[i]["symbol"];
                 String name = jsonArray[i]["name"];
@@ -187,8 +186,7 @@ namespace CryptoRetriever.Source {
         /// <param name="json">A JSON string returned from the history endpoint mentioned above.</param>
         /// <returns>Returns the USD price contained in the json response.</returns>
         private double ParseUsdPriceFromJson(String json) {
-            JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
-            dynamic jsonReader = jsonSerializer.Deserialize<dynamic>(json);
+            dynamic jsonReader = JsonConvert.DeserializeObject<dynamic>(json);
             decimal price = jsonReader["market_data"]["current_price"]["usd"];
 
             return Decimal.ToDouble(price);
