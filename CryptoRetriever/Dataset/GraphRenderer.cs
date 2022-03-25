@@ -87,6 +87,18 @@ namespace CryptoRetriever {
         }
 
         /// <summary>
+        /// Detatches this renderer from the canvas it has been
+        /// drawing to and removes all event handlers. This needs
+        /// to be called prior to attaching a different renderer
+        /// to the canvas.
+        /// </summary>
+        public void Cleanup() {
+            // Clear the canvas, we don't own it anymore
+            _canvas.LayoutUpdated -= OnCanvasLayoutUpdates;
+            _canvas.Children.Clear();
+        }
+
+        /// <summary>
         /// True when the axis is being drawn, false to hide it.
         /// </summary>
         public bool IsAxisEnabled {

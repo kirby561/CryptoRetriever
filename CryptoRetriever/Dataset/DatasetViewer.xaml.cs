@@ -34,7 +34,13 @@ namespace CryptoRetriever.DatasetView {
         }
 
         public void SetDataset(String filePath, Dataset dataset) {
-            _graphCanvas.Children.Clear();
+            // Detach the current renderer if any
+            if (_renderer != null) {
+                _renderer.Cleanup();
+                _renderer = null;
+                _graphController = null;
+            }
+
             _filePath = filePath;
             String filename = Path.GetFileName(filePath);
             _window.Title = filename;
