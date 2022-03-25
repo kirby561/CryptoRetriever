@@ -29,7 +29,10 @@
         
         <Menu Name="_menu" Grid.ColumnSpan="5">
             <MenuItem Header="_File">
-                <MenuItem Header="_Export" Click="OnExportClicked" />
+                <MenuItem Header="_Open" Click="OnOpenClicked" />
+                <MenuItem Header="_Save" Click="OnSaveClicked" />
+                <MenuItem Header="_Save As..." Click="OnSaveAsClicked" />
+                <MenuItem Header="_Export..." Click="OnExportClicked" />
                 <MenuItem Header="_Close" Click="OnCloseClicked" />
             </MenuItem>
             <MenuItem Header="_Filter">
@@ -64,7 +67,6 @@
             Name="_graphCanvas" 
             Background="White"
             ClipToBounds="true"
-            SizeChanged="OnGraphSizeChanged" 
             MouseEnter="OnMouseEntered" 
             MouseLeave="OnMouseLeft" 
             MouseMove="OnMouseMoved"

@@ -1,5 +1,6 @@
 ﻿using CryptoRetriever.Filter;
 using KFSO.UI.DockablePanels;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +17,7 @@ namespace CryptoRetriever.DatasetView {
         // Allow any panel to dock anywhere in this window
         private DockManager _dockManager = new DockManager();
         private Dataset _dataset;
+        private String _filePath;
         private GraphRenderer _renderer;
         private GraphController _graphController;
 
@@ -31,9 +33,11 @@ namespace CryptoRetriever.DatasetView {
             _dockPanelSpotRight.ChildrenChanged += OnStationChildrenChanged;
         }
 
-        public void SetDataset(String name, Dataset dataset) {
+        public void SetDataset(String filePath, Dataset dataset) {
             _graphCanvas.Children.Clear();
-            _window.Title = name;
+            _filePath = filePath;
+            String filename = Path.GetFileName(filePath);
+            _window.Title = filename;
             _dataset = dataset;
             _renderer = new GraphRenderer(_graphCanvas, _dataset);
             // Set the formatters for how to display the timestamps and values. These could be
@@ -42,10 +46,6 @@ namespace CryptoRetriever.DatasetView {
             _renderer.UpdateAll();
 
             _graphController = new GraphController(_renderer);
-        }
-
-        private void OnGraphSizeChanged(object sender, SizeChangedEventArgs e) {
-
         }
 
         private void OnExportClicked(object sender, RoutedEventArgs e) {
@@ -153,13 +153,40 @@ namespace CryptoRetriever.DatasetView {
         private void OnGaussianBlurClicked(object sender, RoutedEventArgs e) {
             _lastFilter = new GaussianFilter(1);
             Dataset output = _lastFilter.Filter(_dataset);
-            SetDataset(_window.Title, output);
+            SetDataset(_filePath, output);
         }
 
         private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {
             if (_lastFilter != null) {
                 Dataset output = _lastFilter.Filter(_dataset);
-                SetDataset(_window.Title, output);
+                SetDataset(_filePath, output);
+            }
+        }
+
+        private void OnSaveClicked(object sender, RoutedEventArgs e) {
+            DatasetWriter writer = new DatasetWriter();
+            Result result = writer.WriteFile(_dataset, _filePath);
+            if (!result.Succeeded) {
+                MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + result.ErrorDetails);
+            }
+        }
+
+        private void OnSaveAsClicked(object sender, RoutedEventArgs e) {
+            Result<String> getPathResult = DatasetUiHelper.ShowSaveDatasetAsDialog(_filePath);
+
+            if (getPathResult.Succeeded) {
+                DatasetWriter writer = new DatasetWriter();
+                Result writeResult = writer.WriteFile(_dataset, getPathResult.Value);
+                if (!writeResult.Succeeded) {
+                    MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + writeResult.ErrorDetails);
+                }
+            }
+        }
+
+        private void OnOpenClicked(object sender, RoutedEventArgs e) {
+            Result<Tuple<Dataset, String>> result = DatasetUiHelper.OpenDatasetWithDialog(_filePath);
+            if (result.Succeeded) {
+                SetDataset(result.Value.Item2, result.Value.Item1);
             }
         }
     }

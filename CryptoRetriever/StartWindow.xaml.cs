@@ -54,31 +54,11 @@ namespace CryptoRetriever {
         private void OnViewDatasetButtonPressed(object sender, MouseButtonEventArgs e) {
             _viewDatasetButton.Background = _buttonPressedBackground;
 
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.DefaultExt = ".dataset";
-            openFileDialog.Filter = "Datasets (.dataset)|*.dataset";
-
-            // Open the dialog
-            Nullable<bool> result = openFileDialog.ShowDialog();
-
-            // Process open file dialog box results
-            if (result.Value) {
-                string filePath = openFileDialog.FileName;
-
-                // Check if the dataset file exists
-                Result<Dataset> datasetResult = DatasetReader.ReadFile(filePath);
-                if (datasetResult.Succeeded) {
-                    if (datasetResult.Value.Points.Count > 0) {
-                        _dataSetViewer = new DatasetViewer();
-                        String filename = Path.GetFileName(filePath);
-                        _dataSetViewer.SetDataset(filename, datasetResult.Value);
-                        _dataSetViewer.Show();
-                    } else {
-                        MessageBox.Show("The dataset is empty.");
-                    }
-                } else {
-                    MessageBox.Show(datasetResult.ErrorDetails);
-                }
+            Result<Tuple<Dataset, String>> result = DatasetUiHelper.OpenDatasetWithDialog("");
+            if (result.Succeeded) {
+                _dataSetViewer = new DatasetViewer();
+                _dataSetViewer.SetDataset(result.Value.Item2, result.Value.Item1);
+                _dataSetViewer.Show();
             }
         }
 
