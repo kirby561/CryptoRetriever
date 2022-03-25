@@ -32,6 +32,11 @@
                 <MenuItem Header="_Export" Click="OnExportClicked" />
                 <MenuItem Header="_Close" Click="OnCloseClicked" />
             </MenuItem>
+            <MenuItem Header="_Filter">
+                <MenuItem Header="_Gaussian Blur" Click="OnGaussianBlurClicked" />
+                <Separator />
+                <MenuItem Header="_Repeat Last" Click="OnRepeatLastFilterClicked" />
+            </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem IsChecked="{Binding IsShown, ElementName=_optionsPanel}" Header="Graph Options" Click="OnShowGraphOptionsPanelClick" />
             </MenuItem>

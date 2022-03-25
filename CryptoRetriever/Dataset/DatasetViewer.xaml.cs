@@ -1,4 +1,5 @@
-﻿using KFSO.UI.DockablePanels;
+﻿using CryptoRetriever.Filter;
+using KFSO.UI.DockablePanels;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,10 @@ namespace CryptoRetriever.DatasetView {
         private GraphRenderer _renderer;
         private GraphController _graphController;
 
+        // Keep track of the last filter that was run so we can
+        // run it again if the user clicks it.
+        private IFilter _lastFilter = null;
+
         public DatasetViewer() {
             this.InitializeComponent();
 
@@ -27,6 +32,7 @@ namespace CryptoRetriever.DatasetView {
         }
 
         public void SetDataset(String name, Dataset dataset) {
+            _graphCanvas.Children.Clear();
             _window.Title = name;
             _dataset = dataset;
             _renderer = new GraphRenderer(_graphCanvas, _dataset);
@@ -141,6 +147,19 @@ namespace CryptoRetriever.DatasetView {
                 }
 
                 parent = parent.Parent as FrameworkElement;
+            }
+        }
+
+        private void OnGaussianBlurClicked(object sender, RoutedEventArgs e) {
+            _lastFilter = new GaussianFilter(1);
+            Dataset output = _lastFilter.Filter(_dataset);
+            SetDataset(_window.Title, output);
+        }
+
+        private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {
+            if (_lastFilter != null) {
+                Dataset output = _lastFilter.Filter(_dataset);
+                SetDataset(_window.Title, output);
             }
         }
     }
