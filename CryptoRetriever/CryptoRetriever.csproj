@@ -15,6 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Images\add.png" />
+    <None Remove="Images\add_click.png" />
+    <None Remove="Images\add_hover.png" />
     <None Remove="Images\analytics.png" />
     <None Remove="Images\cross.png" />
     <None Remove="Images\CryptoRetriever.png" />
@@ -33,6 +36,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\add.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\add_click.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\add_hover.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\analytics.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

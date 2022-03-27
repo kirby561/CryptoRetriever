@@ -1,8 +1,9 @@
-﻿using System;
+﻿using CryptoRetriever.Filter;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CryptoRetriever.Strategy {
+namespace CryptoRetriever.Strats {
     /// <summary>
     /// A Strategy contains information on when to buy
     /// and sell an asset that can be used to simulate
@@ -11,6 +12,9 @@ namespace CryptoRetriever.Strategy {
     /// perform on a historical dataset.
     /// </summary>
     public class Strategy {
+        private List<IFilter> _filters = new List<IFilter>();
+        private ExchangeAssumptions _exchangeAssumptions;
 
+        public List<IFilter> GetFilters() { return _filters; }
     }
 }

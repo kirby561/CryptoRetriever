@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CryptoRetriever.Strategy {
+namespace CryptoRetriever.Strats {
     /// <summary>
     /// A data class for giving some assumptions to a Strategy
     /// that will be taken into account when executing it.

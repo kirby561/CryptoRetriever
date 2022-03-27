@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CryptoRetriever.Strategy {
+namespace CryptoRetriever.Strats {
     public class Account {
         /// <summary>
         /// How much fiat currency is in this account such as USD.

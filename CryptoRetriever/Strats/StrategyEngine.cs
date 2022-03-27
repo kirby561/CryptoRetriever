@@ -5,7 +5,7 @@ using System.Text;
 /// <summary>
 /// A StrategyEngine executes strategies and stores the result.
 /// </summary>
-namespace CryptoRetriever.Strategy {
+namespace CryptoRetriever.Strats {
     public class StrategyEngine {
         public void Run(Account account, ExchangeAssumptions assumptions, Strategy strategy, Dataset dataset) {
 

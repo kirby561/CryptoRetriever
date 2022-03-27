@@ -50,6 +50,12 @@ namespace CryptoRetriever.Filter {
             _oneOverSigmaTimesOneOverSqrt2Pi = _oneOverSigma * _oneOverSqrt2Pi;
         }
 
+        public String Summary {
+            get {
+                return "Gaussian Filter (sigma = " + _sigma + ", kernelSize = " + _kernelSize + ")";
+            }
+        }
+
         public Dataset Filter(Dataset input) {
             // If we have 2 or less points, just return the dataset.
             if (input.Count < 3) {

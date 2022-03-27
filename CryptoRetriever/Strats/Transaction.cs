@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CryptoRetriever.Strategy {
+namespace CryptoRetriever.Strats {
     /// <summary>
     /// A Transaction keeps track of the amount of money and
     /// assets transferred for a single purchase or sell for
