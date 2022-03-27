@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using System;
 using CryptoRetriever.Source;
 using System.IO;
+using CryptoRetriever.UI;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -73,6 +74,11 @@ namespace CryptoRetriever {
         private void OnExitButtonReleased(object sender, MouseButtonEventArgs e) {
             _quitButton.Background = _buttonBackground;
             Application.Current.Shutdown();
+        }
+
+        private void OnAboutClicked(object sender, RoutedEventArgs e) {
+            AboutWindow about = new AboutWindow();
+            about.ShowDialog();
         }
     }
 }

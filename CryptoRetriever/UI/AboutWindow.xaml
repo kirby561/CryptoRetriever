@@ -1,0 +1,105 @@
+﻿<Window x:Class="CryptoRetriever.UI.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CryptoRetriever.UI"
+        mc:Ignorable="d"
+        Background="#00001a"
+        Title="About Crypto Retriever" Height="450" Width="900">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="25" />
+        </Grid.ColumnDefinitions>
+        
+        <Viewbox Margin="10" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" StretchDirection="DownOnly" Stretch="Uniform">
+            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                <TextBlock  Text="Crypto" Foreground="White" FontFamily="Arial Black" FontSize="240" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                <Grid Margin="35">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="About" Foreground="White" FontFamily="Arial Black" FontSize="180" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <Image Grid.Row="1" Source="../Images/CryptoRetriever.png" Width="Auto" Height="Auto" />
+                    <TextBlock Visibility="Hidden" Grid.Row="2" Text="About" Foreground="White" FontFamily="Arial Black" FontSize="180" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Grid>
+                <TextBlock  Text="Retriever" Foreground="White" FontFamily="Arial Black" FontSize="240" VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Viewbox>
+
+        <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Vertical">
+            <TextBlock Text="App Info" Foreground="White" FontFamily="Arial Black" FontSize="20" HorizontalAlignment="Left" />
+            <TextBlock Text="Version 0.1.0" Foreground="White" FontSize="16" HorizontalAlignment="Left" />
+            <TextBlock Foreground="White" FontSize="16" HorizontalAlignment="Left" >
+                Licensed under the
+                <Hyperlink 
+                    Foreground="#cccccc"
+                    NavigateUri="https://github.com/kirby561/CryptoRetriever/blob/master/COPYING.txt"
+                    RequestNavigate="Hyperlink_RequestNavigate">
+                    MIT License
+                </Hyperlink>
+            </TextBlock>
+
+            <TextBlock Margin="0 25 0 0" Text="Report issues at:" Foreground="White" FontSize="16" HorizontalAlignment="Left" />
+            <TextBlock Foreground="White" FontSize="16" HorizontalAlignment="Left" >
+                <Hyperlink 
+                    Foreground="#cccccc"
+                    NavigateUri="https://github.com/kirby561/CryptoRetriever"
+                    RequestNavigate="Hyperlink_RequestNavigate">
+                    https://github.com/kirby561/CryptoRetriever
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
+
+        <ScrollViewer Grid.Column="2" Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Acknowledgements" Foreground="White" FontFamily="Arial Black" FontSize="20" HorizontalAlignment="Left" />
+                <TextBlock Text="Icons" Foreground="White" FontSize="16" HorizontalAlignment="Left" />
+                <TextBlock Foreground="White" FontSize="14" HorizontalAlignment="Left" >
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://www.flaticon.com/free-icons/analysis">
+                        Analysis icons created by Freepik - Flaticon
+                    </Hyperlink><LineBreak/>
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://www.flaticon.com/free-icons/business-and-finance">
+                        Business and finance icons created by Kiranshastry - Flaticon
+                    </Hyperlink><LineBreak/>
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://www.flaticon.com/free-icons/golden-retriever">
+                        Golden retriever icons created by surang - Flaticon
+                    </Hyperlink><LineBreak/>
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://www.flaticon.com/free-icons/hat">
+                        Hat icons created by Pixel perfect - Flaticon
+                    </Hyperlink><LineBreak/>
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://www.flaticon.com/free-icons/gentleman">
+                        Gentleman icons created by Freepik - Flaticon
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Text="Libraries" Margin="0 25 0 0" Foreground="White" FontSize="16" HorizontalAlignment="Left" />
+                <TextBlock Foreground="White" FontSize="14" HorizontalAlignment="Left" >
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://github.com/bchavez/Coinbase">
+                        Coinbase .NET/C# Library - MIT License
+                    </Hyperlink><LineBreak/>
+                    <Hyperlink Foreground="#cccccc" RequestNavigate="Hyperlink_RequestNavigate"
+                               NavigateUri="https://github.com/kirby561/KFSO.UI">
+                        KFSO.UI - MIT License
+                    </Hyperlink><LineBreak/>
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
