@@ -59,7 +59,6 @@ namespace CryptoRetriever.Filter {
             Tuple<bool, double> isEvenlySpacedAndSpacing = IsEvenlySpaced(input);
             bool isEvenlySpaced = isEvenlySpacedAndSpacing.Item1;
             double spacing = isEvenlySpacedAndSpacing.Item2;
-
             if (!isEvenlySpaced)
                 throw new ArgumentException("Non-evenly spaced data is not supported yet.");
 
