@@ -24,6 +24,9 @@
     <None Remove="Images\CryptoRetrieverSocial.png" />
     <None Remove="Images\data-storage.png" />
     <None Remove="Images\data-storage.svg" />
+    <None Remove="Images\more.png" />
+    <None Remove="Images\more_click.png" />
+    <None Remove="Images\more_hover.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,6 +64,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\data-storage.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\more.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\more_click.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\more_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

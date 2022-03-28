@@ -22,9 +22,15 @@ namespace CryptoRetriever.UI {
         public StrategyEditorWindow() {
             InitializeComponent();
 
-            _strategy.GetFilters().Add(new GaussianFilter(2));
-            _filtersView.ItemsSource = _strategy.GetFilters();
-            _strategy.GetFilters().Add(new GaussianFilter(1));
+            _strategy.Filters.Add(new GaussianFilter(2));
+            _filtersView.ItemsSource = _strategy.Filters;
+            _strategy.Filters.Add(new GaussianFilter(1));
+
+            _strategy.States.Add(new State("Default"));
+            _statesView.ItemsSource = _strategy.States;
+
+            _strategy.Triggers.Add(new Strats.Trigger("Sample trigger"));
+            _triggersView.ItemsSource = _strategy.Triggers;
         }
     }
 }

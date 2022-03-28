@@ -3,6 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
-    class Trigger {
+    public class Trigger {
+        private String _name;
+
+        public String Summary {
+            get {
+                return _name;
+            }
+        }
+
+        public Trigger(String name) {
+            _name = name;
+        }
     }
 }
