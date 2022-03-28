@@ -1,6 +1,7 @@
 ﻿using CryptoRetriever.Filter;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
@@ -15,10 +16,10 @@ namespace CryptoRetriever.Strats {
         public String Name { get; set; }
         public Account Account { get; set; } = new Account();
         public ExchangeAssumptions ExchangeAssumptions { get; set; }
-        public List<IFilter> Filters { get; set; } = new List<IFilter>();
-        public List<State> States { get; set; }  = new List<State>();
-        public List<Trigger> Triggers { get; set; } = new List<Trigger>();
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
+        public ObservableCollection<IFilter> Filters { get; set; } = new ObservableCollection<IFilter>();
+        public ObservableCollection<State> States { get; set; }  = new ObservableCollection<State>();
+        public ObservableCollection<Trigger> Triggers { get; set; } = new ObservableCollection<Trigger>();
+        public DateTime Start { get; set; } = DateTime.MinValue; // Min means use the dataset's start
+        public DateTime End { get; set; } = DateTime.MinValue; // Min means use the dataset's end
     }
 }

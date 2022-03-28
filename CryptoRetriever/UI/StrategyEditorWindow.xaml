@@ -6,104 +6,13 @@
         xmlns:local="clr-namespace:CryptoRetriever.UI"
         mc:Ignorable="d"
         Background="#00001a"
-        Title="Strategy Editor" Height="600" Width="500">
+        Title="Strategy Editor" Height="700" Width="500">
     <Window.Resources>
-        <Style x:Key="TbHeader2" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontFamily" Value="Arial" />
-            <Setter Property="Margin" Value="5 2 2 2" />
-        </Style>
-        <Style x:Key="TbValue2" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#cccccc" />
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontFamily" Value="Arial" />
-            <Setter Property="Margin" Value="5 2 2 2" />
-        </Style>
-        <Style x:Key="TbHeader" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontSize" Value="20" />
-            <Setter Property="FontFamily" Value="Arial Black" />
-            <Setter Property="Margin" Value="5" />
-        </Style>
-        <Style x:Key="TbTitle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontSize" Value="24" />
-            <Setter Property="FontFamily" Value="Arial Black" />
-            <Setter Property="Margin" Value="5" />
-        </Style>
-        <Style x:Key="TbListItem" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontFamily" Value="Arial" />
-            <Setter Property="Margin" Value="5" />
-        </Style>
-        <Style x:Key="ListAddButton" TargetType="Button">
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Width" Value="25" />
-            <Setter Property="Height" Value="25" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Image Source="../Images/add.png" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Button">
-                                <Image Source="../Images/add_hover.png" />
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Button">
-                                <Image Source="../Images/add_click.png" />
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="MoreButton" TargetType="Button">
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Width" Value="25" />
-            <Setter Property="Height" Value="25" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Image Source="../Images/more.png" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Button">
-                                <Image Source="../Images/more_hover.png" />
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Button">
-                                <Image Source="../Images/more_click.png" />
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -115,11 +24,11 @@
                 <TextBlock Text="Strategy Editor" HorizontalAlignment="Center" Style="{StaticResource TbTitle}" />
 
                 <!-- Name -->
-                <TextBlock Text="Name" Style="{StaticResource TbHeader}" />
-                <TextBox Grid.Column="1" Margin="5 2 5 2" Text="Strategy1" HorizontalAlignment="Stretch" />
+                <TextBlock Text="Name*" Style="{StaticResource TbHeader}" />
+                <TextBox Name="_nameTextBox"  Grid.Column="1" Margin="5 2 5 2" Text="Strategy1" HorizontalAlignment="Stretch" />
                 
                 <!-- Account -->
-                <TextBlock Margin="0 20 0 0" Text="Account" Style="{StaticResource TbHeader}" />
+                <TextBlock Margin="0 20 0 0" Text="Account*" Style="{StaticResource TbHeader}" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -130,13 +39,13 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Starting Fiat: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBox Grid.Column="1" Margin="5 2 5 2" Text="1000" HorizontalAlignment="Stretch" />
+                    <TextBox Name="_accountStartingFiatTextBox" Grid.Column="1" Margin="5 2 5 2" Text="1000" HorizontalAlignment="Stretch" />
                     <TextBlock Grid.Row="1" Text="Starting Assets: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="0" HorizontalAlignment="Stretch" />
+                    <TextBox Name="_accountStartingAssetsTextBox" Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="0" HorizontalAlignment="Stretch" />
                 </Grid>
 
                 <!-- Exchange Assumptions -->
-                <TextBlock Margin="0 20 0 0" Text="Exchange Assumptions" Style="{StaticResource TbHeader}" />
+                <TextBlock Margin="0 20 0 0" Text="Exchange Assumptions*" Style="{StaticResource TbHeader}" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -147,9 +56,9 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Transaction Fee ($): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBox Grid.Column="1" Margin="5 2 5 2" Text="8" HorizontalAlignment="Stretch" />
+                    <TextBox Name="_exchangeTransactionFeeTextBox" Grid.Column="1" Margin="5 2 5 2" Text="8" HorizontalAlignment="Stretch" />
                     <TextBlock Grid.Row="1" Text="Transaction Time (s): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="600" HorizontalAlignment="Stretch" />
+                    <TextBox Name="_exchangeTransationTimeTextBox" Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="600" HorizontalAlignment="Stretch" />
                 </Grid>
 
                 <!-- Filters -->
@@ -157,9 +66,11 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Filters" Style="{StaticResource TbHeader}" />
-                    <Button Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnAddFilterClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveFilterClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
                 <ListView Name="_filtersView" MinHeight="25">
                     <ListView.ItemTemplate>
@@ -174,9 +85,11 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="States" Style="{StaticResource TbHeader}" />
-                    <Button Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnAddStateClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveStateClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
                 <ListView Name="_statesView" MinHeight="25">
                     <ListView.ItemTemplate>
@@ -191,9 +104,11 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Triggers" Style="{StaticResource TbHeader}" />
                     <Button Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveTriggerClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
                 <ListView Name="_triggersView" MinHeight="25">
                     <ListView.ItemTemplate>
@@ -209,25 +124,24 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Start: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBlock Grid.Column="1" Margin="5 2 5 2" Text="(Enter a date)" HorizontalAlignment="Stretch" Style="{StaticResource TbValue2}" />
-                    <Button Grid.Column="2" Margin="2" HorizontalAlignment="Right" Style="{StaticResource MoreButton}" />
-                    <TextBlock Grid.Row="1" Text="End: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="(Optional)" HorizontalAlignment="Stretch" Style="{StaticResource TbValue2}" />
-                    <Button Grid.Row="1" Grid.Column="2" Margin="2" HorizontalAlignment="Right" Style="{StaticResource MoreButton}" />
+                    <TextBlock Grid.ColumnSpan="2" Text="Leave dates blank to use the start or end of the dataset." Style="{StaticResource TbHeader2}" />
+                    <TextBlock Grid.Row="1" Text="Start: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <DatePicker Grid.Column="2" Grid.Row="1" Name="_startDatePicker" Margin="5 2 5 2" />
+                    <TextBlock Grid.Row="2" Text="End: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <DatePicker  Grid.Column="2" Grid.Row="2"  Name="_endDatePicker" Margin="5 2 5 2" />
                 </Grid>
             </StackPanel>
         </ScrollViewer>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Save" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
-            <Button Content="Cancel" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
+            <Button Click="OnSaveButtonClicked" Content="Save" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
+            <Button Click="OnCancelButtonClicked"  Content="Cancel" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
         </StackPanel>
     </Grid>
 </Window>

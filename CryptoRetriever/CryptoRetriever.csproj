@@ -27,6 +27,9 @@
     <None Remove="Images\more.png" />
     <None Remove="Images\more_click.png" />
     <None Remove="Images\more_hover.png" />
+    <None Remove="Images\remove.png" />
+    <None Remove="Images\remove_click.png" />
+    <None Remove="Images\remove_hover.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -73,6 +76,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\more_hover.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\remove.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\remove_click.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\remove_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

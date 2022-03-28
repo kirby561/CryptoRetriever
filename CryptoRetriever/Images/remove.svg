@@ -2,13 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="100mm"
-   height="100mm"
+   width="100"
+   height="100"
    viewBox="0 0 100 100"
    version="1.1"
    id="svg5"
    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
    sodipodi:docname="remove.svg"
+   inkscape:export-filename="C:\Users\Alex\Documents\Code\CryptoRetriever\CryptoRetriever\Images\add.png"
+   inkscape:export-xdpi="48"
+   inkscape:export-ydpi="48"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,15 +26,20 @@
      inkscape:pagecheckerboard="true"
      inkscape:document-units="px"
      showgrid="false"
-     inkscape:zoom="1.5554293"
-     inkscape:cx="211.83862"
-     inkscape:cy="220.19644"
-     inkscape:window-width="2560"
-     inkscape:window-height="1361"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:zoom="11.313708"
+     inkscape:cx="42.470603"
+     inkscape:cy="50.072001"
+     inkscape:window-width="2542"
+     inkscape:window-height="1343"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     scale-x="1"
+     viewbox-width="100"
+     viewbox-height="100"
+     units="px"
+     width="100px" />
   <defs
      id="defs2" />
   <g
@@ -39,14 +47,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <circle
-       style="fill:none;stroke:#ffffff;stroke-width:1.05833;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#ffffff;stroke-width:4.882;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path53"
        cx="50"
        cy="50"
-       r="50" />
+       r="47.559128" />
     <path
-       style="fill:#feffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 82.574741,49.40464 17.425259,50.59536"
-       id="path1277-8" />
+       style="fill:none;stroke:#ffffff;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 20,50 H 80"
+       id="path2765" />
   </g>
 </svg>
