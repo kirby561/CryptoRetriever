@@ -50,6 +50,12 @@ namespace CryptoRetriever.Filter {
             _oneOverSigmaTimesOneOverSqrt2Pi = _oneOverSigma * _oneOverSqrt2Pi;
         }
 
+        public String Summary {
+            get {
+                return "Gaussian Filter (sigma = " + _sigma + ", kernelSize = " + _kernelSize + ")";
+            }
+        }
+
         public Dataset Filter(Dataset input) {
             // If we have 2 or less points, just return the dataset.
             if (input.Count < 3) {
@@ -59,7 +65,6 @@ namespace CryptoRetriever.Filter {
             Tuple<bool, double> isEvenlySpacedAndSpacing = IsEvenlySpaced(input);
             bool isEvenlySpaced = isEvenlySpacedAndSpacing.Item1;
             double spacing = isEvenlySpacedAndSpacing.Item2;
-
             if (!isEvenlySpaced)
                 throw new ArgumentException("Non-evenly spaced data is not supported yet.");
 

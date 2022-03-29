@@ -1,4 +1,5 @@
 ﻿using CryptoRetriever.Filter;
+using CryptoRetriever.UI;
 using KFSO.UI.DockablePanels;
 using Microsoft.Win32;
 using System;
@@ -194,6 +195,11 @@ namespace CryptoRetriever.DatasetView {
             if (result.Succeeded) {
                 SetDataset(result.Value.Item2, result.Value.Item1);
             }
+        }
+
+        private void OnCreateStrategyClicked(object sender, RoutedEventArgs e) {
+            StrategyEditorWindow window = new StrategyEditorWindow();
+            window.ShowDialog();
         }
     }
 

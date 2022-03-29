@@ -1,0 +1,36 @@
+﻿<Window x:Class="CryptoRetriever.UI.InputBoxDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CryptoRetriever.UI"
+        mc:Ignorable="d"        
+        Background="#00001a"
+        Name="_window"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        Loaded="OnWindowLoaded"
+        Title="Input Box" Height="Auto" Width="300">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <StackPanel Margin="10">
+        <TextBlock Name="_messageText" Text="Message" Style="{StaticResource TbHeader2}" />
+        <TextBox KeyDown="OnEnterTextKeyDown" Name="_enteredText" Margin="5" Text="" />
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Click="OnCreateButtonClicked" Content="Create" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
+            <Button Grid.Column="2" Click="OnCancelButtonClicked"  Content="Cancel" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
+        </Grid>
+    </StackPanel>
+</Window>

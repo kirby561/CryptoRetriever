@@ -42,6 +42,7 @@
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem IsChecked="{Binding IsShown, ElementName=_optionsPanel}" Header="Graph Options" Click="OnShowGraphOptionsPanelClick" />
+                <MenuItem Header="_Create Strategy" Click="OnCreateStrategyClicked" />
             </MenuItem>
         </Menu>
 
