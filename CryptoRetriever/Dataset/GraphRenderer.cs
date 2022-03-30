@@ -34,6 +34,7 @@ namespace CryptoRetriever {
         private TextBlock _yAxisLabel;
         private List<Grid> _graphTicks = new List<Grid>();
         private bool _isAxisEnabled = true;
+        private const int _GRAPH_TICK_COUNT = 10;
 
         // Calculated transforms
         //     Pixel space is from the top left of the canvas in pixels, down is positive.
@@ -48,6 +49,8 @@ namespace CryptoRetriever {
         // Keep track of the bounding box
         private Range _boundingDomain;
         private Range _boundingRange;
+
+        private Grid _gt;
 
         public GraphRenderer(Canvas canvas, Dataset dataset) {
             _canvas = canvas;
@@ -238,9 +241,9 @@ namespace CryptoRetriever {
                 _canvas.Children.Remove(_xAxisLabel);
                 for (int i = 0; i < _graphTicks.Count; i++)
                 {
-                    _canvas.Children.Remove(_graphTicks[0]);
+                    _canvas.Children.Remove(_graphTicks[i]);
                 }
-                _canvas.Children.Clear();
+                _graphTicks.Clear();
             }
 
             if (_yAxis != null)
@@ -315,12 +318,22 @@ namespace CryptoRetriever {
 
             // Setup axis ticks w/ labels
             //      x-axis
-			for (int i = 0; i < _renderParams.Dataset.Points.Count; i++)
+            double[] a = new double[_GRAPH_TICK_COUNT];
+            double domain = GetDomain().End - GetDomain().Start;
+            double interval = domain / a.Length;
+
+            for (int i = 0; i < a.Length; i ++)
 			{
-				Grid graphTick = CreateGraphTick("Test", 12, brush, new SolidColorBrush(Colors.White), true, true);
+                a[i] = GetDomain().Start + (interval * i);
+			}
+            
+			for (int i = 0; i < a.Length; i++)
+			{
+				Grid graphTick = CreateGraphTick(GetDomainTickText(DateTime.Parse(new TimestampToDateFormatter().Format(a[i]))), 12, brush, new SolidColorBrush(Colors.White), true, true);
                 //Grid graphTick = CreateGraphTick(new SolidColorBrush(Colors.White), _xCoordFormatter.Format(_renderParams.Dataset.Points[i].X), 16, true);
-                Canvas.SetLeft(graphTick, _yAxis.X1 + ((_xAxis.X2 - _yAxis.X2) / (_renderParams.Dataset.Points.Count) * (i + 1)));
+                Canvas.SetLeft(graphTick, _yAxis.X1 + ((_xAxis.X2 - _yAxis.X2) / a.Length) * (i));
 				Canvas.SetTop(graphTick, _xAxis.Y1 - 8);
+                _graphTicks.Add(graphTick);
 				_canvas.Children.Add(graphTick);
 			}
             //      y-axis (max 10 ticks for now)
@@ -329,19 +342,21 @@ namespace CryptoRetriever {
                 //int scale = 
 			}
 
-		}
+            if (_gt != null)
+			{
+                _canvas.Children.Remove(_gt);
+			}
+            Grid graphTick2 = CreateGraphTick("test", 12, brush, new SolidColorBrush(Colors.White), true, true);
+            Point point = new Point(400, 0);
 
-        private void UpdateData()
-        {
-            if (_datasetPath != null)
-                _canvas.Children.Remove(_datasetPath);
+            double xAxisSize = _xAxis.X2 - _yAxis.X1;
+            double yAxisSize = _xAxis.Y1 - _yAxis.Y1;
 
             //double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
-            double xInterval = (_xAxis.X2 - _yAxis.X1) / _renderParams.Dataset.Points.Count;
-            double xScale = (xInterval * (_renderParams.Dataset.Points.Count - 1)) / (_renderParams.Domain.End - _renderParams.Domain.Start);
+            double xScale = ((xAxisSize / 100) * 100) / (_renderParams.Domain.End - _renderParams.Domain.Start);
+
             //double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
-            double yInterval = (_xAxis.Y1 - _yAxis.Y1) / 15;
-            double yScale = (yInterval * 13) / (_renderParams.Range.End - _renderParams.Range.Start);
+            double yScale = ((yAxisSize / 100) * 100) / (_renderParams.Range.End - _renderParams.Range.Start);
 
             Matrix layoutTransform = new Matrix();
 
@@ -356,7 +371,81 @@ namespace CryptoRetriever {
             // Now shift the whole curve down by the height of the canvas since our coordinates at this point
             //     are starting at the top of the screen and should be starting at the bottom of the screen
             //layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
-            layoutTransform.Translate(_yAxis.X1 + xInterval, _xAxis.Y1 - yInterval);
+            layoutTransform.Translate(_yAxis.X1, _xAxis.Y1);
+
+            //_dataToPixelSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
+            //_pixelToDataSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
+            //if (_pixelToDataSpaceTransform.HasInverse)
+            //    _pixelToDataSpaceTransform.Invert();
+
+            layoutTransform.Transform(point);
+            Canvas.SetLeft(graphTick2, point.X);
+            Canvas.SetTop(graphTick2, 0);
+            _gt = graphTick2;
+            _canvas.Children.Add(graphTick2);
+            //_datasetGeometry.Transform = new MatrixTransform(layoutTransform);
+
+        }
+
+        private string GetDomainTickText(DateTime date)
+		{
+            double seconds = GetDomain().End - GetDomain().Start;
+            double minutes = seconds / 60;
+            double hours = minutes / 60;
+            double days = hours / 24;
+            double months = days / 30;
+            
+            if (months >= _GRAPH_TICK_COUNT)
+			{
+                return date.ToString("MMM") + " " + date.Year;
+			}
+            else if (days >= _GRAPH_TICK_COUNT)
+			{
+                return date.ToString("MMM") + " " + date.Day;
+            }
+            else if (hours >= _GRAPH_TICK_COUNT)
+			{
+                return date.ToShortDateString();
+			}
+            else if (minutes >= _GRAPH_TICK_COUNT)
+			{
+                return date.ToShortDateString();
+            }
+            else
+			{
+                return date.ToLongTimeString();
+
+            }
+		}
+
+        private void UpdateData()
+        {
+            if (_datasetPath != null)
+                _canvas.Children.Remove(_datasetPath);
+
+            double xAxisSize = _xAxis.X2 - _yAxis.X1;
+            double yAxisSize = _xAxis.Y1 - _yAxis.Y1;
+
+            //double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
+            double xScale = ((xAxisSize / 100) * 100) / (_renderParams.Domain.End - _renderParams.Domain.Start);
+
+            //double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
+            double yScale = ((yAxisSize / 100) * 100) / (_renderParams.Range.End - _renderParams.Range.Start);
+
+            Matrix layoutTransform = new Matrix();
+
+            // Shift the curve to 0 so the first point starts at the top left
+            layoutTransform.Translate(-_renderParams.Domain.Start, -_renderParams.Range.Start);
+            //layoutTransform.Translate(-_renderParams.Domain.Start + _xAxisLabel.DesiredSize.Width + 50, -_renderParams.Range.Start + _yAxis.Y1);
+
+            // Now map left to right on the curve to left to right on the screen. The -yScale is to flip
+            //     the coordinates since the canvas has 0, 0 at the top left and positive is down.
+            layoutTransform.Scale(xScale, -yScale);
+
+            // Now shift the whole curve down by the height of the canvas since our coordinates at this point
+            //     are starting at the top of the screen and should be starting at the bottom of the screen
+            //layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
+            layoutTransform.Translate(_yAxis.X1, _xAxis.Y1);
 
             _dataToPixelSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
             _pixelToDataSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
@@ -602,4 +691,22 @@ namespace CryptoRetriever {
         }
     }
 
+    class DollarFormatter : ICoordinateFormatter
+    {
+        public string Format(double coordinate)
+        {
+            return "$" + ((decimal)coordinate).ToString("N");
+        }
+    }
+
+    class TimestampToDateFormatter : ICoordinateFormatter
+    {
+        public string Format(double coordinate)
+        {
+            long utcTimestampSeconds = (long)Math.Round(coordinate);
+            DateTime unixStart = DateTimeConstant.UnixStart;
+            DateTime localDateTime = unixStart.AddSeconds(utcTimestampSeconds).ToLocalTime();
+            return localDateTime.ToString("G");
+        }
+    }
 }
