@@ -12,6 +12,10 @@ namespace CryptoRetriever.Strats {
             }
         }
 
+        public String GetId() {
+            return _stateId;
+        }
+
         public State(String stateId) {
             _stateId = stateId;
         }

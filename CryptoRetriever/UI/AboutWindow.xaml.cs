@@ -14,7 +14,8 @@ using System.Windows.Shapes;
 
 namespace CryptoRetriever.UI {
     /// <summary>
-    /// Interaction logic for About.xaml
+    /// A Window that includes information about the version of the app and
+    /// credits the sources of images and libraries.
     /// </summary>
     public partial class AboutWindow : Window {
         public AboutWindow() {

@@ -4,16 +4,22 @@ using System.Text;
 
 namespace CryptoRetriever.Strats {
     public class Trigger {
-        private String _name;
+        public String Name { get; set; }
 
         public String Summary {
             get {
-                return _name;
+                return Name;
             }
         }
 
+        public Condition Condition { get; set; } = null;
+
+        public Action TrueAction { get; set; } = null;
+
+        public Action ElseAction { get; set; } = null;
+
         public Trigger(String name) {
-            _name = name;
+            Name = name;
         }
     }
 }

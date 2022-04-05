@@ -1,0 +1,33 @@
+﻿<Window x:Class="CryptoRetriever.UI.ConditionEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CryptoRetriever.UI"
+        mc:Ignorable="d"
+        Background="#00001a"
+        Loaded="OnWindowLoaded"
+        Title="Condition Editor" Height="450" Width="300">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Name="_conditionsPanel" Orientation="Vertical" Height="Auto" />
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Click="OnOkayClicked" Content="Okay" Style="{StaticResource DialogButton}" />
+            <Button Click="OnCancelClicked" Content="Cancel" Style="{StaticResource DialogButton}" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -138,4 +138,20 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    <Style x:Key="DialogButton" TargetType="Button">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="#3465a4" />
+        <Setter Property="FontFamily" Value="Arial" />
+        <Setter Property="Margin" Value="5 5 5 5" />
+        <Setter Property="Padding" Value="5 5 5 5" />
+    </Style>
+<!-- Trigger UI styles -->
+    <Style x:Key="TbTriggerEditorSummary" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="#729fcf" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontFamily" Value="Arial" />
+        <Setter Property="Margin" Value="5 5 5 5" />
+        <Setter Property="Padding" Value="5 5 5 5" />
+    </Style>
 </ResourceDictionary>

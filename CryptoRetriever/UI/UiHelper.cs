@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CryptoRetriever.UI {
     /// <summary>
@@ -20,6 +22,101 @@ namespace CryptoRetriever.UI {
         public static void CenterWindowInWindow(Window childWindow, Window parentWindow) {
             CenterWindowTask centerTask = new CenterWindowTask(childWindow, parentWindow);
             centerTask.Center();
+        }
+
+        /// <summary>
+        /// Shades the color by the given percent. 
+        /// A negative value will make it darker, positive lighter.
+        /// </summary>
+        /// <param name="color">The color to shade.</param>
+        /// <param name="percent">The percent to shade it by. 0.20 = 20% brighter, -0.20 = 20% darker.</param>
+        /// <returns></returns>
+        public static Color ShadeColor(Color color, double percent) {
+            double r = color.R;
+            double b = color.B;
+            double g = color.G;
+
+            if (percent > 0) {
+                // Brighten
+                r = Math.Min((1 + percent) * r, 255);
+                b = Math.Min((1 + percent) * b, 255);
+                g = Math.Min((1 + percent) * g, 255);
+            } else {
+                // Darken
+                r = Math.Max((1 + percent) * r, 0);
+                b = Math.Max((1 + percent) * b, 0);
+                g = Math.Max((1 + percent) * g, 0);
+            }
+
+            return Color.FromArgb(color.A, (byte)r, (byte)g, (byte)b);
+        }
+
+        /// <summary>
+        /// Gives default hover/click shades to the given FrameworkElement assuming it has
+        /// a Background property.
+        /// </summary>
+        /// <param name="baseColor">The base color of the button.</param>
+        /// <param name="element">The element to set the background color on.</param>
+        public static void AddButtonHoverAndClickGraphics(Color baseColor, dynamic element) {
+            // Make sure the given element has a Background property
+            var whatever = element.Background;
+            Color hoverColor = UiHelper.ShadeColor(baseColor, .20);
+            Color pressedColor = UiHelper.ShadeColor(baseColor, -.20);
+            var setter = new ButtonHoverAndClickGraphicSetter(baseColor, hoverColor, pressedColor, element);
+            setter.Initialize();
+        }
+
+        /// <summary>
+        /// Gives default hover/click shades to the given FrameworkElement assuming it has
+        /// a Background property.
+        /// </summary>
+        /// <param name="baseColor">The base color of the button.</param>
+        /// <param name="hoverColor">The hover color of the button.</param>
+        /// <param name="pressedColor">The pressed color of the button.</param>
+        /// <param name="element">The element to set the background color on.</param>
+        public static void AddButtonHoverAndClickGraphics(Color baseColor, Color hoverColor, Color pressedColor, dynamic element) {
+            // Make sure the given element has a Background property
+            var whatever = element.Background;
+            var setter = new ButtonHoverAndClickGraphicSetter(baseColor, hoverColor, pressedColor, element);
+            setter.Initialize();
+        }
+    }
+
+    internal class ButtonHoverAndClickGraphicSetter {
+        private Color _baseColor;
+        private Color _hoverColor;
+        private Color _pressedColor;
+        private dynamic _element;
+
+        public ButtonHoverAndClickGraphicSetter(Color baseColor, Color hoverColor, Color pressedColor, dynamic element) {
+            _element = element;
+            _baseColor = baseColor;
+            _hoverColor = hoverColor;
+            _pressedColor = pressedColor;
+        }
+
+        public void Initialize() {
+            FrameworkElement element = _element as FrameworkElement;
+            element.MouseDown += OnMouseDown;
+            element.MouseEnter += OnMouseEnter;
+            element.MouseLeave += OnMouseLeave;
+            element.MouseUp += OnMouseUp;
+        }
+
+        private void OnMouseEnter(object sender, RoutedEventArgs args) {
+            _element.Background = new SolidColorBrush(_hoverColor);
+        }
+
+        private void OnMouseDown(object sender, RoutedEventArgs args) {
+            _element.Background = new SolidColorBrush(_pressedColor);
+        }
+
+        private void OnMouseUp(object sender, RoutedEventArgs args) {
+            _element.Background = new SolidColorBrush(_baseColor);
+        }
+
+        private void OnMouseLeave(object sender, RoutedEventArgs args) {
+            _element.Background = new SolidColorBrush(_baseColor);
         }
     }
 

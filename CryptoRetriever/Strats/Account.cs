@@ -26,5 +26,13 @@ namespace CryptoRetriever.Strats {
             CurrencyBalance = currency;
             AssetBalance = assets;
         }
+
+        /// <summary>
+        /// Maekes a deep copy of this account.
+        /// </summary>
+        /// <returns>A new Account instance with the same values.</returns>
+        public Account Copy() {
+            return new Account(CurrencyBalance, AssetBalance);
+        }
     }
 }

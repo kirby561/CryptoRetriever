@@ -89,4 +89,10 @@
     </Resource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="UI\ConditionEditorWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+  </ItemGroup>
+
 </Project>

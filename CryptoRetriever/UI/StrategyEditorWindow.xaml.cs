@@ -144,6 +144,32 @@ namespace CryptoRetriever.UI {
             RemoveSelectedItemsFromListBox(_strategy.States, _statesView);
         }
 
+        private void OnAddTriggerClicked(object sender, RoutedEventArgs e) {
+            TriggerEditorWindow triggerEditor = new TriggerEditorWindow();
+            UiHelper.CenterWindowInWindow(triggerEditor, this);
+            triggerEditor.ShowDialog();
+
+            if (triggerEditor.Trigger != null) {
+                _strategy.Triggers.Add(triggerEditor.Trigger);
+            }
+        }
+
+        private void OnTriggerDoubleClicked(object sender, MouseButtonEventArgs e) {
+            if (_triggersView.SelectedIndex >= 0) {
+                TriggerEditorWindow triggerEditor = new TriggerEditorWindow();
+                UiHelper.CenterWindowInWindow(triggerEditor, this);
+
+                // ?? TODO: This should be a deep copy but there's no way to save conditions
+                // right now so it will be a reference until that is implemented.
+                triggerEditor.WorkingTrigger = _strategy.Triggers[_triggersView.SelectedIndex];
+                triggerEditor.ShowDialog();
+
+                if (triggerEditor.Trigger != null) {
+                    _strategy.Triggers[_triggersView.SelectedIndex] = triggerEditor.Trigger;
+                }
+            }
+        }
+
         private void OnRemoveTriggerClicked(object sender, RoutedEventArgs e) {
             RemoveSelectedItemsFromListBox(_strategy.Triggers, _triggersView);
         }
