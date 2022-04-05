@@ -16,11 +16,11 @@ namespace CryptoRetriever {
     public class GraphRenderer {
         private Canvas _canvas;
         private RenderParams _renderParams = new RenderParams();
-        
+
         // Mouse hover dependencies
         private Point _mouseHoverPointPx;
         private bool _mouseHoverPointEnabled = false;
-        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Color.FromRgb(0xff, 0x22, 0x22), 10, 2, 14.0);
+        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Colors.Green, 10, 2, 14.0);
         private Ellipse _hoverPointEllipse;
         private TextBlock _hoverPointText;
         private Rectangle _hoverPointTextBackground;
@@ -30,6 +30,11 @@ namespace CryptoRetriever {
         private Path _datasetPath;
         private Line _xAxis;
         private Line _yAxis;
+        private TextBlock _xAxisLabel;
+        private TextBlock _yAxisLabel;
+        private List<Grid> _graphTicks = new List<Grid>();
+        private readonly SolidColorBrush _GREEN_BRUSH = new SolidColorBrush(Colors.Green);
+        private readonly SolidColorBrush _WHITE_BRUSH = new SolidColorBrush(Colors.White);
         private bool _isAxisEnabled = true;
 
         // Calculated transforms
@@ -153,10 +158,10 @@ namespace CryptoRetriever {
 
         private void InitializeDomainAndRange() {
             // Iterate over the dataset and get the max/min in each dimension
-            double minX = Double.PositiveInfinity;
-            double maxX = Double.NegativeInfinity;
-            double minY = Double.PositiveInfinity;
-            double maxY = Double.NegativeInfinity;
+            double minX = double.PositiveInfinity;
+            double maxX = double.NegativeInfinity;
+            double minY = double.PositiveInfinity;
+            double maxY = double.NegativeInfinity;
 
             foreach (Point p in _renderParams.Dataset.Points) {
                 if (p.X < minX) minX = p.X;
@@ -225,7 +230,7 @@ namespace CryptoRetriever {
         }
 
         public bool IsZoomedOut() {
-            return GetDomain().IsEqual(_boundingDomain) && 
+            return GetDomain().IsEqual(_boundingDomain) &&
                 GetRange().IsEqual(_boundingRange);
         }
 
@@ -233,22 +238,116 @@ namespace CryptoRetriever {
         /// Updates all the graphics to reflect the current state
         /// </summary>
         public void UpdateAll() {
-            UpdateData();
+
             UpdateAxis();
+            UpdateData();
+            UpdateGraphScales();
             UpdateHoverPoint();
         }
 
-        private void UpdateData() {
+        /// <summary>
+        /// Create graph with axis labels
+        /// </summary>
+        private void UpdateAxis() {
+            // Setup axis lines
+            if (_xAxis != null)
+            {
+                _canvas.Children.Remove(_xAxis);
+                _canvas.Children.Remove(_xAxisLabel);
+            }
+
+            if (_yAxis != null)
+            {
+                _canvas.Children.Remove(_yAxis);
+                _canvas.Children.Remove(_yAxisLabel);
+            }
+
+            if (!IsAxisEnabled)
+                return; // Don't draw the axis
+
+            double axisWidthPx = 3;
+            //SolidColorBrush brush = new SolidColorBrush(Colors.Green);
+
+            // Setup axis
+            _xAxis = new Line();
+            _xAxis.Fill = _GREEN_BRUSH;
+            _xAxis.Stroke = _GREEN_BRUSH;
+            _xAxis.StrokeThickness = axisWidthPx;
+            _xAxis.X1 = 50;
+            _xAxis.Y1 = _renderParams.CanvasSizePx.Height - 100;
+            _xAxis.X2 = _renderParams.CanvasSizePx.Width - 50;
+            _xAxis.Y2 = _xAxis.Y1;
+            _xAxis.IsHitTestVisible = false;
+
+            //Canvas.SetLeft(_xAxis, _xAxisLabel.DesiredSize.Width);
+            _canvas.Children.Add(_xAxis);
+
+            _yAxis = new Line();
+            _yAxis.Fill = _GREEN_BRUSH;
+            _yAxis.Stroke = _GREEN_BRUSH;
+            _yAxis.StrokeThickness = axisWidthPx;
+            _yAxis.X1 = _xAxis.X1 + 50;
+            _yAxis.Y1 = 50;
+            _yAxis.X2 = _yAxis.X1;
+            _yAxis.Y2 = _xAxis.Y1 + 50;
+            _yAxis.IsHitTestVisible = false;
+
+            //Canvas.SetLeft(_yAxis, _xAxisLabel.DesiredSize.Width + 50);
+            _canvas.Children.Add(_yAxis);
+
+            // Setup axis labels
+            _xAxisLabel = new TextBlock()
+            {
+                FontSize = 24,
+                Foreground = _GREEN_BRUSH,
+                Text = "Date/Time (EST)",
+                TextWrapping = TextWrapping.Wrap
+
+            };
+
+            _xAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Canvas.SetLeft(_xAxisLabel, ((_xAxis.X2 - _yAxis.X1) / 2) - (_xAxisLabel.DesiredSize.Width / 2) + 100);
+            Canvas.SetBottom(_xAxisLabel, 10);
+            _canvas.Children.Add(_xAxisLabel);
+
+            _yAxisLabel = new TextBlock()
+            {
+                FontSize = 24,
+                Foreground = _GREEN_BRUSH,
+                RenderTransform = new RotateTransform(270),
+                Text = "Price (USD)",
+                TextWrapping = TextWrapping.Wrap
+
+            };
+
+            _yAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Canvas.SetLeft(_yAxisLabel, 10);
+            Canvas.SetTop(_yAxisLabel, ((_xAxis.Y1 - _yAxis.Y1) / 2) + (_yAxisLabel.DesiredSize.Width / 2) + 50);
+            _canvas.Children.Add(_yAxisLabel);            
+        }
+
+        /// <summary>
+        /// Applies transformations to data
+        /// </summary>
+        private void UpdateData()
+        {
             if (_datasetPath != null)
                 _canvas.Children.Remove(_datasetPath);
 
-            double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
-            double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
+			double xAxisSize = _xAxis.X2 - _yAxis.X1;
+			double yAxisSize = _xAxis.Y1 - _yAxis.Y1;
+
+			//double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
+			double xScale = xAxisSize / (_renderParams.Domain.End - _renderParams.Domain.Start);
+
+            //double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
+            double yScale = yAxisSize / (_renderParams.Range.End - _renderParams.Range.Start);
 
             Matrix layoutTransform = new Matrix();
 
             // Shift the curve to 0 so the first point starts at the top left
             layoutTransform.Translate(-_renderParams.Domain.Start, -_renderParams.Range.Start);
+            //layoutTransform.Translate(-_renderParams.Domain.Start + _xAxisLabel.DesiredSize.Width + 50, -_renderParams.Range.Start + _yAxis.Y1);
 
             // Now map left to right on the curve to left to right on the screen. The -yScale is to flip
             //     the coordinates since the canvas has 0, 0 at the top left and positive is down.
@@ -256,7 +355,8 @@ namespace CryptoRetriever {
 
             // Now shift the whole curve down by the height of the canvas since our coordinates at this point
             //     are starting at the top of the screen and should be starting at the bottom of the screen
-            layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
+            //layoutTransform.Translate(0, _renderParams.CanvasSizePx.Height);
+            layoutTransform.Translate(_yAxis.X1, _xAxis.Y1);
 
             _dataToPixelSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
             _pixelToDataSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
@@ -266,40 +366,87 @@ namespace CryptoRetriever {
             _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
             _canvas.Children.Add(_datasetPath);
-        }
+        }       
 
-        private void UpdateAxis() {
-            if (_xAxis != null)
-                _canvas.Children.Remove(_xAxis);
-            if (_yAxis != null)
-                _canvas.Children.Remove(_yAxis);
+        /// <summary>
+        /// Set up tick marks on axis
+        /// </summary>
+        private void UpdateGraphScales()
+		{
+            for (int i = 0; i < _graphTicks.Count; i++)
+            {
+                _canvas.Children.Remove(_graphTicks[i]);
+            }
+            _graphTicks.Clear();
 
-            if (!IsAxisEnabled)
-                return; // Don't draw the axis
+            // Setup axis ticks w/ labels
+            //      y-axis  
+            Point[] rangeTickData = GetRangeTickData();
+            List<double> dblPointsY = rangeTickData.Select(x => x.Y).ToList();
+            _dataToPixelSpaceTransform.Transform(rangeTickData);
 
-            double axisWidthPx = 3;
-            SolidColorBrush brush = new SolidColorBrush(Colors.Black);
-            _xAxis = new Line();
-            _xAxis.Fill = brush;
-            _xAxis.Stroke = brush;
-            _xAxis.StrokeThickness = axisWidthPx;
-            _xAxis.X1 = 0;
-            _xAxis.Y1 = _renderParams.CanvasSizePx.Height;
-            _xAxis.X2 = _renderParams.CanvasSizePx.Width;
-            _xAxis.Y2 = _xAxis.Y1;
-            _xAxis.IsHitTestVisible = false;
-            _canvas.Children.Add(_xAxis);
+            // Override matrix Y transform for each point
+            for (int i = 0; i < rangeTickData.Length; i++)
+            {
+                rangeTickData[i].X = _yAxis.X1 - 30;
+            }
 
-            _yAxis = new Line();
-            _yAxis.Fill = brush;
-            _yAxis.Stroke = brush;
-            _yAxis.StrokeThickness = axisWidthPx;
-            _yAxis.X1 = 0;
-            _yAxis.Y1 = 0;
-            _yAxis.X2 = 0;
-            _yAxis.Y2 = _renderParams.CanvasSizePx.Height;
-            _yAxis.IsHitTestVisible = false;
-            _canvas.Children.Add(_yAxis);
+            // Set up labels and pin to points
+            for (int i = 0; i < dblPointsY.Count; i++)
+            {
+                string label = dblPointsY[i].ToString();
+                
+                Grid graphTick = CreateGraphTick(label, 12, _GREEN_BRUSH, _WHITE_BRUSH, "y", true, dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start ? true : false);
+                Canvas.SetLeft(graphTick, rangeTickData[i].X);
+                Canvas.SetTop(graphTick, rangeTickData[i].Y);
+                _graphTicks.Add(graphTick);
+                _canvas.Children.Add(graphTick);
+            }
+
+
+            //      x-axis
+
+            // Apply graph matrix to axis points
+            Tuple<string, Point[]> domainTickData = GetDomainTickData();
+            List<double> dblPointsX = domainTickData.Item2.Select(x => x.X).ToList();
+            _dataToPixelSpaceTransform.Transform(domainTickData.Item2);
+            
+            // Override matrix Y transform for each point
+            for (int i = 0; i < domainTickData.Item2.Length; i++)
+			{
+                domainTickData.Item2[i].Y = _xAxis.Y1 - 10;
+			}
+
+            // Set up labels and pin to points
+            for (int i = 0; i < dblPointsX.Count; i++)
+            {
+                DateTime date = DateTime.Parse(new TimestampToDateFormatter().Format(dblPointsX[i]));
+
+                string label;
+                switch (domainTickData.Item1)
+                {
+                    case "m":
+                        label = date.ToString("MMM") + " " + date.Year;
+                        break;
+                    //case "w":
+                    //    label = date.ToString("MMM") + " WK" + i;
+                    //    break;
+                    case "d":
+                        label = date.ToString("MMM") + " " + date.Day;
+                        break;
+                    case "s":
+                        label = date.ToLongTimeString();
+                        break;
+                    default:
+                        label = date.ToShortTimeString();
+                        break;
+                }
+                Grid graphTick = CreateGraphTick(label, 12, _GREEN_BRUSH, _WHITE_BRUSH, "x", true, dblPointsX[i] > GetDomain().End || dblPointsX[i] < GetDomain().Start ? true : false);
+                Canvas.SetLeft(graphTick, domainTickData.Item2[i].X);
+                Canvas.SetTop(graphTick, domainTickData.Item2[i].Y);
+                _graphTicks.Add(graphTick);
+                _canvas.Children.Add(graphTick);
+            }
         }
 
         /// <summary>
@@ -347,11 +494,11 @@ namespace CryptoRetriever {
             _hoverPointEllipse.StrokeThickness = _hoverPointOptions.StrokeThickness;
             _hoverPointEllipse.IsHitTestVisible = false;
             Canvas.SetLeft(_hoverPointEllipse, highlightPointPx.X - _hoverPointOptions.Size / 2.0);
-            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);            
+            Canvas.SetTop(_hoverPointEllipse, highlightPointPx.Y - _hoverPointOptions.Size / 2.0);
             _canvas.Children.Add(_hoverPointEllipse);
 
             String xCoordinate = "" + mousePositionInDataSpace.X;
-            if (_xCoordFormatter != null) 
+            if (_xCoordFormatter != null)
                 xCoordinate = _xCoordFormatter.Format(mousePositionInDataSpace.X);
             String yCoordinate = "" + mousePositionInDataSpace.Y;
             if (_yCoordFormatter != null)
@@ -383,7 +530,7 @@ namespace CryptoRetriever {
                 textTopPx = canvasPadding;
             if (textTopPx + textHeight + canvasPadding > _canvas.ActualHeight)
                 textTopPx -= (textTopPx + textHeight + canvasPadding) - _canvas.ActualHeight;
-            
+
             Canvas.SetLeft(_hoverPointText, textLeftPx);
             Canvas.SetTop(_hoverPointText, textTopPx);
 
@@ -400,6 +547,211 @@ namespace CryptoRetriever {
             _hoverPointTextBackground.IsHitTestVisible = false;
             _canvas.Children.Add(_hoverPointTextBackground);
             _canvas.Children.Add(_hoverPointText); // Add the text after the background so it is in front
+        }
+
+        /// <summary>
+        /// Creates a graph tick mark inside grid ctrl
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="fontSize"></param>
+        /// <param name="lineColor"></param>
+        /// <param name="textColor"></param>
+        /// <param name="showTick"></param>
+        /// <returns></returns>
+        private Grid CreateGraphTick(string text, double fontSize, Brush lineColor, Brush textColor, string axis, bool showTick, bool blurTick)
+        {
+            Grid grid = new Grid();
+            Line line = new Line()
+            {
+                Fill = lineColor,
+                Opacity = blurTick ? 0.5 : 1.0,
+                Stroke = lineColor,
+                StrokeThickness = 1,
+                X1 = 0,
+                X2 = axis == "x" ? 0 : 16,
+                Y1 = 0,
+                Y2 = axis == "x" ? 16 : 0
+            };
+            
+            TextBlock textBlock = new TextBlock()
+            {
+                FontSize = fontSize,
+                Foreground = textColor,
+                Opacity = blurTick ? 0.5 : 1.0,
+                RenderTransform = new RotateTransform(45),
+                RenderTransformOrigin = new Point(0.25, 0.25),
+                Text = text,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            if (axis == "y")
+			{
+                grid.ColumnDefinitions.Add(new ColumnDefinition());
+                Grid.SetColumn(textBlock, 0);
+                Grid.SetColumn(line, 1);
+            }
+            grid.RowDefinitions.Add(new RowDefinition());
+            if (axis == "x")
+			{
+                grid.RowDefinitions.Add(new RowDefinition());
+                Grid.SetRow(line, 0);
+                Grid.SetRow(textBlock, 1);
+            }           
+            
+
+            grid.Children.Add(line);
+            grid.Children.Add(textBlock);
+
+            if (!showTick)
+                line.Visibility = Visibility.Hidden;
+
+            return grid;
+        }
+
+        /// <summary>
+        /// Returns the unit we will use for x-axis based on data within domain as well as location of label with
+        /// respect to x-axis.
+        /// </summary>
+        /// <returns></returns>
+        private Tuple<string, Point[]> GetDomainTickData()
+        {
+            double seconds = GetDomain().End - GetDomain().Start;
+            double minutes = seconds / 60;
+            double hours = minutes / 60;
+            double days = hours / 24;
+            double weeks = days / 7;
+            double months = days / 30;
+
+            string unit;
+            double unitV;
+
+            Point[] points;
+
+            if (months > 1)
+            {
+                unit = "m";
+                unitV = months;
+            }
+            //else if (weeks >= 3)
+            //{
+            //    unit = "w";
+            //    unitV = weeks;
+            //}
+            else if (days > 1)
+            {
+                unit = "d";
+                unitV = days;
+            }
+            else if (hours > 1)
+            {
+                unit = "h";
+                unitV = hours;
+            }
+            else if (minutes > 1)
+            {
+                unit = "mi";
+                unitV = minutes;
+            }
+            else
+            {
+                unit = "s";
+                unitV = seconds;
+
+            }
+            int numTicks = (int)Math.Ceiling(unitV) + 1;
+            points = new Point[numTicks];
+            for (int i = 0; i < numTicks; i++)
+            {
+                double intervalSeconds = GetDomain().Start + ((seconds / unitV) * i);
+                points[i] = new Point(GetUnitBeginning(unit, intervalSeconds), 0);            
+            }
+            //points[points.Length - 2] = new Point(GetBoundingDomain().Start, 0);
+            //points[points.Length - 1] = new Point(GetBoundingDomain().End, 0);
+            //points = points.OrderBy(x => x.X).ToArray();
+
+            return new Tuple<string, Point[]>(unit, points);
+        }
+
+        private Point[] GetRangeTickData()
+		{
+            double dollars = GetRange().End - GetRange().Start;
+            Point[] values;
+
+            double scale;
+            int resetCount = 0;
+            int tickCount = 1;
+            for (scale = 1.0; scale < 100000; scale = (resetCount == 1) ? scale * 2.5 : scale * 2)
+			{
+                tickCount = (int)Math.Ceiling(dollars / scale);
+                if (tickCount >= 5 && tickCount <= 10)
+				{
+                    break;
+				}
+
+                resetCount++;
+                if (resetCount == 3)
+				{
+                    resetCount = 0;
+				}
+			}
+
+            values = new Point[tickCount + 1];
+            values[0] = new Point(0, (int)(GetRange().Start / scale) * scale);
+            for (int i = 1; i <= tickCount; i++)
+			{
+                values[i] = new Point(0, values[i - 1].Y + scale);
+			}
+            //values = values.OrderBy(x => x).ToArray();
+
+            return values;
+		}
+
+        /// <summary>
+        /// Provided the unit type and seconds value, this will calculate the beginning of that unit in seconds.
+        /// For example, supplying unitType = "d" (day) and date "3/11/2022 15:33:41" this function will return
+        /// "3/11/2022 00:00:00" (beginning of the day) as seconds
+        /// </summary>
+        /// <param name="unitType"></param>
+        /// <param name="seconds"></param>
+        /// <returns></returns>
+        private double GetUnitBeginning(string unitType, double seconds)
+		{
+            long utcTimestampSeconds = (long)Math.Round(seconds);
+            DateTime utcDateTime = DateTimeConstant.UnixStart.AddSeconds(utcTimestampSeconds);
+            DateTime utcBegin;
+            
+
+            if (unitType == "m")
+			{
+                utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, 0).ToUniversalTime();
+                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, 0), DateTimeKind.Utc);
+            }
+            else if (unitType == "d")
+            {
+                utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day).ToUniversalTime();
+                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, 0, 0, 0, DateTimeKind.Utc);
+            }
+            else if (unitType == "h")
+			{
+                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, 0, 0).ToUniversalTime();
+                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, 0, 0), DateTimeKind.Utc);
+                utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour);
+            }
+            else if (unitType == "mi")
+            {
+                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, 0).ToUniversalTime();
+                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, 0), DateTimeKind.Utc);
+                utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour).AddMinutes(utcDateTime.Minute);
+            }
+            else
+            {
+                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, utcDateTime.Second).ToUniversalTime();
+                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, utcDateTime.Second), DateTimeKind.Utc);
+                utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour).AddMinutes(utcDateTime.Minute).AddSeconds(utcDateTime.Second);
+            }
+
+            return seconds - (utcDateTime - utcBegin).TotalSeconds;
         }
     }
 
@@ -421,7 +773,7 @@ namespace CryptoRetriever {
         }
 
         public bool IsEqual(HoverPointOptions other) {
-            return other.Color.Equals(Color) && 
+            return other.Color.Equals(Color) &&
                 other.Size == Size &&
                 other.StrokeThickness == StrokeThickness &&
                 other.FontSize == FontSize;
@@ -431,7 +783,7 @@ namespace CryptoRetriever {
     class LineOptions {
         public Color Color { get; set; }
         public double Thickness { get; set; }
- 
+
         public LineOptions(Color color, double thickness) {
             Color = color;
             Thickness = thickness;
@@ -473,7 +825,7 @@ namespace CryptoRetriever {
         public Range Domain { get; set; } = new Range();
         public Range Range { get; set; } = new Range();
         public Size CanvasSizePx { get; set; } = new Size();
-        public LineOptions LineOptions { get; set; } = new LineOptions(Color.FromRgb(0x22, 0x44, 0xff), 1.0);
+        public LineOptions LineOptions { get; set; } = new LineOptions(Colors.White, 1.0);
 
         public RenderParams Clone() {
             RenderParams clone = new RenderParams();
@@ -494,6 +846,25 @@ namespace CryptoRetriever {
                 other.Range.IsEqual(Range) &&
                 other.CanvasSizePx.Equals(CanvasSizePx) &&
                 other.LineOptions.IsEqual(LineOptions);
+        }
+    }
+
+    class DollarFormatter : ICoordinateFormatter
+    {
+        public string Format(double coordinate)
+        {
+            return "$" + ((decimal)coordinate).ToString("N");
+        }
+    }
+
+    class TimestampToDateFormatter : ICoordinateFormatter
+    {
+        public string Format(double coordinate)
+        {
+            long utcTimestampSeconds = (long)Math.Round(coordinate);
+            DateTime unixStart = DateTimeConstant.UnixStart;
+            DateTime localDateTime = unixStart.AddSeconds(utcTimestampSeconds).ToLocalTime();
+            return localDateTime.ToString("G");
         }
     }
 }

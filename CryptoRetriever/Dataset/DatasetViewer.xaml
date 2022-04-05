@@ -1,13 +1,14 @@
 ﻿<Window
-    x:Class="CryptoRetriever.DatasetView.DatasetViewer"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:CryptoRetriever="clr-namespace:CryptoRetriever"
+    x:Class="CryptoRetriever.DatasetView.DatasetViewer"
     xmlns:kfso="clr-namespace:KFSO.UI.DockablePanels;assembly=DockablePanels"
     Background="#00001a"
-    Left="100"
-    Top="100"
+    Left="10"
+    Top="10"
     Width="1800" Height="1000"
     Name="_window"
     mc:Ignorable="d">
@@ -65,18 +66,19 @@
         <Canvas 
             Grid.Row="1" 
             Grid.Column="2"
-            Name="_graphCanvas" 
-            Background="White"
+            Name="_graphCanvas"
+            Background="#222222"
             ClipToBounds="true"
             MouseEnter="OnMouseEntered" 
             MouseLeave="OnMouseLeft" 
             MouseMove="OnMouseMoved"
             MouseUp="OnMouseUp"
             MouseDown="OnMouseDown"
-            MouseWheel="OnMouseWheel" />
+            MouseWheel="OnMouseWheel">
+		</Canvas>
 
         <GridSplitter Name="_rightGridSplitter" Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch" />
-
+        
         <kfso:DockStation x:Name="_dockPanelSpotRight" Grid.Row="1" Grid.Column="4" MinWidth="0" MinHeight="1" Background="#cccccc" />
-    </Grid>
+	</Grid>
 </Window>

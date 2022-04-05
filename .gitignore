@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/CryptoRetriever/bin
+/packages/Newtonsoft.Json.12.0.3
+/CryptoRetriever/obj
+/CryptoRetriever/Libraries/KFSO.UI-1.1.1/DockablePanels/bin
+/CryptoRetriever/Libraries/KFSO.UI-1.1.1/DockablePanels/obj
