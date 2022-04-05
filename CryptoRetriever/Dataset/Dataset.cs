@@ -20,6 +20,15 @@ namespace CryptoRetriever {
         /// </summary>
         public double Granularity { get; set; }
 
+        /// <summary>
+        /// Returns the number of points in this dataset.
+        /// </summary>
+        public int Count {
+            get {
+                return Points.Count;
+            }
+        }
+
         public Dataset() {
             Points = new List<Point>();
         }
@@ -32,9 +41,26 @@ namespace CryptoRetriever {
             Points = points;
         }
 
+        /// <summary>
+        /// Creates a new dataset with the given points.
+        /// </summary>
+        /// <param name="points">The list of points to start with.</param>
+        /// <param name="granularitySeconds">The granularity of points.</param>
         public Dataset(List<Point> points, double granularitySeconds) {
             Points = points;
             Granularity = granularitySeconds;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the given dataset.
+        /// </summary>
+        /// <param name="other">The other dataset to copy.</param>
+        public Dataset(Dataset other) {
+            Points = new List<Point>(other.Points.Count);
+            foreach (Point p in other.Points) {
+                Points.Add(new Point(p.X, p.Y));
+            }
+            Granularity = other.Granularity;
         }
 
         public void Insert(Point point) {

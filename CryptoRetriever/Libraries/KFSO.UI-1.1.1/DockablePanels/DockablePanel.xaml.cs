@@ -25,6 +25,7 @@ namespace KFSO.UI.DockablePanels {
     public partial class DockablePanel : UserControl {
         private UIElement _content;
         private DockablePanelWindow _floatingWindow = null;
+        private Window _parentWindow; // The original parent window when the floating window was created.
 
         // Drag members
         private Point _mouseDownPointScreen;
@@ -169,7 +170,7 @@ namespace KFSO.UI.DockablePanels {
                         _panelStartPositionScreen = PointToScreen(new Point(0, 0));
                         Point panelStartPositionWpf = ScreenCoordinateToWpfCoordinate(_panelStartPositionScreen);
 
-                        ShowFloatingWindow(panelStartPositionWpf);
+                        ShowFloatingWindow(panelStartPositionWpf, GetParentWindow());
 
                         // Capture the mouse so that you can't lose the window while dragging and we will get
                         // the mouse up event when done.
@@ -215,8 +216,9 @@ namespace KFSO.UI.DockablePanels {
         /// Shows this panel in a floating window.
         /// If it's docked into a station it is undocked first.
         /// <param name="startPositionWpf">The starting position in WPF coordinates.</param>
+        /// <param name="parentWindow">The parent window of this floating window. The floating window will be closed if the parent window is.</param>
         /// </summary>
-        public void ShowFloatingWindow(Point startPositionWpf) {
+        public void ShowFloatingWindow(Point startPositionWpf, Window parentWindow) {
             if (IsFloating)
                 return;
 
@@ -231,16 +233,42 @@ namespace KFSO.UI.DockablePanels {
             _floatingWindow.Title = TitleText;
             _floatingWindow.Closed += _floatingWindow_Closed;
             _floatingWindow.Show();
+
+            _parentWindow = parentWindow;
+            _parentWindow.Closed += OnParentWindowClosed;
         }
 
         private void _floatingWindow_Closed(object sender, EventArgs e) {
             // Make sure the window is null when closed.
             _floatingWindow = null;
 
+            // Check for null because if the parent window
+            // is closed it will clear the parent window
+            // there so we don't double remove the event.
+            if (_parentWindow != null) {
+                _parentWindow.Closed -= OnParentWindowClosed;
+                _parentWindow = null;
+            }
+
             // Make sure we have no parent
-            Panel parent = Parent as Panel;
+                Panel parent = Parent as Panel;
             if (parent != null) {
                 parent.Children.Remove(this);
+            }
+        }
+
+        private void OnParentWindowClosed(object sender, EventArgs e) {
+            // When a parent window closes, all child 
+            // panel windows should also close.
+            _floatingWindow.Close();
+
+            // Check for null because if the floating window
+            // is manually closed it will clear the parent window
+            // there so we don't double remove the event.
+            if (_parentWindow != null) {
+                // Remove the event
+                _parentWindow.Closed -= OnParentWindowClosed;
+                _parentWindow = null;
             }
         }
 
@@ -251,6 +279,9 @@ namespace KFSO.UI.DockablePanels {
         public void Dock(DockStation station) {
             // First check if we're in a floating window
             if (_floatingWindow != null) {
+                // Remove parent window closed event
+                GetParentWindow().Closed -= OnParentWindowClosed;
+
                 // Remove us from the floating window and destroy
                 // it first
                 _floatingWindow.HostedPanel = null;
@@ -294,6 +325,26 @@ namespace KFSO.UI.DockablePanels {
 
             Point targetPoint = source.CompositionTarget.TransformFromDevice.Transform(screenCoordinate);
             return targetPoint;
+        }
+
+        /// <summary>
+        /// Iterates of the logical tree to find the window this
+        /// panel is a part of.
+        /// </summary>
+        /// <returns>Returns the window or null if this panel is not in a window.</returns>
+        private Window GetParentWindow() {
+            // Walk the tree to find this panel's parent window
+            DependencyObject parent = Parent;
+            while (parent != null) {
+                Window window = parent as Window;
+                if (window != null)
+                    return window;
+
+                FrameworkElement uiElement = parent as FrameworkElement;
+                if (uiElement != null)
+                    parent = uiElement.Parent;
+            }
+            return null;
         }
 
         private void _closeButton_MouseUp(object sender, MouseButtonEventArgs e) {

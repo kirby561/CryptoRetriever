@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase", "CryptoRetriever\Libraries\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj", "{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockablePanels", "CryptoRetriever\Libraries\KFSO.UI-1.1.0\DockablePanels\DockablePanels.csproj", "{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockablePanels", "CryptoRetriever\Libraries\KFSO.UI-1.1.1\DockablePanels\DockablePanels.csproj", "{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

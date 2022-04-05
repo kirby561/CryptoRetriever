@@ -13,6 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="2*" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
@@ -33,7 +34,7 @@
         </Viewbox>
 
         <!-- Create Dataset Button -->
-        <Grid Name="_createDatasetButton" MouseDown="OnCreateDatasetPressed" MouseUp="OnCreateDatasetReleased"  MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="1" Background="#729fcf">
+        <Grid Name="_createDatasetButton" MouseDown="OnCreateDatasetPressed" MouseUp="OnCreateDatasetReleased"  MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="3" Grid.Column="1" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="Auto" />
@@ -45,7 +46,7 @@
         </Grid>
 
         <!-- View Dataset Button -->
-        <Grid Name="_viewDatasetButton" MouseDown="OnViewDatasetButtonPressed" MouseUp="OnViewDatasetButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="2" Background="#729fcf">
+        <Grid Name="_viewDatasetButton" MouseDown="OnViewDatasetButtonPressed" MouseUp="OnViewDatasetButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="3" Grid.Column="2" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="Auto" />
@@ -57,7 +58,7 @@
         </Grid>
 
         <!-- Quit Button -->
-        <Grid Name="_quitButton" MouseDown="OnExitButtonPressed" MouseUp="OnExitButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="2" Grid.Column="3" Background="#729fcf">
+        <Grid Name="_quitButton" MouseDown="OnExitButtonPressed" MouseUp="OnExitButtonReleased" MouseMove="OnButtonPointerEntered" MouseLeave="OnButtonPointerLeft" Margin="25" Grid.Row="3" Grid.Column="3" Background="#729fcf">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="Auto" />
@@ -67,5 +68,7 @@
                 <TextBlock Text="Exit" Foreground="White" FontFamily="Arial Black" FontSize="28" HorizontalAlignment="Center" />
             </Viewbox>
         </Grid>
+
+        <Button Click="OnAboutClicked" Margin="25 0 0 0" Grid.Row="2" Grid.Column="1" Background="#729fcf" Foreground="White" Content="About" HorizontalAlignment="Left" Padding="5" FontWeight="Bold" Width="Auto" />
     </Grid>
 </Window>

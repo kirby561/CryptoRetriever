@@ -17,22 +17,22 @@ namespace CryptoRetriever {
             try {
                 datasetText = File.ReadAllText(filename);
             } catch (Exception ex) {
-                return new Result<Dataset>("There was an error opening the dataset. Exception: " + ex.Message);
+                return new Error<Dataset>("There was an error opening the dataset. Exception: " + ex.Message);
             }
 
             if (String.IsNullOrEmpty(datasetText)) {
-                return new Result<Dataset>("The dataset is empty.");
+                return new Error<Dataset>("The dataset is empty.");
             }
 
             Dataset dataset = null;
             try {
                 dataset = JsonConvert.DeserializeObject<Dataset>(datasetText);
             } catch (Exception ex) {
-                return new Result<Dataset>("There was an error in the formatting of the dataset. Exception: " + ex.Message);
+                return new Error<Dataset>("There was an error in the formatting of the dataset. Exception: " + ex.Message);
             }
 
             if (dataset == null)
-                return new Result<Dataset>("There was an error in the formatting of the dataset.");
+                return new Error<Dataset>("There was an error in the formatting of the dataset.");
             return new Result<Dataset>(dataset);
         }
     }

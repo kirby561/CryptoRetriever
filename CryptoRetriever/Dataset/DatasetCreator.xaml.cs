@@ -127,14 +127,18 @@ namespace CryptoRetriever.DatasetView {
                                 Directory.CreateDirectory(dir);
                                 String json = JsonConvert.SerializeObject(result.Value, Formatting.Indented);
                                 File.WriteAllText(filePath, json);
+                                DatasetWriter writer = new DatasetWriter();
+                                Result writeResult = writer.WriteFile(result.Value, filePath);
+                                if (!writeResult.Succeeded) {
+                                    MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + result.ErrorDetails);
+                                } else {
+                                    // Open a dataset viewer
+                                    DatasetViewer viewer = new DatasetViewer();
+                                    viewer.SetDataset(filePath, result.Value);
+                                    viewer.Show();
+                                }
                                 dialog.Close();
                                 Close();
-
-                                // Open a dataset viewer
-                                DatasetViewer viewer = new DatasetViewer();
-                                String filename = Path.GetFileName(filePath);
-                                viewer.SetDataset(filename, result.Value);
-                                viewer.Show();
                             } catch (Exception ex) {
                                 dialog.Close();
                                 MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + ex.Message);
@@ -202,8 +206,6 @@ namespace CryptoRetriever.DatasetView {
         }
 
         private void OnChooseOutputButtonClicked(object sender, RoutedEventArgs e) {
-            SaveFileDialog saveFileDlg = new SaveFileDialog();
-
             // Make a default name that is informative
             String name = "";
             if (_currentSource != null) {
@@ -223,17 +225,9 @@ namespace CryptoRetriever.DatasetView {
                 name += "_from_" + selectedDate.ToShortDateString().Replace("/", "-");
             }
 
-            // Initialize some defaults
-            saveFileDlg.FileName = name + ".dataset";
-            saveFileDlg.DefaultExt = "dataset";
-            saveFileDlg.Filter = "Dataset Files (*.dataset)|*.dataset";
-            saveFileDlg.AddExtension = true;
-
-            // Show it
-            Nullable<bool> result = saveFileDlg.ShowDialog();
-
-            if (result.HasValue && result.Value) {
-                _selectedOutput.Text = saveFileDlg.FileName;
+            Result<String> result = DatasetUiHelper.ShowSaveDatasetAsDialog(name);
+            if (result.Succeeded) {
+                _selectedOutput.Text = result.Value;
             }
         }
 

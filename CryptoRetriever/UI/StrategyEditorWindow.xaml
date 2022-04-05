@@ -1,0 +1,147 @@
+﻿<Window x:Class="CryptoRetriever.UI.StrategyEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CryptoRetriever.UI"
+        mc:Ignorable="d"
+        Background="#00001a"
+        Title="Strategy Editor" Height="700" Width="500">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical" Margin="10">
+                <TextBlock Text="Strategy Editor" HorizontalAlignment="Center" Style="{StaticResource TbTitle}" />
+
+                <!-- Name -->
+                <TextBlock Text="Name*" Style="{StaticResource TbHeader}" />
+                <TextBox Name="_nameTextBox"  Grid.Column="1" Margin="5 2 5 2" Text="Strategy1" HorizontalAlignment="Stretch" />
+                
+                <!-- Account -->
+                <TextBlock Margin="0 20 0 0" Text="Account*" Style="{StaticResource TbHeader}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Starting Fiat: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <TextBox Name="_accountStartingFiatTextBox" Grid.Column="1" Margin="5 2 5 2" Text="1000" HorizontalAlignment="Stretch" />
+                    <TextBlock Grid.Row="1" Text="Starting Assets: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <TextBox Name="_accountStartingAssetsTextBox" Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="0" HorizontalAlignment="Stretch" />
+                </Grid>
+
+                <!-- Exchange Assumptions -->
+                <TextBlock Margin="0 20 0 0" Text="Exchange Assumptions*" Style="{StaticResource TbHeader}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Transaction Fee ($): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <TextBox Name="_exchangeTransactionFeeTextBox" Grid.Column="1" Margin="5 2 5 2" Text="8" HorizontalAlignment="Stretch" />
+                    <TextBlock Grid.Row="1" Text="Transaction Time (s): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <TextBox Name="_exchangeTransationTimeTextBox" Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="600" HorizontalAlignment="Stretch" />
+                </Grid>
+
+                <!-- Filters -->
+                <Grid Margin="0 20 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Filters" Style="{StaticResource TbHeader}" />
+                    <Button Click="OnAddFilterClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveFilterClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                </Grid>
+                <ListView Name="_filtersView" MinHeight="25">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- States -->
+                <Grid Margin="0 20 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="States" Style="{StaticResource TbHeader}" />
+                    <Button Click="OnAddStateClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveStateClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                </Grid>
+                <ListView Name="_statesView" MinHeight="25">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Triggers -->
+                <Grid Margin="0 20 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Triggers" Style="{StaticResource TbHeader}" />
+                    <Button Click="OnAddTriggerClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveTriggerClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                </Grid>
+                <ListView Name="_triggersView" MouseDoubleClick="OnTriggerDoubleClicked" MinHeight="25">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Start/End date -->
+                <TextBlock Margin="0 20 0 0" Text="Date/Time Range" Style="{StaticResource TbHeader}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.ColumnSpan="2" Text="Leave dates blank to use the start or end of the dataset." Style="{StaticResource TbHeader2}" />
+                    <TextBlock Grid.Row="1" Text="Start: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <DatePicker Grid.Column="2" Grid.Row="1" Name="_startDatePicker" Margin="5 2 5 2" />
+                    <TextBlock Grid.Row="2" Text="End: " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <DatePicker  Grid.Column="2" Grid.Row="2"  Name="_endDatePicker" Margin="5 2 5 2" />
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Click="OnSaveButtonClicked" Content="Save" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
+            <Button Click="OnCancelButtonClicked"  Content="Cancel" Background="#3465a4" Foreground="White" Margin="5" Padding="5" />
+        </StackPanel>
+    </Grid>
+</Window>
