@@ -16,7 +16,7 @@ namespace CryptoRetriever.UI {
     /// </summary>
     public partial class ConditionEditorWindow : Window {
         private Trigger _trigger;
-        private StrategyRunParams _dummyContext;
+        private StrategyRuntimeContext _dummyContext;
 
         public Trigger Trigger {
             get {
@@ -43,14 +43,14 @@ namespace CryptoRetriever.UI {
         public void UpdateUi() {
             _conditionsPanel.Children.Clear();
             if (_trigger.Condition != null) {
-                List<UiEntry> nodes = new List<UiEntry>();
-                PreOrderTraverseNodes(_trigger.Condition, null, 0, nodes, 0);
+                List<TreeUiEntry> nodes = new List<TreeUiEntry>();
+                TreeUiEntry.PreOrderTraverseNodes(_trigger.Condition, null, 0, nodes, 0);
 
                 int index = 0;
                 int currentIndent = 0;
                 Stack<Panel> panelStack = new Stack<Panel>();
                 panelStack.Push(_conditionsPanel);
-                foreach (UiEntry entry in nodes) {
+                foreach (TreeUiEntry entry in nodes) {
                     if (entry.Indentation < currentIndent) {
                         panelStack.Pop();
                         currentIndent = entry.Indentation;
@@ -62,11 +62,10 @@ namespace CryptoRetriever.UI {
                     border.CornerRadius = new CornerRadius(5);
 
                     TextBlock block = new TextBlock();
-                    block.Text = entry.Node.GetId() + " (" + entry.Node.GetStringValue() + ")";
+                    block.Text = entry.Node.GetId() + " (" + entry.Node.GetStringValue(_dummyContext) + ")";
                     block.Padding = new Thickness(5);
                     block.Foreground = new SolidColorBrush(Colors.White);
                     block.FontSize = 14;
-
 
                     if (entry.Node.GetChildren() == null) {
                         Color backgroundColor;
@@ -77,7 +76,7 @@ namespace CryptoRetriever.UI {
                         if (entry.Node is Operator) {
                             backgroundColor = Colors.DarkGreen;
                             border.Background = new SolidColorBrush(backgroundColor);
-                            block.Text = entry.Node.GetStringValue();
+                            block.Text = entry.Node.GetStringValue(_dummyContext);
                         } else {
                             backgroundColor = Colors.DarkOrange;
                             border.Background = new SolidColorBrush(backgroundColor);
@@ -117,8 +116,8 @@ namespace CryptoRetriever.UI {
             // Measure the conditions panel and increase the window width
             // if it's less than its desired with
             _conditionsPanel.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
-            if (ActualWidth < _conditionsPanel.DesiredSize.Width + 5) {
-                Width = _conditionsPanel.DesiredSize.Width;
+            if (ActualWidth < _conditionsPanel.DesiredSize.Width + 50) {
+                Width = _conditionsPanel.DesiredSize.Width + 50;
             }
         }
 
@@ -127,30 +126,8 @@ namespace CryptoRetriever.UI {
         /// it's actually used in context.
         /// </summary>
         /// <returns>A dummy strategy run context.</returns>
-        public StrategyRunParams GetDummyContext() {
+        public StrategyRuntimeContext GetDummyContext() {
             return _dummyContext;
-        }
-
-        /// <summary>
-        /// Walks the tree in Pre-Order and builds a list of UiEntry nodes representing
-        /// the order the UI should layout the blocks in. The indentation, parent,
-        /// and child index are also recorded for later so the UI can properly indent
-        /// each child.
-        /// </summary>
-        /// <param name="current">The current node being looked at.</param>
-        /// <param name="parent">The parent of the current node or null if it's the first.</param>
-        /// <param name="childIndex">The index the child is in the parent's list of children.</param>
-        /// <param name="nodes">The list of nodes in the order they should appear.</param>
-        /// <param name="indentation">The current indentation level.</param>
-        private void PreOrderTraverseNodes(ITreeNode current, ITreeNode parent, int childIndex, List<UiEntry> nodes, int indentation) {
-            nodes.Add(new UiEntry(current, parent, childIndex, indentation));
-            if (current.GetChildren() != null) {
-                int index = 0;
-                foreach (ITreeNode node in current.GetChildren()) {
-                    PreOrderTraverseNodes(node, current, index, nodes, indentation + 1);
-                    index++;
-                }
-            }
         }
 
         private void OnOkayClicked(object sender, RoutedEventArgs e) {
@@ -162,8 +139,8 @@ namespace CryptoRetriever.UI {
             Close();
         }
 
-        private void AddEvents(TextBlock block, UiEntry entry) {
-            ClickHandlerBase handler = null;
+        private void AddEvents(TextBlock block, TreeUiEntry entry) {
+            TreeUiEntryClickHandlerBase handler = null;
             if (entry.Node is Operator) {
                 handler = new OperatorClickHandler(this, entry);
             } else if (entry.Node is Condition) {
@@ -185,55 +162,18 @@ namespace CryptoRetriever.UI {
             UpdateUi();
         }
 
-        class UiEntry {
-            public ITreeNode Node { get; set; }
-            public ITreeNode Parent { get; set; }
-            public int ChildIndexInParent { get; set; }
-            public int Indentation { get; set; }
+        class ConditionWindowClickHandler : TreeUiEntryClickHandlerBase {
+            protected ConditionEditorWindow _window;
 
-            public UiEntry(ITreeNode node, ITreeNode parent, int childIndexInParent, int indentation) {
-                Node = node;
-                Parent = parent;
-                ChildIndexInParent = childIndexInParent;
-                Indentation = indentation;
+            public ConditionWindowClickHandler(ConditionEditorWindow window, TreeUiEntry entry)
+                : base(entry) {
+                _window = window;
             }
         }
 
-        class ClickHandlerBase {
-            protected ConditionEditorWindow _context;
-            protected UiEntry _entry;
-
-            // Keek track of if the mouse was pressed on this
-            // element so that we don't fire the even if you clicked on
-            // something in a window over this button and then the up
-            // event mis-fires.
-            protected bool _isMouseDown = false;
-
-            protected Color _initialColor;
-            protected Color _hoverColor;
-            protected Color _pressedColor;
-
-            public ClickHandlerBase(ConditionEditorWindow context, UiEntry entry) {
-                _context = context;
-                _entry = entry;
-            }
-
-            public virtual void OnMouseDown(object sender, RoutedEventArgs e) {
-                _isMouseDown = true;
-            }
-
-            public virtual void OnMouseLeave(object sender, RoutedEventArgs e) {
-                _isMouseDown = false;
-            }
-
-            public virtual void OnMouseUp(object sender, RoutedEventArgs e) {
-                _isMouseDown = false;
-            }
-        }
-
-        class OperatorClickHandler : ClickHandlerBase {
-            public OperatorClickHandler(ConditionEditorWindow context, UiEntry entry)
-                : base(context, entry) { }
+        class OperatorClickHandler : ConditionWindowClickHandler {
+            public OperatorClickHandler(ConditionEditorWindow window, TreeUiEntry entry)
+                : base(window, entry) { }
 
             public override void OnMouseUp(object sender, RoutedEventArgs e) {
                 if (!_isMouseDown)
@@ -244,21 +184,21 @@ namespace CryptoRetriever.UI {
                 Operator[] options = op.GetOptions();
                 ListBoxDialog dialog = new ListBoxDialog();
                 dialog.SetItemSource(
-                    (Operator op) => { return op.GetStringValue(); },
+                    (Operator op) => { return op.GetStringValue(_window.GetDummyContext()); },
                     options);
-                UiHelper.CenterWindowInWindow(dialog, _context);
+                UiHelper.CenterWindowInWindow(dialog, _window);
                 dialog.ShowDialog();
 
                 if (dialog.SelectedIndex >= 0) {
                     _entry.Parent.SetChild(_entry.ChildIndexInParent, options[dialog.SelectedIndex]);
-                    _context.UpdateUi();
+                    _window.UpdateUi();
                 }
             }
         }
 
-        class ConditionClickHandler : ClickHandlerBase {
-            public ConditionClickHandler(ConditionEditorWindow context, UiEntry entry)
-                : base(context, entry) { }
+        class ConditionClickHandler : ConditionWindowClickHandler {
+            public ConditionClickHandler(ConditionEditorWindow window, TreeUiEntry entry)
+                : base(window, entry) { }
 
             public override void OnMouseUp(object sender, RoutedEventArgs e) {
                 if (!_isMouseDown)
@@ -270,27 +210,27 @@ namespace CryptoRetriever.UI {
                 ListBoxDialog dialog = new ListBoxDialog();
                 dialog.SetItemSource(
                     (Condition c) => {
-                        return (c.GetChildren() != null) ? c.GetId() : c.GetStringValue();
+                        return (c.GetChildren() != null) ? c.GetId() : c.GetStringValue(_window.GetDummyContext());
                     },
                     options);
-                UiHelper.CenterWindowInWindow(dialog, _context);
+                UiHelper.CenterWindowInWindow(dialog, _window);
                 dialog.ShowDialog();
 
                 if (dialog.SelectedIndex >= 0) {
                     if (_entry.Parent != null) {
                         _entry.Parent.SetChild(_entry.ChildIndexInParent, options[dialog.SelectedIndex]);
-                        _context.UpdateUi();
+                        _window.UpdateUi();
                     } else {
-                        _context.Trigger.Condition = options[dialog.SelectedIndex];
-                        _context.UpdateUi();
+                        _window.Trigger.Condition = options[dialog.SelectedIndex];
+                        _window.UpdateUi();
                     }
                 }
             }
         }
 
-        class StringValueClickHandler : ClickHandlerBase {
-            public StringValueClickHandler(ConditionEditorWindow context, UiEntry entry)
-                : base(context, entry) { }
+        class StringValueClickHandler : ConditionWindowClickHandler {
+            public StringValueClickHandler(ConditionEditorWindow window, TreeUiEntry entry)
+                : base(window, entry) { }
 
             public override void OnMouseUp(object sender, RoutedEventArgs e) {
                 if (!_isMouseDown)
@@ -305,7 +245,7 @@ namespace CryptoRetriever.UI {
                         return c.Id;
                     },
                     variableOptions);
-                UiHelper.CenterWindowInWindow(dialog, _context);
+                UiHelper.CenterWindowInWindow(dialog, _window);
                 dialog.ShowDialog();
 
                 if (dialog.ResultType != ConstantVariableWindow.SelectionType.None) {
@@ -313,21 +253,21 @@ namespace CryptoRetriever.UI {
                         StringVariable var = variableOptions[dialog.SelectedIndex];
                         _entry.Parent.SetChild(
                             _entry.ChildIndexInParent,
-                            new VariableStringValue(_context.GetDummyContext(), var));
-                        _context.UpdateUi();
+                            new VariableStringValue(var));
+                        _window.UpdateUi();
                     } else if (!String.IsNullOrWhiteSpace(dialog.Constant)) {
                         _entry.Parent.SetChild(
                             _entry.ChildIndexInParent,
                             new StringValue(dialog.Constant));
-                        _context.UpdateUi();
+                        _window.UpdateUi();
                     }
                 }
             }
         }
 
-        class NumberValueClickHandler : ClickHandlerBase {
-            public NumberValueClickHandler(ConditionEditorWindow context, UiEntry entry)
-                : base(context, entry) { }
+        class NumberValueClickHandler : ConditionWindowClickHandler {
+            public NumberValueClickHandler(ConditionEditorWindow window, TreeUiEntry entry)
+                : base(window, entry) { }
 
             public override void OnMouseUp(object sender, RoutedEventArgs e) {
                 if (!_isMouseDown)
@@ -356,7 +296,7 @@ namespace CryptoRetriever.UI {
                         }
                     },
                     allOptions);
-                UiHelper.CenterWindowInWindow(dialog, _context);
+                UiHelper.CenterWindowInWindow(dialog, _window);
                 dialog.ShowDialog();
 
                 if (dialog.ResultType != ConstantVariableWindow.SelectionType.None) {
@@ -370,48 +310,25 @@ namespace CryptoRetriever.UI {
                         } else {
                             // Else it's actually a variable
                             NumberVariable var = variableOptions[dialog.SelectedIndex - numSpecialOptions];
-                            result = new VariableNumberValue(_context.GetDummyContext(), var);
+                            result = new VariableNumberValue(var);
                         }
 
                         _entry.Parent.SetChild(
                             _entry.ChildIndexInParent,
                             result);
-                        _context.UpdateUi();
+                        _window.UpdateUi();
                     } else if (!String.IsNullOrWhiteSpace(dialog.Constant)) {
                         double constantValue;
                         if (Double.TryParse(dialog.Constant, out constantValue)) {
                             _entry.Parent.SetChild(
                                 _entry.ChildIndexInParent,
                                 new NumberValue(constantValue));
-                            _context.UpdateUi();
+                            _window.UpdateUi();
                         } else {
                             MessageBox.Show("You need to enter a valid number.");
                         }
                     }
                 }
-            }
-        }
-
-        private class ExampleStrategy : Strategy {
-            public ExampleStrategy() {
-                Name = "ExampleStrategy";
-                States.Add(new State("Default"));
-            }
-        }
-
-        private class ExampleDataset : Dataset {
-            public ExampleDataset() {
-                Points.Add(new Point(1, 10));
-                Points.Add(new Point(2, 20));
-                Points.Add(new Point(3, 30));
-                Points.Add(new Point(4, 40));
-                Points.Add(new Point(5, 50));
-            }
-        }
-
-        private class ExampleStrategyRunParams : StrategyRunParams {
-            public ExampleStrategyRunParams() : base(new ExampleStrategy(), new ExampleDataset()) {
-                CurrentState = Strategy.States[0].GetId();
             }
         }
     }

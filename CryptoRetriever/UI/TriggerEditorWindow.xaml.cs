@@ -21,6 +21,10 @@ namespace CryptoRetriever.UI {
     /// showing the window.
     /// </summary>
     public partial class TriggerEditorWindow : Window {
+        // Use a dummy context to show dummy values since we're not
+        // actually running the strategy yet
+        private StrategyRuntimeContext _dummyContext = new ExampleStrategyRunParams();
+
         /// <summary>
         /// Contains the trigger being worked on.
         /// When Okay is pressed, this becomes the result Trigger.
@@ -59,30 +63,42 @@ namespace CryptoRetriever.UI {
         private void OnWindowLoaded(object sender, RoutedEventArgs e) {
             if (WorkingTrigger == null) {
                 // Create a dummy trigger for now
-                WorkingTrigger = new Trigger("SomeTrigger");
-                WorkingTrigger.Condition = new LogicComparison(
-                    new LogicComparison(
-                        new BoolCondition("IsCool", true),
-                        new OrLogicOperator(),
-                        new BoolCondition("NotCool", false)),
-                    new AndLogicOperator(),
-                    new NumberComparison(
-                        new NumberValue(5),
-                        new GreaterThanNumberOperator(),
-                        new MathValue(
-                            new NumberValue(2),
-                            new AdditionOperator(),
-                            new MathValue(
-                                new NumberValue(3),
-                                new MultiplicationOperator(),
-                                new NumberValue(5)
-                            )
-                        )
-                    )
-                );
+                WorkingTrigger = new Trigger("DefaultTrigger");
             }
 
+            if (WorkingTrigger.Condition == null)
+                WorkingTrigger.Condition = new BoolCondition("Condition", true);
+            if (WorkingTrigger.TrueAction == null)
+                WorkingTrigger.TrueAction = new DoNothingAction();
+            if (WorkingTrigger.FalseAction == null)
+                WorkingTrigger.FalseAction = new DoNothingAction();
+
+            UpdateUi();
+        }
+
+        private void OnThenActionClicked(object sender, MouseButtonEventArgs e) {
+            ActionEditorWindow editor = new ActionEditorWindow();
+            editor.Action = WorkingTrigger.TrueAction;
+            UiHelper.CenterWindowInWindow(editor, this);
+            editor.ShowDialog();
+            WorkingTrigger.TrueAction = editor.Action;
+            UpdateUi();
+        }
+
+        private void OnElseActionClicked(object sender, MouseButtonEventArgs e) {
+            ActionEditorWindow editor = new ActionEditorWindow();
+            editor.Action = WorkingTrigger.FalseAction;
+            UiHelper.CenterWindowInWindow(editor, this);
+            editor.ShowDialog();
+            WorkingTrigger.FalseAction = editor.Action;
+            UpdateUi();
+        }
+
+        private void UpdateUi() {
             _triggerNameTextBox.Text = WorkingTrigger.Name;
+            _conditionTb.Text = WorkingTrigger.Condition.GetId() + " - " + WorkingTrigger.Condition.GetStringValue(_dummyContext);
+            _thenActionTb.Text = WorkingTrigger.TrueAction.GetId() + " - " + WorkingTrigger.TrueAction.GetStringValue(_dummyContext);
+            _elseActionTb.Text = WorkingTrigger.FalseAction.GetId() + " - " + WorkingTrigger.FalseAction.GetStringValue(_dummyContext);
         }
     }
 }

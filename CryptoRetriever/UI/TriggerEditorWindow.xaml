@@ -27,14 +27,14 @@
             <TextBlock Text="After Event" Style="{StaticResource TbHeader}" />
             <TextBlock Text="New Tick" Style="{StaticResource TbTriggerEditorSummary}" />
             
-            <TextBlock Text="If " Style="{StaticResource TbHeader}" />
-            <TextBlock MouseUp="OnConditionClicked"  Text="Condition" Style="{StaticResource TbTriggerEditorSummary}" />
+            <TextBlock Text="If" Style="{StaticResource TbHeader}" />
+            <TextBlock Name="_conditionTb" Text="Condition" MouseUp="OnConditionClicked" Style="{StaticResource TbTriggerEditorSummary}" />
 
             <TextBlock Text="Then" Style="{StaticResource TbHeader}" />
-            <TextBlock Text="Action" Style="{StaticResource TbTriggerEditorSummary}" />
+            <TextBlock Name="_thenActionTb" Text="Action" MouseUp="OnThenActionClicked" Style="{StaticResource TbTriggerEditorSummary}" />
 
             <TextBlock Text="Else" Style="{StaticResource TbHeader}" />
-            <TextBlock Text="Action" Style="{StaticResource TbTriggerEditorSummary}" />
+            <TextBlock Name="_elseActionTb" Text="Action" MouseUp="OnElseActionClicked" Style="{StaticResource TbTriggerEditorSummary}" />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">

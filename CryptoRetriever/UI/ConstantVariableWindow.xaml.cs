@@ -69,6 +69,12 @@ namespace CryptoRetriever.UI {
         public int SelectedIndex { get; set; } = -1;
 
         /// <summary>
+        /// Set to false to only show the constant entry field
+        /// and hide the variable list.
+        /// </summary>
+        public bool ShowVariableList { get; set; } = true;
+
+        /// <summary>
         /// Set the items in the list for any type and give a function that gets the text
         /// to display from the item somehow. Note that this needs to be called again if 
         /// the text changes if using this method.
@@ -133,6 +139,14 @@ namespace CryptoRetriever.UI {
 
         private void OnWindowLoaded(object sender, RoutedEventArgs e) {
             _constant.Focus();
+
+            if (!ShowVariableList) {
+                _itemsList.Visibility = Visibility.Collapsed;
+                _itemsListTitle.Visibility = Visibility.Collapsed;
+                _currentSelectionType = SelectionType.Constant;
+                SelectedIndex = -1;
+                _itemsList.SelectedIndex = -1;
+            }
         }
 
         class ItemWrapper {

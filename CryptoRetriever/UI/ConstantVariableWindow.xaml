@@ -26,7 +26,7 @@
         <StackPanel Orientation="Vertical">
             <TextBlock Text="Constant" Style="{StaticResource TbHeader2}" />
             <TextBox Name="_constant" TextChanged="OnConstantChanged" KeyUp="OnCheckEnterPressed" Grid.Column="1" Margin="5 2 5 5" Text="" HorizontalAlignment="Stretch" />
-            <TextBlock Text="Variable" Style="{StaticResource TbHeader2}" />
+            <TextBlock Text="Variable" Name="_itemsListTitle" Style="{StaticResource TbHeader2}" />
         </StackPanel>
 
         <ListView Name="_itemsList" SelectionChanged="OnSelectedVariableChanged" KeyUp="OnCheckEnterPressed" MouseDoubleClick="OnListDoubleClick" Grid.Row="1" MinHeight="25" Margin="5" SelectionMode="Single">

@@ -13,21 +13,21 @@ namespace CryptoRetriever.Strats {
         /// A method that takes in the strategy run context and returns
         /// the value of the variable T at that point in time.
         /// </summary>
-        public Func<StrategyRunParams, T> VariableRetrievalMethod { get; private set; }
+        public Func<StrategyRuntimeContext, T> VariableRetrievalMethod { get; private set; }
 
-        public Variable(String id, Func<StrategyRunParams, T> variableRetrievalMethod) {
+        public Variable(String id, Func<StrategyRuntimeContext, T> variableRetrievalMethod) {
             Id = id;
             VariableRetrievalMethod = variableRetrievalMethod;
         }
     }
 
     public class StringVariable : Variable<StringValue> {
-        public StringVariable(String id, Func<StrategyRunParams, StringValue> variableRetrievalMethod)
+        public StringVariable(String id, Func<StrategyRuntimeContext, StringValue> variableRetrievalMethod)
             : base(id, variableRetrievalMethod) { }
     }
     
     public class NumberVariable : Variable<NumberValue> {
-        public NumberVariable(String id, Func<StrategyRunParams, NumberValue> variableRetrievalMethod)
+        public NumberVariable(String id, Func<StrategyRuntimeContext, NumberValue> variableRetrievalMethod)
             : base(id, variableRetrievalMethod) { }
     }
 

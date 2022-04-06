@@ -14,9 +14,9 @@ namespace CryptoRetriever.Strats {
 
         public Condition Condition { get; set; } = null;
 
-        public Action TrueAction { get; set; } = null;
+        public StratAction TrueAction { get; set; } = null;
 
-        public Action ElseAction { get; set; } = null;
+        public StratAction FalseAction { get; set; } = null;
 
         public Trigger(String name) {
             Name = name;

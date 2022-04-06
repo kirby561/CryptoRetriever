@@ -10,20 +10,39 @@ namespace CryptoRetriever.Strats {
     /// </summary>
     public class Transaction {
         /// <summary>
+        /// The exact time the purchase occurred.
+        /// </summary>
+        public DateTime TransactionTime { get; private set; }
+
+        /// <summary>
         /// The account that made the transaction.
         /// </summary>
-        public Account Account { get; set; }
+        public Account Account { get; private set; }
 
         /// <summary>
-        /// The amount of currency that was transferred from the account to the exchange
-        /// in this transaction. Note this will be negative for Sells and positive for Buys.
+        /// The transaction fee charged to make this trade.
+        /// This is in fiat currency and is not included in the CurrencyTransferred property.
         /// </summary>
-        public double CurrencyTransferred { get; set; }
+        public double TransactionFee { get; private set; }
 
         /// <summary>
-        /// The amount of the asset transferred from the account to the exchange in this
-        /// transaction. Note this will be negative for Buys and positive for Sells.
+        /// The amount of currency that was transferred from the exchange to the account
+        /// in this transaction. Note this will be positive for Sells and negative for Buys.
         /// </summary>
-        public double AssetTransferred { get; set; }
+        public double CurrencyTransferred { get; private set; }
+
+        /// <summary>
+        /// The amount of the asset transferred from the exchange to the account in this
+        /// transaction. Note this will be positive for Buys and negative for Sells.
+        /// </summary>
+        public double AssetTransferred { get; private set; }
+
+        public Transaction(DateTime time, double fee, double currencyTransferred, double assetTransferred, Account account) {
+            TransactionTime = time;
+            TransactionFee = fee;
+            CurrencyTransferred = currencyTransferred;
+            AssetTransferred = assetTransferred;
+            Account = account;
+        }
     }
 }
