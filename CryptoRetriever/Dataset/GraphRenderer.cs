@@ -32,7 +32,7 @@ namespace CryptoRetriever {
         private Line _yAxis;
         private TextBlock _xAxisLabel;
         private TextBlock _yAxisLabel;
-        private List<Grid> _graphTicks = new List<Grid>();
+        private List<FrameworkElement> _graphTicks = new List<FrameworkElement>();
         private readonly SolidColorBrush _GREEN_BRUSH = new SolidColorBrush(Colors.Green);
         private readonly SolidColorBrush _WHITE_BRUSH = new SolidColorBrush(Colors.White);
         private bool _isAxisEnabled = true;
@@ -299,10 +299,9 @@ namespace CryptoRetriever {
             _xAxisLabel = new TextBlock()
             {
                 FontSize = 24,
-                Foreground = _GREEN_BRUSH,
+                Foreground = _WHITE_BRUSH,
                 Text = "Date/Time (EST)",
                 TextWrapping = TextWrapping.Wrap
-
             };
 
             _xAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
@@ -313,11 +312,10 @@ namespace CryptoRetriever {
             _yAxisLabel = new TextBlock()
             {
                 FontSize = 24,
-                Foreground = _GREEN_BRUSH,
+                Foreground = _WHITE_BRUSH,
                 RenderTransform = new RotateTransform(270),
                 Text = "Price (USD)",
                 TextWrapping = TextWrapping.Wrap
-
             };
 
             _yAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
@@ -388,19 +386,32 @@ namespace CryptoRetriever {
             // Override matrix Y transform for each point
             for (int i = 0; i < rangeTickData.Length; i++)
             {
-                rangeTickData[i].X = _yAxis.X1 - 30;
+                rangeTickData[i].X = _yAxis.X1;
             }
 
             // Set up labels and pin to points
             for (int i = 0; i < dblPointsY.Count; i++)
             {
-                string label = dblPointsY[i].ToString();
-                
-                Grid graphTick = CreateGraphTick(label, 12, _GREEN_BRUSH, _WHITE_BRUSH, "y", true, dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start ? true : false);
-                Canvas.SetLeft(graphTick, rangeTickData[i].X);
-                Canvas.SetTop(graphTick, rangeTickData[i].Y);
-                _graphTicks.Add(graphTick);
-                _canvas.Children.Add(graphTick);
+                string label = dblPointsY[i].ToString("C");
+
+                TextBlock block = CreateGraphTickLabel(
+                    label,
+                    12,
+                    _WHITE_BRUSH,
+                    dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start ? true : false);
+
+                block.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+
+                Canvas.SetLeft(block, rangeTickData[i].X - block.DesiredSize.Width);
+                Canvas.SetTop(block, rangeTickData[i].Y - block.DesiredSize.Height);
+                _graphTicks.Add(block);
+                _canvas.Children.Add(block);
+
+                Line tick = CreateTickMark(_GREEN_BRUSH, "y", dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start);
+                Canvas.SetLeft(tick, rangeTickData[i].X);
+                Canvas.SetTop(tick, rangeTickData[i].Y);
+                _graphTicks.Add(tick);
+                _canvas.Children.Add(tick);
             }
 
 
@@ -414,7 +425,7 @@ namespace CryptoRetriever {
             // Override matrix Y transform for each point
             for (int i = 0; i < domainTickData.Item2.Length; i++)
 			{
-                domainTickData.Item2[i].Y = _xAxis.Y1 - 10;
+                domainTickData.Item2[i].Y = _xAxis.Y1;
 			}
 
             // Set up labels and pin to points
@@ -441,11 +452,19 @@ namespace CryptoRetriever {
                         label = date.ToShortTimeString();
                         break;
                 }
-                Grid graphTick = CreateGraphTick(label, 12, _GREEN_BRUSH, _WHITE_BRUSH, "x", true, dblPointsX[i] > GetDomain().End || dblPointsX[i] < GetDomain().Start ? true : false);
-                Canvas.SetLeft(graphTick, domainTickData.Item2[i].X);
-                Canvas.SetTop(graphTick, domainTickData.Item2[i].Y);
-                _graphTicks.Add(graphTick);
-                _canvas.Children.Add(graphTick);
+                bool blurTick = dblPointsX[i] > GetDomain().End || dblPointsX[i] < GetDomain().Start ? true : false;
+                TextBlock xTickLabel = CreateGraphTickLabel(label, 12, _WHITE_BRUSH, blurTick);
+                xTickLabel.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+                Canvas.SetLeft(xTickLabel, domainTickData.Item2[i].X);
+                Canvas.SetTop(xTickLabel, domainTickData.Item2[i].Y);
+                _graphTicks.Add(xTickLabel);
+                _canvas.Children.Add(xTickLabel);
+
+                Line xTick = CreateTickMark(_GREEN_BRUSH, "x", blurTick);
+                Canvas.SetLeft(xTick, domainTickData.Item2[i].X);
+                Canvas.SetTop(xTick, domainTickData.Item2[i].Y);
+                _graphTicks.Add(xTick);
+                _canvas.Children.Add(xTick);
             }
         }
 
@@ -549,20 +568,21 @@ namespace CryptoRetriever {
             _canvas.Children.Add(_hoverPointText); // Add the text after the background so it is in front
         }
 
-        /// <summary>
-        /// Creates a graph tick mark inside grid ctrl
-        /// </summary>
-        /// <param name="text"></param>
-        /// <param name="fontSize"></param>
-        /// <param name="lineColor"></param>
-        /// <param name="textColor"></param>
-        /// <param name="showTick"></param>
-        /// <returns></returns>
-        private Grid CreateGraphTick(string text, double fontSize, Brush lineColor, Brush textColor, string axis, bool showTick, bool blurTick)
-        {
-            Grid grid = new Grid();
-            Line line = new Line()
-            {
+        private TextBlock CreateGraphTickLabel(string text, double fontSize, Brush textColor, bool blurTick) {
+            TextBlock textBlock = new TextBlock() {
+                FontSize = fontSize,
+                Foreground = textColor,
+                Opacity = blurTick ? 0.5 : 1.0,
+                LayoutTransform = new RotateTransform(45),
+                Text = text,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            return textBlock;
+        }
+
+        private Line CreateTickMark(Brush lineColor, String axis, bool blurTick) {
+            Line line = new Line() {
                 Fill = lineColor,
                 Opacity = blurTick ? 0.5 : 1.0,
                 Stroke = lineColor,
@@ -570,43 +590,9 @@ namespace CryptoRetriever {
                 X1 = 0,
                 X2 = axis == "x" ? 0 : 16,
                 Y1 = 0,
-                Y2 = axis == "x" ? 16 : 0
+                Y2 = axis == "x" ? -16 : 0
             };
-            
-            TextBlock textBlock = new TextBlock()
-            {
-                FontSize = fontSize,
-                Foreground = textColor,
-                Opacity = blurTick ? 0.5 : 1.0,
-                RenderTransform = new RotateTransform(45),
-                RenderTransformOrigin = new Point(0.25, 0.25),
-                Text = text,
-                TextWrapping = TextWrapping.Wrap
-            };
-
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            if (axis == "y")
-			{
-                grid.ColumnDefinitions.Add(new ColumnDefinition());
-                Grid.SetColumn(textBlock, 0);
-                Grid.SetColumn(line, 1);
-            }
-            grid.RowDefinitions.Add(new RowDefinition());
-            if (axis == "x")
-			{
-                grid.RowDefinitions.Add(new RowDefinition());
-                Grid.SetRow(line, 0);
-                Grid.SetRow(textBlock, 1);
-            }           
-            
-
-            grid.Children.Add(line);
-            grid.Children.Add(textBlock);
-
-            if (!showTick)
-                line.Visibility = Visibility.Hidden;
-
-            return grid;
+            return line;
         }
 
         /// <summary>
@@ -673,36 +659,58 @@ namespace CryptoRetriever {
             return new Tuple<string, Point[]>(unit, points);
         }
 
-        private Point[] GetRangeTickData()
-		{
+        private Point[] GetRangeTickData() {
             double dollars = GetRange().End - GetRange().Start;
             Point[] values;
 
-            double scale;
-            int resetCount = 0;
-            int tickCount = 1;
-            for (scale = 1.0; scale < 100000; scale = (resetCount == 1) ? scale * 2.5 : scale * 2)
-			{
-                tickCount = (int)Math.Ceiling(dollars / scale);
-                if (tickCount >= 5 && tickCount <= 10)
-				{
-                    break;
-				}
+            int targetTickCount = 5;
+            int minTicks = 3;
+            double spacingForTarget = dollars / targetTickCount;
 
-                resetCount++;
-                if (resetCount == 3)
-				{
-                    resetCount = 0;
-				}
-			}
+            // Get the number of ticks needed for the lower 10 and upper 10
+            int closestLower10Power = (int)Math.Floor(Math.Log10(spacingForTarget));
+            int closestHigher10Power = (int)Math.Ceiling(Math.Log10(spacingForTarget));
+            double lowerSpacing = Math.Pow(10, closestLower10Power);
+            double higherSpacing = Math.Pow(10, closestHigher10Power);
+            int numLeftSpacingTicks = (int)(dollars / lowerSpacing);
+            int numRightSpacingTicks = (int)(dollars / higherSpacing);
 
-            values = new Point[tickCount + 1];
-            values[0] = new Point(0, (int)(GetRange().Start / scale) * scale);
-            for (int i = 1; i <= tickCount; i++)
-			{
-                values[i] = new Point(0, values[i - 1].Y + scale);
-			}
-            //values = values.OrderBy(x => x).ToArray();
+            // Pick the spacing closer to the target number of ticks
+            double spacing;
+            int numTicks;
+            if (Math.Abs(numLeftSpacingTicks - targetTickCount) < Math.Abs(numRightSpacingTicks - targetTickCount) 
+                    || numRightSpacingTicks < minTicks) {
+                // Use lower spacing
+                spacing = lowerSpacing;
+                numTicks = numLeftSpacingTicks;
+            } else {
+                // Use higher spacing
+                spacing = higherSpacing;
+                numTicks = numRightSpacingTicks;
+            }
+
+            // Don't let the number of ticks get passed twice the target
+            while (numTicks > targetTickCount * 2) {
+                numTicks /= 2;
+                spacing *= 2;
+            }
+
+            // Get the first tick on the range
+            double start = GetRange().Start;
+            int spacingMultiples = (int)(start / spacing);
+            double firstTickSpot = spacingMultiples * spacing;
+            if (firstTickSpot < start)
+                firstTickSpot += spacing; // Go one more if start isn't an even multiple of spacing (almost always)
+
+            // If we can fit another tick at the end, do so
+            //  (changes depending on where the first tick is)
+            if (firstTickSpot + spacing * (numTicks - 1) < (GetRange().End - spacing))
+                numTicks++;
+
+            values = new Point[numTicks];
+            for (int i = 0; i < numTicks; i++) {
+                values[i] = new Point(0, firstTickSpot + spacing * i);
+            }
 
             return values;
 		}
