@@ -712,42 +712,39 @@ namespace CryptoRetriever {
         /// For example, supplying unitType = "d" (day) and date "3/11/2022 15:33:41" this function will return
         /// "3/11/2022 00:00:00" (beginning of the day) as seconds
         /// </summary>
-        /// <param name="unitType"></param>
-        /// <param name="seconds"></param>
-        /// <returns></returns>
+        /// <param name="unitType">
+        ///     The ID of the unit type:
+        ///         m - Month
+        ///         d - Day
+        ///         h - Hour
+        ///         mi - Minute
+        /// </param>
+        /// <param name="seconds">The UTC timestamp of a point.</param>
+        /// <returns>Returns the calculated UTC timestamp of the tick at the given granularity.</returns>
         private double GetUnitBeginning(string unitType, double seconds)
 		{
             long utcTimestampSeconds = (long)Math.Round(seconds);
             DateTime utcDateTime = DateTimeConstant.UnixStart.AddSeconds(utcTimestampSeconds);
             DateTime utcBegin;
             
-
             if (unitType == "m")
 			{
-                utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, 0).ToUniversalTime();
-                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, 0), DateTimeKind.Utc);
+                utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, 1).ToUniversalTime();
             }
             else if (unitType == "d")
             {
                 utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day).ToUniversalTime();
-                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, 0, 0, 0, DateTimeKind.Utc);
             }
             else if (unitType == "h")
 			{
-                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, 0, 0).ToUniversalTime();
-                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, 0, 0), DateTimeKind.Utc);
                 utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour);
             }
             else if (unitType == "mi")
             {
-                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, 0).ToUniversalTime();
-                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, 0), DateTimeKind.Utc);
                 utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour).AddMinutes(utcDateTime.Minute);
             }
             else
             {
-                //utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, utcDateTime.Second).ToUniversalTime();
-                //utcBegin = DateTime.SpecifyKind(new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day, utcDateTime.Hour, utcDateTime.Minute, utcDateTime.Second), DateTimeKind.Utc);
                 utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour).AddMinutes(utcDateTime.Minute).AddSeconds(utcDateTime.Second);
             }
 
