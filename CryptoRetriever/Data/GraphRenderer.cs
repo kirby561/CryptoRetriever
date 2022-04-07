@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace CryptoRetriever {
+namespace CryptoRetriever.Data {
     /// <summary>
     /// Renders a dataset to the given canvas with some options.
     /// Can be controlled with mouse or touch input using a GraphController.

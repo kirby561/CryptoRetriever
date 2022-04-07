@@ -1,5 +1,4 @@
-﻿using CryptoRetriever.DatasetView;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -8,6 +7,7 @@ using System;
 using CryptoRetriever.Source;
 using System.IO;
 using CryptoRetriever.UI;
+using CryptoRetriever.Data;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.

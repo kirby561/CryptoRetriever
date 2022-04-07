@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace CryptoRetriever {
+namespace CryptoRetriever.Data {
     /// <summary>
     /// Responsible for writing datasets to files.
     /// </summary>

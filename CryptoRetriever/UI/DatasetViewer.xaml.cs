@@ -1,4 +1,5 @@
-﻿using CryptoRetriever.Filter;
+﻿using CryptoRetriever.Data;
+using CryptoRetriever.Filter;
 using CryptoRetriever.UI;
 using KFSO.UI.DockablePanels;
 using Microsoft.Win32;
@@ -10,7 +11,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CryptoRetriever.DatasetView {
+namespace CryptoRetriever.UI {
     /// <summary>
     /// Used to view datasets and manipulate or export them.
     /// </summary>

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace CryptoRetriever {
+namespace CryptoRetriever.Data {
     class DatasetReader {
         /// <summary>
         /// Reads the given dataset file and returns it as a Dataset object if successful.

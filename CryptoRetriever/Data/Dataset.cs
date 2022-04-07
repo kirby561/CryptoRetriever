@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace CryptoRetriever {
+namespace CryptoRetriever.Data {
     public class Dataset {
         /// <summary>
         /// The points are coordinates but they are ordered by X value.

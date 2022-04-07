@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CryptoRetriever.Data;
+using System;
 using System.Collections.Generic;
 
 namespace CryptoRetriever.Source {

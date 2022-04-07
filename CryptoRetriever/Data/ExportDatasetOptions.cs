@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoRetriever {
+namespace CryptoRetriever.Data {
     public class ExportDatasetOptions {
         public ExportFileType FileType { get; set; } = ExportFileType.Csv;
         public ExportDateStringFormat DateStringFormat { get; set; } = ExportDateStringFormat.UtcTimestamp;

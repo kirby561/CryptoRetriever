@@ -1,4 +1,5 @@
-﻿using CryptoRetriever.Filter;
+﻿using CryptoRetriever.Data;
+using CryptoRetriever.Filter;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

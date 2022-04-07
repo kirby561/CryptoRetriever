@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 
-namespace CryptoRetriever {
+namespace CryptoRetriever.Data {
     /// <summary>
     /// Contains helpful methods for showing Dataset UI elements
     /// like the Save As dialog.

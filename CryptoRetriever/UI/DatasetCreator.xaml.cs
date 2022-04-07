@@ -8,11 +8,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Newtonsoft.Json;
+using CryptoRetriever.Data;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace CryptoRetriever.DatasetView {
+namespace CryptoRetriever.UI {
     /// <summary>
     /// A window that lets users grab a dataset from a list of sources that are displayed
     /// for the selected currency in a selected date range and spaced at a selected granularity.

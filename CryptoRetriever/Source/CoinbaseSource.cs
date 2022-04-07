@@ -1,5 +1,6 @@
 ﻿using Coinbase;
 using Coinbase.Models;
+using CryptoRetriever.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
