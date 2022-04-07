@@ -33,9 +33,15 @@ namespace CryptoRetriever.Data {
         private TextBlock _xAxisLabel;
         private TextBlock _yAxisLabel;
         private List<FrameworkElement> _graphTicks = new List<FrameworkElement>();
-        private readonly SolidColorBrush _GREEN_BRUSH = new SolidColorBrush(Colors.Green);
-        private readonly SolidColorBrush _WHITE_BRUSH = new SolidColorBrush(Colors.White);
         private bool _isAxisEnabled = true;
+
+        // Constants
+        private static readonly SolidColorBrush GREEN_BRUSH = new SolidColorBrush(Colors.Green);
+        private static readonly SolidColorBrush WHITE_BRUSH = new SolidColorBrush(Colors.White);
+        private static readonly double X_AXIS_X_OFFSET = 50; // Distance from the left of the window to the left of the X axis in pixels
+        private static readonly double X_AXIS_Y_OFFSET = 100; // Distance from the bottom of the window to the X axis in pixels
+        private static readonly double Y_AXIS_X_OFFSET = X_AXIS_X_OFFSET + 50; // Distance from the left of the window to the Y axis in pixels
+        private static readonly double Y_AXIS_Y_OFFSET = 50; // Distance from the bottom of the window to the bototm of the Y axis in pixels
 
         // Calculated transforms
         //     Pixel space is from the top left of the canvas in pixels, down is positive.
@@ -238,7 +244,6 @@ namespace CryptoRetriever.Data {
         /// Updates all the graphics to reflect the current state
         /// </summary>
         public void UpdateAll() {
-
             UpdateAxis();
             UpdateData();
             UpdateGraphScales();
@@ -266,53 +271,50 @@ namespace CryptoRetriever.Data {
                 return; // Don't draw the axis
 
             double axisWidthPx = 3;
-            //SolidColorBrush brush = new SolidColorBrush(Colors.Green);
 
             // Setup axis
             _xAxis = new Line();
-            _xAxis.Fill = _GREEN_BRUSH;
-            _xAxis.Stroke = _GREEN_BRUSH;
+            _xAxis.Fill = GREEN_BRUSH;
+            _xAxis.Stroke = GREEN_BRUSH;
             _xAxis.StrokeThickness = axisWidthPx;
-            _xAxis.X1 = 50;
-            _xAxis.Y1 = _renderParams.CanvasSizePx.Height - 100;
-            _xAxis.X2 = _renderParams.CanvasSizePx.Width - 50;
+            _xAxis.X1 = X_AXIS_X_OFFSET;
+            _xAxis.Y1 = _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET;
+            _xAxis.X2 = _renderParams.CanvasSizePx.Width - X_AXIS_X_OFFSET;
             _xAxis.Y2 = _xAxis.Y1;
             _xAxis.IsHitTestVisible = false;
 
-            //Canvas.SetLeft(_xAxis, _xAxisLabel.DesiredSize.Width);
             _canvas.Children.Add(_xAxis);
 
             _yAxis = new Line();
-            _yAxis.Fill = _GREEN_BRUSH;
-            _yAxis.Stroke = _GREEN_BRUSH;
+            _yAxis.Fill = GREEN_BRUSH;
+            _yAxis.Stroke = GREEN_BRUSH;
             _yAxis.StrokeThickness = axisWidthPx;
-            _yAxis.X1 = _xAxis.X1 + 50;
-            _yAxis.Y1 = 50;
+            _yAxis.X1 = Y_AXIS_X_OFFSET;
+            _yAxis.Y1 = Y_AXIS_Y_OFFSET;
             _yAxis.X2 = _yAxis.X1;
-            _yAxis.Y2 = _xAxis.Y1 + 50;
+            _yAxis.Y2 = _xAxis.Y1 + Y_AXIS_Y_OFFSET;
             _yAxis.IsHitTestVisible = false;
 
-            //Canvas.SetLeft(_yAxis, _xAxisLabel.DesiredSize.Width + 50);
             _canvas.Children.Add(_yAxis);
 
             // Setup axis labels
             _xAxisLabel = new TextBlock()
             {
                 FontSize = 24,
-                Foreground = _WHITE_BRUSH,
+                Foreground = WHITE_BRUSH,
                 Text = "Date/Time (EST)",
                 TextWrapping = TextWrapping.Wrap
             };
 
             _xAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            Canvas.SetLeft(_xAxisLabel, ((_xAxis.X2 - _yAxis.X1) / 2) - (_xAxisLabel.DesiredSize.Width / 2) + 100);
+            Canvas.SetLeft(_xAxisLabel, ((_xAxis.X2 + _yAxis.X1) / 2) - (_xAxisLabel.DesiredSize.Width / 2));
             Canvas.SetBottom(_xAxisLabel, 10);
             _canvas.Children.Add(_xAxisLabel);
 
             _yAxisLabel = new TextBlock()
             {
                 FontSize = 24,
-                Foreground = _WHITE_BRUSH,
+                Foreground = WHITE_BRUSH,
                 RenderTransform = new RotateTransform(270),
                 Text = "Price (USD)",
                 TextWrapping = TextWrapping.Wrap
@@ -320,7 +322,7 @@ namespace CryptoRetriever.Data {
 
             _yAxisLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             Canvas.SetLeft(_yAxisLabel, 10);
-            Canvas.SetTop(_yAxisLabel, ((_xAxis.Y1 - _yAxis.Y1) / 2) + (_yAxisLabel.DesiredSize.Width / 2) + 50);
+            Canvas.SetTop(_yAxisLabel, ((_xAxis.Y1 + _yAxis.Y1) / 2) + (_yAxisLabel.DesiredSize.Width / 2));
             _canvas.Children.Add(_yAxisLabel);            
         }
 
@@ -363,6 +365,18 @@ namespace CryptoRetriever.Data {
 
             _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
+            // Clip to within the axis bounds if we've been laid out.
+            if (_renderParams.CanvasSizePx.Width > 0 && _renderParams.CanvasSizePx.Height > 0) {
+                _datasetPath.Clip = new RectangleGeometry(
+                    new Rect(
+                        Y_AXIS_X_OFFSET,
+                        0,
+                        _renderParams.CanvasSizePx.Width - Y_AXIS_X_OFFSET,
+                        _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET
+                    )
+                );
+            }
+
             _canvas.Children.Add(_datasetPath);
         }       
 
@@ -397,7 +411,7 @@ namespace CryptoRetriever.Data {
                 TextBlock block = CreateGraphTickLabel(
                     label,
                     12,
-                    _WHITE_BRUSH,
+                    WHITE_BRUSH,
                     dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start ? true : false);
 
                 block.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
@@ -407,7 +421,7 @@ namespace CryptoRetriever.Data {
                 _graphTicks.Add(block);
                 _canvas.Children.Add(block);
 
-                Line tick = CreateTickMark(_GREEN_BRUSH, "y", dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start);
+                Line tick = CreateTickMark(GREEN_BRUSH, "y", dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start);
                 Canvas.SetLeft(tick, rangeTickData[i].X);
                 Canvas.SetTop(tick, rangeTickData[i].Y);
                 _graphTicks.Add(tick);
@@ -453,14 +467,14 @@ namespace CryptoRetriever.Data {
                         break;
                 }
                 bool blurTick = dblPointsX[i] > GetDomain().End || dblPointsX[i] < GetDomain().Start ? true : false;
-                TextBlock xTickLabel = CreateGraphTickLabel(label, 12, _WHITE_BRUSH, blurTick);
+                TextBlock xTickLabel = CreateGraphTickLabel(label, 12, WHITE_BRUSH, blurTick);
                 xTickLabel.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
                 Canvas.SetLeft(xTickLabel, domainTickData.Item2[i].X);
                 Canvas.SetTop(xTickLabel, domainTickData.Item2[i].Y);
                 _graphTicks.Add(xTickLabel);
                 _canvas.Children.Add(xTickLabel);
 
-                Line xTick = CreateTickMark(_GREEN_BRUSH, "x", blurTick);
+                Line xTick = CreateTickMark(GREEN_BRUSH, "x", blurTick);
                 Canvas.SetLeft(xTick, domainTickData.Item2[i].X);
                 Canvas.SetTop(xTick, domainTickData.Item2[i].Y);
                 _graphTicks.Add(xTick);
