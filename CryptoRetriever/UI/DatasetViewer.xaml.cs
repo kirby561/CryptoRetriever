@@ -1,10 +1,12 @@
 ﻿using CryptoRetriever.Data;
 using CryptoRetriever.Filter;
+using CryptoRetriever.Strats;
 using CryptoRetriever.UI;
 using KFSO.UI.DockablePanels;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -23,9 +25,24 @@ namespace CryptoRetriever.UI {
         private GraphRenderer _renderer;
         private GraphController _graphController;
 
+        // Strategy list view
+        // ?? TODO: This is set in its OnLoad even because of this error:
+        //      "Cannot set Name attribute value '_strategiesListView' on element 'ListView'. 'ListView' is under the scope of element 'DockablePanel'...
+        //      Need to do more reading about this and probably need to fix KFSO.DockablePanels.
+        //      For the moment, this works fine though.
+        private ListView _strategiesListView;
+
         // Keep track of the last filter that was run so we can
         // run it again if the user clicks it.
         private IFilter _lastFilter = null;
+
+        /// <summary>
+        /// A manager that provides the list of strategies that can be run on
+        /// the dataset being viewed. This can be set prior to launching the window
+        /// in order to specify a different manager (one shared by the application for
+        /// example).
+        /// </summary>
+        public StrategyManager StrategyManager { get; set; } = new StrategyManager();
 
         public DatasetViewer() {
             this.InitializeComponent();
@@ -80,12 +97,20 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnShowGraphOptionsPanelClick(object sender, RoutedEventArgs e) {
+            ShowDockPanel(_optionsPanel);
+        }
+
+        private void OnShowStrategiesPanelClick(object sender, RoutedEventArgs e) {
+            ShowDockPanel(_strategyPanel);
+        }
+
+        private void ShowDockPanel(DockablePanel panel) {
             // Check if it's displayed already
-            if (!_optionsPanel.IsShown) {
-                _optionsPanel.Dock(_dockPanelSpotLeft);
+            if (!panel.IsShown) {
+                panel.Dock(_dockPanelSpotLeft);
             } else {
                 // Try to bring it in to view
-                FocusWindowOfElement(_optionsPanel);
+                FocusWindowOfElement(panel);
             }
         }
 
@@ -198,11 +223,51 @@ namespace CryptoRetriever.UI {
             }
         }
 
-        private void OnCreateStrategyClicked(object sender, RoutedEventArgs e) {
+        private void OnAddStrategyClicked(object sender, RoutedEventArgs e) {
             StrategyEditorWindow window = new StrategyEditorWindow();
+            UiHelper.CenterWindowInWindow(window, this);
             window.ShowDialog();
+
+            if (window.Strategy != null) {
+                StrategyManager.AddStrategy(window.Strategy);
+            }
+        }
+
+        private void OnRemoveStrategyClicked(object sender, RoutedEventArgs e) {
+            UiHelper.RemoveSelectedItemsFromListBox(StrategyManager.GetStrategies(), _strategiesListView);
+        }
+
+        private void OnStrategiesListDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            if (_strategiesListView.SelectedIndex >= 0) {
+                StrategyEditorWindow strategyEditorWindow = new StrategyEditorWindow();
+                UiHelper.CenterWindowInWindow(strategyEditorWindow, this);
+
+                // ?? TODO: This should be a deep copy but there's no way to save conditions
+                // right now so it will be a reference until that is implemented.
+                strategyEditorWindow.SetWorkingStrategy(StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex]);
+                strategyEditorWindow.ShowDialog();
+
+                if (strategyEditorWindow.Strategy != null) {
+                    StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex] = strategyEditorWindow.Strategy;
+                }
+            }
+        }
+
+        private void OnStrategyListViewLoaded(object sender, RoutedEventArgs e) {
+            _strategiesListView = sender as ListView;
+            _strategiesListView.ItemsSource = StrategyManager.GetStrategies();
+        }
+
+        private void RunStrategyClicked(object sender, RoutedEventArgs e) {
+            if (_strategiesListView.SelectedIndex < 0) {
+                return; // Nothing is selected
+            }
+
+            Strategy strategy = StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex];
+            StrategyEngine engine = new StrategyEngine(strategy, _dataset);
+            engine.Run();
+
+            MessageBox.Show(engine.RunContext.ToString());
         }
     }
-
-  
 }

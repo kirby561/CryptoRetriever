@@ -24,6 +24,11 @@ namespace CryptoRetriever.Strats {
                  (context, stringVar) => {
                      context.CurrentState = stringVar.VariableRetrievalMethod.Invoke(context).GetValue(context);
                  }));
+            actions.Add(new StringAction(
+                 "ChangeNextStateTo",
+                 (context, stringVar) => {
+                     context.NextState = stringVar.VariableRetrievalMethod.Invoke(context).GetValue(context);
+                 }));
             actions.Add(new DoNothingAction());
             actions.Add(new MultiAction(new FutureAction(), new FutureAction()));
             return actions;

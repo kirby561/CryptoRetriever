@@ -23,6 +23,15 @@ namespace CryptoRetriever.Strats {
         public ObservableCollection<Trigger> Triggers { get; set; } = new ObservableCollection<Trigger>();
         public DateTime Start { get; set; } = DateTime.MinValue; // Min means use the dataset's start
         public DateTime End { get; set; } = DateTime.MinValue; // Min means use the dataset's end
+
+        /// <summary>
+        /// Used for displaying in list views.
+        /// </summary>
+        public String Summary {
+            get {
+                return Name;
+            }
+        }
     }
 
     public class ExampleStrategy : Strategy {

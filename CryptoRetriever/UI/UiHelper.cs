@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -79,6 +80,23 @@ namespace CryptoRetriever.UI {
             var whatever = element.Background;
             var setter = new ButtonHoverAndClickGraphicSetter(baseColor, hoverColor, pressedColor, element);
             setter.Initialize();
+        }
+
+        /// <summary>
+        /// Removes the selected item in the given listbox from the listbox
+        /// and the given backing collection.
+        /// </summary>
+        /// <typeparam name="T">A generic type that the list contains.</typeparam>
+        /// <param name="list">The source for the items in listbox</param>
+        /// <param name="listbox">The ListBox to remove the item from.</param>
+        public static void RemoveSelectedItemsFromListBox<T>(ObservableCollection<T> list, ListBox listbox) {
+            List<T> itemsToRemove = new List<T>();
+            foreach (T item in listbox.SelectedItems) {
+                itemsToRemove.Add(item);
+            }
+            foreach (T item in itemsToRemove) {
+                list.Remove(item);
+            }
         }
     }
 

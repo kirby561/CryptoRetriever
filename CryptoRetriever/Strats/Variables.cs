@@ -22,6 +22,10 @@ namespace CryptoRetriever.Strats {
                 "CurrentState",
                 (context) => { return new StringValue(context.CurrentState); }
             ));
+            result.Add(new StringVariable(
+                "NextState",
+                (context) => { return new StringValue(context.NextState); }
+            ));
             return result;
         }
 
@@ -32,8 +36,20 @@ namespace CryptoRetriever.Strats {
         public static List<NumberVariable> GetNumberVariables() {
             var result = new List<NumberVariable>();
             result.Add(new NumberVariable(
+                "Account.CurrencyBalance",
+                (context) => { return new NumberValue(context.Account.CurrencyBalance); }
+            ));
+            result.Add(new NumberVariable(
+                "Account.AssetBalance",
+                (context) => { return new NumberValue(context.Account.CurrencyBalance); }
+            ));
+            result.Add(new NumberVariable(
                 "CurrentTimestampSecs",
                 (context) => { return new NumberValue(context.GetCurrentTimestamp()); }
+            ));
+            result.Add(new NumberVariable(
+                "CurrentDatapointIndex",
+                (context) => { return new NumberValue(context.CurrentDatapointIndex); }
             ));
             return result;
         }

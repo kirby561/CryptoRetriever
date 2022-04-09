@@ -12,7 +12,13 @@
     Width="1800" Height="1000"
     Name="_window"
     mc:Ignorable="d">
-
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="22" />
@@ -43,18 +49,44 @@
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem IsChecked="{Binding IsShown, ElementName=_optionsPanel}" Header="Graph Options" Click="OnShowGraphOptionsPanelClick" />
-                <MenuItem Header="_Create Strategy" Click="OnCreateStrategyClicked" />
+                <MenuItem IsChecked="{Binding IsShown, ElementName=_strategyPanel}" Header="Strategies" Click="OnShowStrategiesPanelClick" />
             </MenuItem>
         </Menu>
 
         <!-- Second row -->
 
-        <kfso:DockStation x:Name="_dockPanelSpotLeft" Grid.Row="1" Grid.Column="0" MinWidth="0" MinHeight="1" Background="#cccccc">
+        <kfso:DockStation x:Name="_dockPanelSpotLeft" Grid.Row="1" Grid.Column="0" MinWidth="0" MinHeight="1">
             <kfso:DockablePanel x:Name="_optionsPanel" TitleText="Graph Options">
                 <kfso:DockablePanel.HostedContent>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#cccccc" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#00001a" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                            <CheckBox IsChecked="True" Content="Show Axis" Checked="OnAxisVisibleCheckboxChecked" Unchecked="OnAxisVisibleCheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="True" Content="Show Axis" Checked="OnAxisVisibleCheckboxChecked" Unchecked="OnAxisVisibleCheckboxChecked" Margin="5" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </kfso:DockablePanel.HostedContent>
+            </kfso:DockablePanel>
+            <kfso:DockablePanel x:Name="_strategyPanel" TitleText="Strategies">
+                <kfso:DockablePanel.HostedContent>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#00001a" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="5">
+                            <!-- Strategy List -->
+                            <ListView Loaded="OnStrategyListViewLoaded" MouseDoubleClick="OnStrategiesListDoubleClick" MinHeight="25">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Button Click="RunStrategyClicked" Grid.Column="0" HorizontalAlignment="Left" Style="{StaticResource ListPlayButton}" />
+                                <Button Click="OnAddStrategyClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                                <Button Click="OnRemoveStrategyClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                            </Grid>
                         </StackPanel>
                     </ScrollViewer>
                 </kfso:DockablePanel.HostedContent>
@@ -74,8 +106,7 @@
             MouseMove="OnMouseMoved"
             MouseUp="OnMouseUp"
             MouseDown="OnMouseDown"
-            MouseWheel="OnMouseWheel">
-		</Canvas>
+            MouseWheel="OnMouseWheel" />
 
         <GridSplitter Name="_rightGridSplitter" Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch" />
         

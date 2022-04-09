@@ -56,6 +56,7 @@ namespace CryptoRetriever.Strats {
                 }
             }
 
+            RunContext.CurrentState = RunContext.NextState;
             RunContext.CurrentDatapointIndex++;
         }
     }
@@ -65,18 +66,80 @@ namespace CryptoRetriever.Strats {
     /// variables while a strategy is being run.
     /// </summary>
     public class StrategyRuntimeContext {
+        private String _currentState;
+
+        /// <summary>
+        /// Gets the list of transactions that were made while running
+        /// a strategy.
+        /// </summary>
         public List<Transaction> Transactions { get; protected set; } = new List<Transaction>();
+
+        /// <summary>
+        /// Gets a list of errors that occurred while running a Strategy
+        /// </summary>
         public List<StrategyError> Errors { get; protected set; } = new List<StrategyError>();
+
+        /// <summary>
+        /// Gets the Strategy being run.
+        /// </summary>
         public Strategy Strategy { get; protected set; }
+
+        /// <summary>
+        /// Gets the state of the Account at any point during running the strategy.
+        /// </summary>
         public Account Account { get; protected set; }
+
+        /// <summary>
+        /// Gets the dataset being used.
+        /// </summary>
         public Dataset Dataset { get; set; }
-        public String CurrentState { get; set; }
+
+        /// <summary>
+        /// Returns the current state as controlled by the running strategy.
+        /// Note that if this is set by a trigger, it will override the NextState
+        /// if one has been set.
+        /// </summary>
+        public String CurrentState {
+            get {
+                return _currentState;
+            }
+            set {
+                _currentState = value;
+                
+                // Set the NextState too so it doesn't flip back
+                // if the state is changing while running a set
+                // of triggers. This also means if a previous
+                // trigger sets the next state, a following
+                // trigger setting the current state will override
+                // that.
+                NextState = _currentState;
+            }
+        }
+        
+        /// <summary>
+        /// Gets or sets the next state the context will enter after all current
+        /// triggers have been run. If the CurrentState is set before this, it will
+        /// be overwritten.
+        /// </summary>
+        public String NextState { get; set; } // The state we will enter after running all the triggers for the current event
+
+        /// <summary>
+        /// The current datapoint index in Dataset.
+        /// </summary>
         public int CurrentDatapointIndex { get; set; } = 0;
+
+        /// <summary>
+        /// Gets the next datapoint index in Dataset.
+        /// </summary>
         public int NextDatapointIndex {
             get {
                 return CurrentDatapointIndex + 1;
             }
         }
+
+        /// <summary>
+        /// Gets the current DateTime in the dataset being looked at.
+        /// </summary>
         public DateTime CurrentDateTime {
             get {
                 return DateTime.UnixEpoch + TimeSpan.FromSeconds(Dataset.Points[CurrentDatapointIndex].X);
@@ -164,8 +227,13 @@ namespace CryptoRetriever.Strats {
         /// satisfy the transaction time constraint in the ExchangeAssumptions.
         /// </returns>
         private bool LastTransactionCompleted() {
-            return Transactions.Count > 0 ||
-                (CurrentDateTime - Transactions[Transactions.Count - 1].TransactionTime > TimeSpan.FromSeconds(Strategy.ExchangeAssumptions.TransactionTimeS));
+            if (Transactions.Count == 0)
+                return true; // No transactiosn so no transaction minimum time
+
+            TimeSpan timeElapsed = CurrentDateTime - Transactions[Transactions.Count - 1].TransactionTime;
+            TimeSpan minimumTimespan = TimeSpan.FromSeconds(Strategy.ExchangeAssumptions.TransactionTimeS);
+
+            return timeElapsed > minimumTimespan;
         }
     }
 }

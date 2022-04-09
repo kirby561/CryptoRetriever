@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100"
+   height="100"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="play.svg"
+   inkscape:export-filename="C:\Users\Alex\Documents\Code\CryptoRetriever\CryptoRetriever\Images\add.png"
+   inkscape:export-xdpi="48"
+   inkscape:export-ydpi="48"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#616561"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="3.9999998"
+     inkscape:cx="63.500003"
+     inkscape:cy="41.375002"
+     inkscape:window-width="2542"
+     inkscape:window-height="1343"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     scale-x="1"
+     viewbox-width="100"
+     viewbox-height="100"
+     units="px"
+     width="100px" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="fill:none;stroke:#ffffff;stroke-width:4.882;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path53"
+       cx="50"
+       cy="50"
+       r="47.559128" />
+    <path
+       id="rect2009"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:11.826;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 25.163789,27.029486 V 76.506048 L 86.836211,51.767767 Z" />
+  </g>
+</svg>

@@ -33,13 +33,9 @@ namespace CryptoRetriever.UI {
 
         public StrategyEditorWindow() {
             InitializeComponent();
-            SetStrategy(new Strategy());
+            SetWorkingStrategy(new Strategy());
 
-            // Temp
-            _strategy.Filters.Add(new GaussianFilter(2));
-            _strategy.Filters.Add(new GaussianFilter(1));
             _strategy.States.Add(new State("Default"));
-            _strategy.Triggers.Add(new Strats.Trigger("Sample trigger"));
         }
 
         /// <summary>
@@ -47,7 +43,7 @@ namespace CryptoRetriever.UI {
         /// values contained as its defaults.
         /// </summary>
         /// <param name="strategyToEdit">The strategy to edit.</param>
-        public void SetStrategy(Strategy strategyToEdit) {
+        public void SetWorkingStrategy(Strategy strategyToEdit) {
             _strategy = strategyToEdit;
             _nameTextBox.Text = strategyToEdit.Name;
             _accountStartingFiatTextBox.Text = "" + _strategy.Account.CurrencyBalance;
@@ -101,12 +97,28 @@ namespace CryptoRetriever.UI {
                 return;
             }
 
+            // Exchange assumptions
+            ExchangeAssumptions assumptions = new ExchangeAssumptions();
+            double transactionFee;
+            if (!Double.TryParse(_exchangeTransactionFeeTextBox.Text, out transactionFee)) {
+                MessageBox.Show("The transaction fee must be a number.");
+                return;
+            }
+            double transactionTime;
+            if (!Double.TryParse(_exchangeTransationTimeTextBox.Text, out transactionTime)) {
+                MessageBox.Show("The transaction time must be a number.");
+                return;
+            }
+            assumptions.TransactionFee = transactionFee;
+            assumptions.TransactionTimeS = transactionTime;
+
             // The Filters/States/Triggers are updated
             // as we go on the working Strategy so no
             // need to do anything for those.
 
             _strategy.Name = name;
             _strategy.Account = new Account(startingFiat, startingAssets);
+            _strategy.ExchangeAssumptions = assumptions;
             _strategy.Start = startDate;
             _strategy.End = endDate;
             _result = _strategy;
@@ -125,7 +137,7 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnRemoveFilterClicked(object sender, RoutedEventArgs e) {
-            RemoveSelectedItemsFromListBox(_strategy.Filters, _filtersView);
+            UiHelper.RemoveSelectedItemsFromListBox(_strategy.Filters, _filtersView);
         }
 
         private void OnAddStateClicked(object sender, RoutedEventArgs e) {
@@ -141,7 +153,7 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnRemoveStateClicked(object sender, RoutedEventArgs e) {
-            RemoveSelectedItemsFromListBox(_strategy.States, _statesView);
+            UiHelper.RemoveSelectedItemsFromListBox(_strategy.States, _statesView);
         }
 
         private void OnAddTriggerClicked(object sender, RoutedEventArgs e) {
@@ -171,17 +183,7 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnRemoveTriggerClicked(object sender, RoutedEventArgs e) {
-            RemoveSelectedItemsFromListBox(_strategy.Triggers, _triggersView);
-        }
-
-        private void RemoveSelectedItemsFromListBox<T>(ObservableCollection<T> list, ListBox listbox) {
-            List<T> itemsToRemove = new List<T>();
-            foreach (T item in listbox.SelectedItems) {
-                itemsToRemove.Add(item);
-            }
-            foreach (T item in itemsToRemove) {
-                list.Remove(item);
-            }
+            UiHelper.RemoveSelectedItemsFromListBox(_strategy.Triggers, _triggersView);
         }
     }
 }
