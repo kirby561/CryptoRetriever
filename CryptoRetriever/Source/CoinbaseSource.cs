@@ -1,7 +1,6 @@
 ﻿using Coinbase;
 using Coinbase.Models;
 using CryptoRetriever.Data;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using Utf8Json;
 
 namespace CryptoRetriever.Source {
     public class CoinbaseSource : ISource {
@@ -192,19 +192,19 @@ namespace CryptoRetriever.Source {
 
             Dataset dataSet = new Dataset();
 
-            dynamic jsonArr = JsonConvert.DeserializeObject<dynamic>(json);
+            dynamic jsonArr = JsonSerializer.Deserialize<dynamic>(json);
             for (int i = 0; i < jsonArr.Count; i++) {
-                decimal timeBucketStartTime = jsonArr[i][TimeBucketStartTimeIndex];
-                decimal lowestPrice = jsonArr[i][LowestPriceIndex];
-                decimal highestPrice = jsonArr[i][HighestPriceIndex];
-                decimal openingPrice = jsonArr[i][OpeningPriceIndex];
-                decimal closingPrice = jsonArr[i][ClosingPriceIndex];
-                decimal tradingVolume = jsonArr[i][TradingVolumeIndex];
+                double timeBucketStartTime = jsonArr[i][TimeBucketStartTimeIndex];
+                double lowestPrice = jsonArr[i][LowestPriceIndex];
+                double highestPrice = jsonArr[i][HighestPriceIndex];
+                double openingPrice = jsonArr[i][OpeningPriceIndex];
+                double closingPrice = jsonArr[i][ClosingPriceIndex];
+                double tradingVolume = jsonArr[i][TradingVolumeIndex];
 
                 dataSet.Insert(
                     new Point(
-                        Decimal.ToDouble(timeBucketStartTime), 
-                        Decimal.ToDouble(lowestPrice)));
+                        timeBucketStartTime, 
+                        lowestPrice));
             }
 
             return dataSet;

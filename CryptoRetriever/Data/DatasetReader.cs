@@ -1,8 +1,8 @@
 ﻿using CryptoRetriever.Source;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Utf8Json;
 
 namespace CryptoRetriever.Data {
     class DatasetReader {
@@ -26,7 +26,7 @@ namespace CryptoRetriever.Data {
 
             Dataset dataset = null;
             try {
-                dataset = JsonConvert.DeserializeObject<Dataset>(datasetText);
+                dataset = JsonSerializer.Deserialize<Dataset>(datasetText);
             } catch (Exception ex) {
                 return new Error<Dataset>("There was an error in the formatting of the dataset. Exception: " + ex.Message);
             }

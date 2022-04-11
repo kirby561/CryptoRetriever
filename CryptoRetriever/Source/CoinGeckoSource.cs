@@ -1,5 +1,4 @@
 ﻿using CryptoRetriever.Data;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Utf8Json;
 
 namespace CryptoRetriever.Source {
     class CoinGeckoSource : ISource {
@@ -149,7 +149,7 @@ namespace CryptoRetriever.Source {
         private List<Asset> ParseCoinGeckoJsonToAssetList(String json) {
             var result = new List<Asset>();
 
-            dynamic jsonArray = JsonConvert.DeserializeObject<dynamic>(json);
+            dynamic jsonArray = JsonSerializer.Deserialize<dynamic>(json);
             for (int i = 0; i < jsonArray.Count; i++) {
                 String id = jsonArray[i]["id"];
                 String symbol = jsonArray[i]["symbol"];
@@ -187,10 +187,10 @@ namespace CryptoRetriever.Source {
         /// <param name="json">A JSON string returned from the history endpoint mentioned above.</param>
         /// <returns>Returns the USD price contained in the json response.</returns>
         private double ParseUsdPriceFromJson(String json) {
-            dynamic jsonReader = JsonConvert.DeserializeObject<dynamic>(json);
-            decimal price = jsonReader["market_data"]["current_price"]["usd"];
+            dynamic jsonReader = JsonSerializer.Deserialize<dynamic>(json);
+            double price = jsonReader["market_data"]["current_price"]["usd"];
 
-            return Decimal.ToDouble(price);
+            return price;
         }
 
         /// <summary>

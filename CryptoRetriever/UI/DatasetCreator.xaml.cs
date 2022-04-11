@@ -6,9 +6,9 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using Newtonsoft.Json;
 using CryptoRetriever.Data;
+using System.Windows.Media;
+using Utf8Json;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -126,8 +126,8 @@ namespace CryptoRetriever.UI {
                                 String filePath = _selectedOutput.Text;
                                 String dir = Path.GetDirectoryName(filePath);
                                 Directory.CreateDirectory(dir);
-                                String json = JsonConvert.SerializeObject(result.Value, Formatting.Indented);
-                                File.WriteAllText(filePath, json);
+                                byte[] json = JsonSerializer.PrettyPrintByteArray(JsonSerializer.Serialize(result.Value));
+                                File.WriteAllBytes(filePath, json);
                                 DatasetWriter writer = new DatasetWriter();
                                 Result writeResult = writer.WriteFile(result.Value, filePath);
                                 if (!writeResult.Succeeded) {

@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Utf8Json;
 
 namespace CryptoRetriever.Data {
     /// <summary>
@@ -17,8 +17,8 @@ namespace CryptoRetriever.Data {
         /// <returns>Returns a result indicating if it was successful and containing details on what happened if not.</returns>
         public Result WriteFile(Dataset dataset, String filePath) {
             try {
-                String json = JsonConvert.SerializeObject(dataset, Formatting.Indented);
-                File.WriteAllText(filePath, json);
+                byte[] json = JsonSerializer.PrettyPrintByteArray(JsonSerializer.Serialize(dataset));
+                File.WriteAllBytes(filePath, json);
             } catch (Exception ex) {
                 return new Result("Failed to write the file. Exception: " + ex.Message);
             }
