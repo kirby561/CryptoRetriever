@@ -164,6 +164,24 @@ namespace CryptoRetriever.UI {
             _renderer.IsAxisEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
         }
 
+        private void OnTickmarksVisibleCheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.AreTicksEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
+        private void OnStartRangeAt0CheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.ShouldStartRangeAt0 = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
         /// <summary>
         /// Focuses the window the given element is in. This can be used to bring
         /// it into view if it is behind other windows (such as a floating dockable panel

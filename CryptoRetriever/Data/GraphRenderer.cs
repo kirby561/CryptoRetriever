@@ -34,6 +34,8 @@ namespace CryptoRetriever.Data {
         private TextBlock _yAxisLabel;
         private List<FrameworkElement> _graphTicks = new List<FrameworkElement>();
         private bool _isAxisEnabled = true;
+        private bool _areTicksEnabled = true;
+        private bool _startRangeAt0 = false; // True to lock the bottom of the bounding range to 0
 
         // Constants
         private static readonly SolidColorBrush GREEN_BRUSH = new SolidColorBrush(Colors.Green);
@@ -123,6 +125,33 @@ namespace CryptoRetriever.Data {
         }
 
         /// <summary>
+        /// True if ticks should be drawn, false otherwise.
+        /// </summary>
+        public bool AreTicksEnabled {
+            get {
+                return _areTicksEnabled;
+            }
+            set {
+                _areTicksEnabled = value;
+                UpdateGraphScales();
+            }
+        }
+
+        /// <summary>
+        /// True if the bounding range should start at 0,
+        /// False if it should start at the lowest point in the dataset.
+        /// </summary>
+        public bool ShouldStartRangeAt0 {
+            get {
+                return _startRangeAt0;
+            }
+            set {
+                _startRangeAt0 = value;
+                InitializeDomainAndRange();
+            }
+        }
+
+        /// <summary>
         /// Sets formatters that are used when displaying x or y coordinates to the user.
         /// This can be used to convert/display the units they are in, add a dollar symbol, 
         /// control the number of decimal places, etc..
@@ -179,8 +208,11 @@ namespace CryptoRetriever.Data {
             _boundingDomain = new Range(minX, maxX);
             _boundingRange = new Range(minY, maxY);
 
-            SetDomain(minX, maxX);
-            SetRange(minY, maxY);
+            if (_startRangeAt0)
+                _boundingRange.Start = 0;
+
+            SetDomain(_boundingDomain.Start, _boundingDomain.End);
+            SetRange(_boundingRange.Start, _boundingRange.End);
 
             UpdateAll();
         }
@@ -390,6 +422,9 @@ namespace CryptoRetriever.Data {
                 _canvas.Children.Remove(_graphTicks[i]);
             }
             _graphTicks.Clear();
+
+            if (!_areTicksEnabled)
+                return; // We're done.
 
             // Setup axis ticks w/ labels
             //      y-axis  

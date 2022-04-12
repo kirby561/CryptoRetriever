@@ -61,6 +61,8 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#00001a" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Axis" Checked="OnAxisVisibleCheckboxChecked" Unchecked="OnAxisVisibleCheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="True" Content="Show Tickmarks" Checked="OnTickmarksVisibleCheckboxChecked" Unchecked="OnTickmarksVisibleCheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="False" Content="Start range at 0" Checked="OnStartRangeAt0CheckboxChecked" Unchecked="OnStartRangeAt0CheckboxChecked" Margin="5" />
                         </StackPanel>
                     </ScrollViewer>
                 </kfso:DockablePanel.HostedContent>
