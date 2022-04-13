@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using CryptoRetriever.Filter;
 using CryptoRetriever.Strats;
+using Utf8Json;
 
 namespace CryptoRetriever.UI {
     /// <summary>

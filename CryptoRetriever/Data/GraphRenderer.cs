@@ -20,7 +20,7 @@ namespace CryptoRetriever.Data {
         // Mouse hover dependencies
         private Point _mouseHoverPointPx;
         private bool _mouseHoverPointEnabled = false;
-        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Colors.Green, 10, 2, 14.0);
+        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Color.FromRgb(0x72, 0x9f, 0xcf)/*Colors.Green*/, 10, 2, 14.0);
         private Ellipse _hoverPointEllipse;
         private TextBlock _hoverPointText;
         private Rectangle _hoverPointTextBackground;
@@ -35,15 +35,23 @@ namespace CryptoRetriever.Data {
         private List<FrameworkElement> _graphTicks = new List<FrameworkElement>();
         private bool _isAxisEnabled = true;
         private bool _areTicksEnabled = true;
+        private bool _areXGridlinesEnabled = true;
+        private bool _areYGridlinesEnabled = true;
         private bool _startRangeAt0 = false; // True to lock the bottom of the bounding range to 0
 
+        // Colors
+        private SolidColorBrush _axisBrush = new SolidColorBrush(Color.FromRgb(0x72, 0x9f, 0xcf));// Colors.Green);
+        private SolidColorBrush _gridlineBrush = new SolidColorBrush(Color.FromRgb(0x44, 0x44, 0x44));// Colors.Green);
+        private SolidColorBrush _foregroundColor = new SolidColorBrush(Colors.White); // Color of data and text
+
         // Constants
-        private static readonly SolidColorBrush GREEN_BRUSH = new SolidColorBrush(Colors.Green);
-        private static readonly SolidColorBrush WHITE_BRUSH = new SolidColorBrush(Colors.White);
         private static readonly double X_AXIS_X_OFFSET = 50; // Distance from the left of the window to the left of the X axis in pixels
         private static readonly double X_AXIS_Y_OFFSET = 100; // Distance from the bottom of the window to the X axis in pixels
         private static readonly double Y_AXIS_X_OFFSET = X_AXIS_X_OFFSET + 50; // Distance from the left of the window to the Y axis in pixels
         private static readonly double Y_AXIS_Y_OFFSET = 50; // Distance from the bottom of the window to the bototm of the Y axis in pixels
+
+        private static readonly int DATA_ZINDEX = -1;
+        private static readonly int GRIDLINE_ZINDEX = -2;
 
         // Calculated transforms
         //     Pixel space is from the top left of the canvas in pixels, down is positive.
@@ -133,6 +141,34 @@ namespace CryptoRetriever.Data {
             }
             set {
                 _areTicksEnabled = value;
+                UpdateGraphScales();
+            }
+        }
+
+        /// <summary>
+        /// True if gridlines should be drawn at each X tick.
+        /// False otherwise.
+        /// </summary>
+        public bool AreXGridlinesEnabled {
+            get {
+                return _areXGridlinesEnabled;
+            }
+            set {
+                _areXGridlinesEnabled = value;
+                UpdateGraphScales();
+            }
+        }
+
+        /// <summary>
+        /// True if gridlines should be drawn at each Y tick.
+        /// False otherwise.
+        /// </summary>
+        public bool AreYGridlinesEnabled {
+            get {
+                return _areYGridlinesEnabled;
+            }
+            set {
+                _areYGridlinesEnabled = value;
                 UpdateGraphScales();
             }
         }
@@ -306,8 +342,8 @@ namespace CryptoRetriever.Data {
 
             // Setup axis
             _xAxis = new Line();
-            _xAxis.Fill = GREEN_BRUSH;
-            _xAxis.Stroke = GREEN_BRUSH;
+            _xAxis.Fill = _axisBrush;
+            _xAxis.Stroke = _axisBrush;
             _xAxis.StrokeThickness = axisWidthPx;
             _xAxis.X1 = X_AXIS_X_OFFSET;
             _xAxis.Y1 = _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET;
@@ -318,8 +354,8 @@ namespace CryptoRetriever.Data {
             _canvas.Children.Add(_xAxis);
 
             _yAxis = new Line();
-            _yAxis.Fill = GREEN_BRUSH;
-            _yAxis.Stroke = GREEN_BRUSH;
+            _yAxis.Fill = _axisBrush;
+            _yAxis.Stroke = _axisBrush;
             _yAxis.StrokeThickness = axisWidthPx;
             _yAxis.X1 = Y_AXIS_X_OFFSET;
             _yAxis.Y1 = Y_AXIS_Y_OFFSET;
@@ -333,7 +369,7 @@ namespace CryptoRetriever.Data {
             _xAxisLabel = new TextBlock()
             {
                 FontSize = 24,
-                Foreground = WHITE_BRUSH,
+                Foreground = _foregroundColor,
                 Text = "Date/Time (EST)",
                 TextWrapping = TextWrapping.Wrap
             };
@@ -346,7 +382,7 @@ namespace CryptoRetriever.Data {
             _yAxisLabel = new TextBlock()
             {
                 FontSize = 24,
-                Foreground = WHITE_BRUSH,
+                Foreground = _foregroundColor,
                 RenderTransform = new RotateTransform(270),
                 Text = "Price (USD)",
                 TextWrapping = TextWrapping.Wrap
@@ -409,6 +445,7 @@ namespace CryptoRetriever.Data {
                 );
             }
 
+            Canvas.SetZIndex(_datasetPath, DATA_ZINDEX);
             _canvas.Children.Add(_datasetPath);
         }       
 
@@ -417,14 +454,10 @@ namespace CryptoRetriever.Data {
         /// </summary>
         private void UpdateGraphScales()
 		{
-            for (int i = 0; i < _graphTicks.Count; i++)
-            {
+            for (int i = 0; i < _graphTicks.Count; i++) {
                 _canvas.Children.Remove(_graphTicks[i]);
             }
             _graphTicks.Clear();
-
-            if (!_areTicksEnabled)
-                return; // We're done.
 
             // Setup axis ticks w/ labels
             //      y-axis  
@@ -439,28 +472,27 @@ namespace CryptoRetriever.Data {
             }
 
             // Set up labels and pin to points
-            for (int i = 0; i < dblPointsY.Count; i++)
-            {
-                string label = dblPointsY[i].ToString("C");
+            if (_areTicksEnabled) {
+                for (int i = 0; i < dblPointsY.Count; i++) {
+                    string label = dblPointsY[i].ToString("C");
 
-                TextBlock block = CreateGraphTickLabel(
-                    label,
-                    12,
-                    WHITE_BRUSH,
-                    dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start ? true : false);
+                    TextBlock block = CreateGraphTickLabel(
+                        label,
+                        12,
+                        _foregroundColor,
+                        dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start ? true : false);
 
-                block.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+                    block.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
 
-                Canvas.SetLeft(block, rangeTickData[i].X - block.DesiredSize.Width);
-                Canvas.SetTop(block, rangeTickData[i].Y - block.DesiredSize.Height);
-                _graphTicks.Add(block);
-                _canvas.Children.Add(block);
+                    Canvas.SetLeft(block, rangeTickData[i].X - block.DesiredSize.Width);
+                    Canvas.SetTop(block, rangeTickData[i].Y - block.DesiredSize.Height);
+                    _graphTicks.Add(block);
 
-                Line tick = CreateTickMark(GREEN_BRUSH, "y", dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start);
-                Canvas.SetLeft(tick, rangeTickData[i].X);
-                Canvas.SetTop(tick, rangeTickData[i].Y);
-                _graphTicks.Add(tick);
-                _canvas.Children.Add(tick);
+                    Line tick = CreateTickMark(_axisBrush, "y", dblPointsY[i] > GetRange().End || dblPointsY[i] < GetRange().Start);
+                    Canvas.SetLeft(tick, rangeTickData[i].X);
+                    Canvas.SetTop(tick, rangeTickData[i].Y);
+                    _graphTicks.Add(tick);
+                }
             }
 
 
@@ -478,43 +510,98 @@ namespace CryptoRetriever.Data {
 			}
 
             // Set up labels and pin to points
-            for (int i = 0; i < dblPointsX.Count; i++)
-            {
-                DateTime date = DateTime.Parse(new TimestampToDateFormatter().Format(dblPointsX[i]));
+            if (_areTicksEnabled) {
+                for (int i = 0; i < dblPointsX.Count; i++) {
+                    DateTime date = DateTime.Parse(new TimestampToDateFormatter().Format(dblPointsX[i]));
 
-                string label;
-                switch (domainTickData.Item1)
-                {
-                    case "m":
-                        label = date.ToString("MMM") + " " + date.Year;
-                        break;
-                    //case "w":
-                    //    label = date.ToString("MMM") + " WK" + i;
-                    //    break;
-                    case "d":
-                        label = date.ToString("MMM") + " " + date.Day;
-                        break;
-                    case "s":
-                        label = date.ToLongTimeString();
-                        break;
-                    default:
-                        label = date.ToShortTimeString();
-                        break;
+                    string label;
+                    switch (domainTickData.Item1) {
+                        case "m":
+                            label = date.ToString("MMM") + " " + date.Year;
+                            break;
+                        //case "w":
+                        //    label = date.ToString("MMM") + " WK" + i;
+                        //    break;
+                        case "d":
+                            label = date.ToString("MMM") + " " + date.Day;
+                            break;
+                        case "s":
+                            label = date.ToLongTimeString();
+                            break;
+                        default:
+                            label = date.ToShortTimeString();
+                            break;
+                    }
+                    bool blurTick = dblPointsX[i] > GetDomain().End || dblPointsX[i] < GetDomain().Start ? true : false;
+                    TextBlock xTickLabel = CreateGraphTickLabel(label, 12, _foregroundColor, blurTick);
+                    xTickLabel.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+                    Canvas.SetLeft(xTickLabel, domainTickData.Item2[i].X);
+                    Canvas.SetTop(xTickLabel, domainTickData.Item2[i].Y);
+                    _graphTicks.Add(xTickLabel);
+
+                    Line xTick = CreateTickMark(_axisBrush, "x", blurTick);
+                    Canvas.SetLeft(xTick, domainTickData.Item2[i].X);
+                    Canvas.SetTop(xTick, domainTickData.Item2[i].Y);
+                    _graphTicks.Add(xTick);
                 }
-                bool blurTick = dblPointsX[i] > GetDomain().End || dblPointsX[i] < GetDomain().Start ? true : false;
-                TextBlock xTickLabel = CreateGraphTickLabel(label, 12, WHITE_BRUSH, blurTick);
-                xTickLabel.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
-                Canvas.SetLeft(xTickLabel, domainTickData.Item2[i].X);
-                Canvas.SetTop(xTickLabel, domainTickData.Item2[i].Y);
-                _graphTicks.Add(xTickLabel);
-                _canvas.Children.Add(xTickLabel);
-
-                Line xTick = CreateTickMark(GREEN_BRUSH, "x", blurTick);
-                Canvas.SetLeft(xTick, domainTickData.Item2[i].X);
-                Canvas.SetTop(xTick, domainTickData.Item2[i].Y);
-                _graphTicks.Add(xTick);
-                _canvas.Children.Add(xTick);
             }
+
+            // If X Gridlines are enabled, add them at
+            // the same places but dashed and full length
+            if (_areXGridlinesEnabled && domainTickData.Item2.Length > 0) {
+                StreamGeometry verticalGridlineGeometry = new StreamGeometry();
+                using (StreamGeometryContext stream = verticalGridlineGeometry.Open()) {
+                    double yStart = Y_AXIS_Y_OFFSET;
+                    double yEnd = _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET;
+                    stream.BeginFigure(new Point(domainTickData.Item2[0].X, Y_AXIS_Y_OFFSET), false, false);
+                    stream.LineTo(new Point(domainTickData.Item2[0].X, _renderParams.CanvasSizePx.Height - Y_AXIS_Y_OFFSET - X_AXIS_Y_OFFSET), true, false);
+
+                    for (int i = 1; i < domainTickData.Item2.Length; i++) {
+                        Point top = new Point(domainTickData.Item2[i].X, yStart);
+                        Point bottom = new Point(top.X, yEnd);
+                        stream.LineTo(top, false, false);
+                        stream.LineTo(bottom, true, false);
+                    }
+                }
+                Path verticalGridlines = MakePathFromGeometry(_gridlineBrush, verticalGridlineGeometry, 1);
+                Canvas.SetZIndex(verticalGridlines, GRIDLINE_ZINDEX);
+                _graphTicks.Add(verticalGridlines);
+            }
+
+            if (_areYGridlinesEnabled && rangeTickData.Length > 0) {
+                StreamGeometry horizontalGridlineGeometry = new StreamGeometry();
+                using (StreamGeometryContext stream = horizontalGridlineGeometry.Open()) {
+                    double xStart = Y_AXIS_X_OFFSET;
+                    double xEnd = _renderParams.CanvasSizePx.Width - X_AXIS_X_OFFSET;
+                    stream.BeginFigure(new Point(xStart, rangeTickData[0].Y), false, false);
+                    stream.LineTo(new Point(xEnd, rangeTickData[0].Y), true, false);
+
+                    for (int i = 1; i < rangeTickData.Length; i++) {
+                        Point left = new Point(xStart, rangeTickData[i].Y);
+                        Point right = new Point(xEnd, rangeTickData[i].Y);
+                        stream.LineTo(left, false, false);
+                        stream.LineTo(right, true, false);
+                    }
+                }
+                Path horizontalGridlines = MakePathFromGeometry(_gridlineBrush, horizontalGridlineGeometry, 1);
+                Canvas.SetZIndex(horizontalGridlines, GRIDLINE_ZINDEX);
+                _graphTicks.Add(horizontalGridlines);
+            }
+
+            foreach (FrameworkElement element in _graphTicks)
+                _canvas.Children.Add(element);
+        }
+
+        private Path MakePathFromGeometry(Brush stroke, StreamGeometry geometry, double thickness) {
+            Path path = new Path();
+            path.Data = geometry;
+            path.Stroke = _gridlineBrush;
+            path.StrokeThickness = thickness;
+            Canvas.SetLeft(path, 0);
+            Canvas.SetTop(path, 0);
+            Canvas.SetRight(path, 0);
+            Canvas.SetBottom(path, 0);
+            return path;
         }
 
         /// <summary>

@@ -62,6 +62,8 @@
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Axis" Checked="OnAxisVisibleCheckboxChecked" Unchecked="OnAxisVisibleCheckboxChecked" Margin="5" />
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Tickmarks" Checked="OnTickmarksVisibleCheckboxChecked" Unchecked="OnTickmarksVisibleCheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="True" Content="Show Hor. Gridlines" Checked="OnHorizGridlinesVisibleCheckboxChecked" Unchecked="OnHorizGridlinesVisibleCheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="True" Content="Show Vert. Gridlines" Checked="OnVertGridlinesVisibleCheckboxChecked" Unchecked="OnVertGridlinesVisibleCheckboxChecked" Margin="5" />
                             <CheckBox Foreground="White" IsChecked="False" Content="Start range at 0" Checked="OnStartRangeAt0CheckboxChecked" Unchecked="OnStartRangeAt0CheckboxChecked" Margin="5" />
                         </StackPanel>
                     </ScrollViewer>

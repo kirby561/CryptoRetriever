@@ -173,6 +173,24 @@ namespace CryptoRetriever.UI {
             _renderer.AreTicksEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
         }
 
+        private void OnHorizGridlinesVisibleCheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.AreYGridlinesEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
+        private void OnVertGridlinesVisibleCheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.AreXGridlinesEnabled = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
         private void OnStartRangeAt0CheckboxChecked(object sender, RoutedEventArgs e) {
             if (_renderer == null)
                 return; // The dataset has not been set yet
