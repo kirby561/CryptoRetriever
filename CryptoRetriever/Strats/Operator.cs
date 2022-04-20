@@ -11,16 +11,29 @@ namespace CryptoRetriever.Strats {
     /// </summary>
     public abstract class Operator : ITreeNode {
         public abstract String GetId();
+        public abstract String GetDescription();
         public abstract String GetStringValue(StrategyRuntimeContext context);
+        public abstract Operator Clone();
+        
+        public virtual String GetLabel() {
+            return GetId();
+        }
+
         public virtual ITreeNode[] GetChildren() {
             // By default, no children
             return null;
         }
+
         public virtual void SetChild(int index, ITreeNode child) {
             // By default, no children
             throw new Exception("This node has no children");
         }
-        public abstract Operator[] GetOptions();
+
+        /// <returns>
+        /// Gets the available operators for this operator type indexed in a map
+        /// by ID..
+        /// </returns>
+        public abstract Dictionary<String, Operator> GetOptions();
     }
 
     /// <summary>
@@ -29,17 +42,13 @@ namespace CryptoRetriever.Strats {
     public abstract class MathOperator : Operator {
         public abstract NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
+        public abstract override String GetDescription();
+        public abstract override Operator Clone();
         public override String GetId() {
             return "MathOperator";
         }
-        public override Operator[] GetOptions() {
-            return new Operator[] {
-                new AdditionOperator(),
-                new SubtractionOperator(),
-                new MultiplicationOperator(),
-                new DivisionOperator(),
-                new ExponentOperator()
-            };
+        public override Dictionary<String, Operator> GetOptions() {
+            return Operators.GetMathOperators();
         }
     }
 
@@ -48,8 +57,20 @@ namespace CryptoRetriever.Strats {
             return new NumberValue(num1.GetValue(context) + num2.GetValue(context));
         }
 
+        public override String GetId() {
+            return "AdditionOperator";
+        }
+
+        public override String GetDescription() {
+            return "Adds two numbers together.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "+";
+        }
+
+        public override Operator Clone() {
+            return new AdditionOperator();
         }
     }
 
@@ -58,8 +79,20 @@ namespace CryptoRetriever.Strats {
             return new NumberValue(num1.GetValue(context) - num2.GetValue(context));
         }
 
+        public override String GetId() {
+            return "SubtractionOperator";
+        }
+
+        public override String GetDescription() {
+            return "Subtracts the second number from the first.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "-";
+        }
+
+        public override Operator Clone() {
+            return new SubtractionOperator();
         }
     }
 
@@ -68,8 +101,20 @@ namespace CryptoRetriever.Strats {
             return new NumberValue(num1.GetValue(context) * num2.GetValue(context));
         }
 
+        public override String GetId() {
+            return "MultiplicationOperator";
+        }
+
+        public override String GetDescription() {
+            return "Multiplies two numbers together.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "x";
+        }
+
+        public override Operator Clone() {
+            return new MultiplicationOperator();
         }
     }
 
@@ -77,8 +122,21 @@ namespace CryptoRetriever.Strats {
         public override NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context) {
             return new NumberValue(num1.GetValue(context) / num2.GetValue(context));
         }
+
+        public override String GetId() {
+            return "DivisionOperator";
+        }
+
+        public override String GetDescription() {
+            return "Divides the first number by the second.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "/";
+        }
+
+        public override Operator Clone() {
+            return new DivisionOperator();
         }
     }
 
@@ -87,8 +145,20 @@ namespace CryptoRetriever.Strats {
             return new NumberValue(Math.Pow(num1.GetValue(context), num2.GetValue(context)));
         }
 
+        public override String GetId() {
+            return "ExponentOperator";
+        }
+
+        public override String GetDescription() {
+            return "Raises the first number to the second number power.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "^";
+        }
+
+        public override Operator Clone() {
+            return new ExponentOperator();
         }
     }
 
@@ -98,17 +168,13 @@ namespace CryptoRetriever.Strats {
     public abstract class StringComparisonOperator : Operator {
         public abstract Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
+        public abstract override String GetDescription();
         public override String GetId() {
             return "StringComparisonOperator";
         }
 
-        public override Operator[] GetOptions() {
-            return new Operator[] {
-                new LessThanStringOperator(),
-                new GreaterThanStringOperator(),
-                new EqualsStringOperator(),
-                new DoesNotEqualStringOperator()
-            };
+        public override Dictionary<String, Operator> GetOptions() {
+            return Operators.GetStringComparisonOperators();
         }
     }
 
@@ -117,8 +183,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) < 0);
         }
 
+        public override String GetId() {
+            return "LessThanStringOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first string is less than the second (alphabetically).";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "<";
+        }
+
+        public override Operator Clone() {
+            return new LessThanStringOperator();
         }
     }
 
@@ -127,8 +205,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) > 0);
         }
 
+        public override String GetId() {
+            return "GreaterThanStringOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first string is greater than the second (alphabetically).";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return ">";
+        }
+
+        public override Operator Clone() {
+            return new GreaterThanStringOperator();
         }
     }
 
@@ -136,8 +226,21 @@ namespace CryptoRetriever.Strats {
         public override Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) == 0);
         }
+
+        public override String GetId() {
+            return "EqualsStringOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first string has the same content as the second.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "==";
+        }
+
+        public override Operator Clone() {
+            return new EqualsStringOperator();
         }
     }
 
@@ -145,8 +248,21 @@ namespace CryptoRetriever.Strats {
         public override Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) != 0);
         }
+
+        public override String GetId() {
+            return "DoesNotEqualStringOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first string has different content than the second string.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "!=";
+        }
+
+        public override Operator Clone() {
+            return new DoesNotEqualStringOperator();
         }
     }
 
@@ -156,17 +272,13 @@ namespace CryptoRetriever.Strats {
     public abstract class NumberComparisonOperator : Operator {
         public abstract Condition Compare(NumberValue left, NumberValue right, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
+        public abstract override String GetDescription();
         public override String GetId() {
             return "NumberComparisonOperator";
         }
 
-        public override Operator[] GetOptions() {
-            return new Operator[] {
-                new LessThanNumberOperator(),
-                new GreaterThanNumberOperator(),
-                new EqualsNumberOperator(),
-                new DoesNotEqualNumberOperator()
-            };
+        public override Dictionary<String, Operator> GetOptions() {
+            return Operators.GetNumberComparisonOperators();
         }
     }
 
@@ -175,8 +287,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.GetValue(context) < right.GetValue(context));
         }
 
+        public override String GetId() {
+            return "LessThanNumberOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first number is less than the second number.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "<";
+        }
+
+        public override Operator Clone() {
+            return new LessThanNumberOperator();
         }
     }
 
@@ -185,8 +309,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.GetValue(context) > right.GetValue(context));
         }
 
+        public override String GetId() {
+            return "GreaterThanNumberOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first number is greater than the second number.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return ">";
+        }
+
+        public override Operator Clone() {
+            return new GreaterThanNumberOperator();
         }
     }
 
@@ -195,8 +331,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.GetValue(context) == right.GetValue(context));
         }
 
+        public override String GetId() {
+            return "EqualsNumberOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the two numbers are equal.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "==";
+        }
+
+        public override Operator Clone() {
+            return new EqualsNumberOperator();
         }
     }
 
@@ -205,8 +353,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.GetValue(context) != right.GetValue(context));
         }
 
+        public override String GetId() {
+            return "DoesNotEqualNumberOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the two numbers are not equal.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "!=";
+        }
+
+        public override Operator Clone() {
+            return new DoesNotEqualNumberOperator();
         }
     }
 
@@ -216,15 +376,13 @@ namespace CryptoRetriever.Strats {
     public abstract class LogicOperator : Operator {
         public abstract Condition Compare(Condition left, Condition right, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
+        public abstract override String GetDescription();
         public override String GetId() {
             return "LogicOperator";
         }
 
-        public override Operator[] GetOptions() {
-            return new Operator[] {
-                new AndLogicOperator(),
-                new OrLogicOperator()
-            };
+        public override Dictionary<String, Operator> GetOptions() {
+            return Operators.GetLogicOperators();
         }
     }
 
@@ -233,8 +391,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.IsTrue(context) && right.IsTrue(context));
         }
 
+        public override String GetId() {
+            return "AndLogicOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first and second conditions are both true.";
+        }
+
         public override string GetStringValue(StrategyRuntimeContext context) {
             return "&&";
+        }
+
+        public override Operator Clone() {
+            return new AndLogicOperator();
         }
     }
 
@@ -243,8 +413,20 @@ namespace CryptoRetriever.Strats {
             return new BoolCondition(left.IsTrue(context) || right.IsTrue(context));
         }
 
+        public override String GetId() {
+            return "OrLogicOperator";
+        }
+
+        public override String GetDescription() {
+            return "Indicates if the first condition is true or the second condition is true.";
+        }
+
         public override string GetStringValue(StrategyRuntimeContext context) {
             return "||";
+        }
+
+        public override Operator Clone() {
+            return new OrLogicOperator();
         }
     }
 }

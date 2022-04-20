@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using Trigger = CryptoRetriever.Strats.Trigger;
 using Condition = CryptoRetriever.Strats.Condition;
+using System.Linq;
 
 namespace CryptoRetriever.UI {
     /// <summary>
@@ -62,7 +63,7 @@ namespace CryptoRetriever.UI {
                     border.CornerRadius = new CornerRadius(5);
 
                     TextBlock block = new TextBlock();
-                    block.Text = entry.Node.GetId() + " (" + entry.Node.GetStringValue(_dummyContext) + ")";
+                    block.Text = entry.Node.GetLabel();
                     block.Padding = new Thickness(5);
                     block.Foreground = new SolidColorBrush(Colors.White);
                     block.FontSize = 14;
@@ -78,7 +79,7 @@ namespace CryptoRetriever.UI {
                             border.Background = new SolidColorBrush(backgroundColor);
                             block.Text = entry.Node.GetStringValue(_dummyContext);
                         } else {
-                            backgroundColor = Colors.DarkOrange;
+                            backgroundColor = Color.FromRgb(0x72, 0x9f, 0xcf);
                             border.Background = new SolidColorBrush(backgroundColor);
                         }
                         panelStack.Peek().Children.Add(border);
@@ -181,16 +182,16 @@ namespace CryptoRetriever.UI {
                 base.OnMouseDown(sender, e);
 
                 Operator op = _entry.Node as Operator;
-                Operator[] options = op.GetOptions();
+                Operator[] options = op.GetOptions().Values.ToArray();
                 ListBoxDialog dialog = new ListBoxDialog();
                 dialog.SetItemSource(
-                    (Operator op) => { return op.GetStringValue(_window.GetDummyContext()); },
+                    (Operator op) => { return op.GetLabel(); },
                     options);
                 UiHelper.CenterWindowInWindow(dialog, _window);
                 dialog.ShowDialog();
 
                 if (dialog.SelectedIndex >= 0) {
-                    _entry.Parent.SetChild(_entry.ChildIndexInParent, options[dialog.SelectedIndex]);
+                    _entry.Parent.SetChild(_entry.ChildIndexInParent, options[dialog.SelectedIndex].Clone());
                     _window.UpdateUi();
                 }
             }
@@ -206,7 +207,7 @@ namespace CryptoRetriever.UI {
                 base.OnMouseUp(sender, e);
 
                 Condition cond = _entry.Node as Condition;
-                Condition[] options = cond.GetOptions();
+                Condition[] options = Conditions.GetConditions().Values.ToArray();
                 ListBoxDialog dialog = new ListBoxDialog();
                 dialog.SetItemSource(
                     (Condition c) => {
@@ -217,11 +218,12 @@ namespace CryptoRetriever.UI {
                 dialog.ShowDialog();
 
                 if (dialog.SelectedIndex >= 0) {
+                    Condition selectedCondition = options[dialog.SelectedIndex].Clone();
                     if (_entry.Parent != null) {
-                        _entry.Parent.SetChild(_entry.ChildIndexInParent, options[dialog.SelectedIndex]);
+                        _entry.Parent.SetChild(_entry.ChildIndexInParent, selectedCondition);
                         _window.UpdateUi();
                     } else {
-                        _window.Trigger.Condition = options[dialog.SelectedIndex];
+                        _window.Trigger.Condition = selectedCondition;
                         _window.UpdateUi();
                     }
                 }
@@ -238,7 +240,7 @@ namespace CryptoRetriever.UI {
                 base.OnMouseUp(sender, e);
 
                 StringValue clickedString = _entry.Node as StringValue;
-                List<StringVariable> variableOptions = Variables.GetStringVariables();
+                List<StringVariable> variableOptions = Variables.GetStringVariables().Values.ToList();
                 ConstantVariableWindow dialog = new ConstantVariableWindow();
                 dialog.SetItemSource(
                     (StringVariable c) => {
@@ -275,7 +277,7 @@ namespace CryptoRetriever.UI {
                 base.OnMouseUp(sender, e);
 
                 NumberValue clickedNumber = _entry.Node as NumberValue;
-                List<NumberVariable> variableOptions = Variables.GetNumberVariables();
+                List<NumberVariable> variableOptions = Variables.GetNumberVariables().Values.ToList();
 
                 // For numbers, add in MathValue too
                 List<object> allOptions = new List<object>();

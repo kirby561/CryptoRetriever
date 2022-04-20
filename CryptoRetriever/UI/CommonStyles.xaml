@@ -53,7 +53,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Width" Value="25" />
         <Setter Property="Height" Value="25" />
-        <Setter Property="Margin" Value="2" />
+        <Setter Property="Margin" Value="0 2 0 2" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -121,7 +121,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Width" Value="25" />
         <Setter Property="Height" Value="25" />
-        <Setter Property="Margin" Value="2" />
+        <Setter Property="Margin" Value="0 2 0 2" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -192,12 +192,15 @@
         <Setter Property="Padding" Value="5 5 5 5" />
     </Style>
 <!-- Trigger UI styles -->
-    <Style x:Key="TbTriggerEditorSummary" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="#729fcf" />
+    <Style x:Key="TriggerNodeTextBox" TargetType="TextBlock">
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontFamily" Value="Arial" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style x:Key="TriggerNodeBorder" TargetType="Border">
+        <Setter Property="Background" Value="#729fcf" />
         <Setter Property="Margin" Value="5 5 5 5" />
         <Setter Property="Padding" Value="5 5 5 5" />
+        <Setter Property="CornerRadius" Value="5" />
     </Style>
 </ResourceDictionary>

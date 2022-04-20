@@ -64,7 +64,7 @@
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Tickmarks" Checked="OnTickmarksVisibleCheckboxChecked" Unchecked="OnTickmarksVisibleCheckboxChecked" Margin="5" />
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Hor. Gridlines" Checked="OnHorizGridlinesVisibleCheckboxChecked" Unchecked="OnHorizGridlinesVisibleCheckboxChecked" Margin="5" />
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Vert. Gridlines" Checked="OnVertGridlinesVisibleCheckboxChecked" Unchecked="OnVertGridlinesVisibleCheckboxChecked" Margin="5" />
-                            <CheckBox Foreground="White" IsChecked="False" Content="Start range at 0" Checked="OnStartRangeAt0CheckboxChecked" Unchecked="OnStartRangeAt0CheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="False" Content="Start Range at 0" Checked="OnStartRangeAt0CheckboxChecked" Unchecked="OnStartRangeAt0CheckboxChecked" Margin="5" />
                         </StackPanel>
                     </ScrollViewer>
                 </kfso:DockablePanel.HostedContent>
@@ -81,7 +81,7 @@
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-                            <Grid Margin="5">
+                            <Grid Margin="0 5 0 5">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1*" />
                                     <ColumnDefinition Width="Auto" />

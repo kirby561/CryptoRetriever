@@ -8,6 +8,8 @@ using CryptoRetriever.Source;
 using System.IO;
 using CryptoRetriever.UI;
 using CryptoRetriever.Data;
+using CryptoRetriever.Strats;
+using System.Diagnostics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -26,9 +28,13 @@ namespace CryptoRetriever {
 
         private DatasetViewer _dataSetViewer;
         private Window _dataSetCreator;
+        private StrategyManager _strategyManager;
 
         public StartWindow() {
             InitializeComponent();
+
+            _strategyManager = new StrategyManager(GetStrategyDirectory());
+            _strategyManager.LoadAll();
         }
 
         
@@ -48,7 +54,7 @@ namespace CryptoRetriever {
 
         private void OnCreateDatasetReleased(object sender, MouseButtonEventArgs e) {
             _createDatasetButton.Background = _buttonBackground;
-            _dataSetCreator = new DatasetCreator();
+            _dataSetCreator = new DatasetCreator(_strategyManager);
             _dataSetCreator.Show();
         }
 
@@ -57,7 +63,7 @@ namespace CryptoRetriever {
 
             Result<Tuple<Dataset, String>> result = DatasetUiHelper.OpenDatasetWithDialog("");
             if (result.Succeeded) {
-                _dataSetViewer = new DatasetViewer();
+                _dataSetViewer = new DatasetViewer(_strategyManager);
                 _dataSetViewer.SetDataset(result.Value.Item2, result.Value.Item1);
                 _dataSetViewer.Show();
             }
@@ -79,6 +85,13 @@ namespace CryptoRetriever {
         private void OnAboutClicked(object sender, RoutedEventArgs e) {
             AboutWindow about = new AboutWindow();
             about.ShowDialog();
+        }
+
+        private String GetStrategyDirectory() {
+            String path = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + "/Strategies";
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            return path;
         }
     }
 }

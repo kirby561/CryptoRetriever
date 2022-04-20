@@ -42,11 +42,12 @@ namespace CryptoRetriever.UI {
         /// in order to specify a different manager (one shared by the application for
         /// example).
         /// </summary>
-        public StrategyManager StrategyManager { get; set; } = new StrategyManager();
+        public StrategyManager StrategyManager { get; set; }
 
-        public DatasetViewer() {
+        public DatasetViewer(StrategyManager manager) {
             this.InitializeComponent();
 
+            StrategyManager = manager;
             _dockManager.UseDockManagerForTree(this);
             _dockPanelSpotLeft.ChildrenChanged += OnStationChildrenChanged;
             _dockPanelSpotRight.ChildrenChanged += OnStationChildrenChanged;
@@ -260,7 +261,7 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnAddStrategyClicked(object sender, RoutedEventArgs e) {
-            StrategyEditorWindow window = new StrategyEditorWindow();
+            StrategyEditorWindow window = new StrategyEditorWindow(StrategyManager);
             UiHelper.CenterWindowInWindow(window, this);
             window.ShowDialog();
 
@@ -270,22 +271,25 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnRemoveStrategyClicked(object sender, RoutedEventArgs e) {
-            UiHelper.RemoveSelectedItemsFromListBox(StrategyManager.GetStrategies(), _strategiesListView);
+            if (_strategiesListView.SelectedIndex >= 0) {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this strategy?", "Delete strategy", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes) {
+                    Strategy selectedStrategy = _strategiesListView.SelectedItem as Strategy;
+                    StrategyManager.DeleteStrategyByName(selectedStrategy.Name);
+                    UiHelper.RemoveSelectedItemsFromListBox(StrategyManager.GetStrategies(), _strategiesListView);
+                }
+            }
         }
 
         private void OnStrategiesListDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             if (_strategiesListView.SelectedIndex >= 0) {
-                StrategyEditorWindow strategyEditorWindow = new StrategyEditorWindow();
+                StrategyEditorWindow strategyEditorWindow = new StrategyEditorWindow(StrategyManager);
                 UiHelper.CenterWindowInWindow(strategyEditorWindow, this);
 
                 // ?? TODO: This should be a deep copy but there's no way to save conditions
                 // right now so it will be a reference until that is implemented.
                 strategyEditorWindow.SetWorkingStrategy(StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex]);
                 strategyEditorWindow.ShowDialog();
-
-                if (strategyEditorWindow.Strategy != null) {
-                    StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex] = strategyEditorWindow.Strategy;
-                }
             }
         }
 

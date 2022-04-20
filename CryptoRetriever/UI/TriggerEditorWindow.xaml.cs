@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using CryptoRetriever.Strats;
 using Trigger = CryptoRetriever.Strats.Trigger;
 
@@ -21,10 +22,6 @@ namespace CryptoRetriever.UI {
     /// showing the window.
     /// </summary>
     public partial class TriggerEditorWindow : Window {
-        // Use a dummy context to show dummy values since we're not
-        // actually running the strategy yet
-        private StrategyRuntimeContext _dummyContext = new ExampleStrategyRunParams();
-
         /// <summary>
         /// Contains the trigger being worked on.
         /// When Okay is pressed, this becomes the result Trigger.
@@ -67,11 +64,15 @@ namespace CryptoRetriever.UI {
             }
 
             if (WorkingTrigger.Condition == null)
-                WorkingTrigger.Condition = new BoolCondition("Condition", true);
+                WorkingTrigger.Condition = Conditions.GetConditions()["True"].Clone();
             if (WorkingTrigger.TrueAction == null)
-                WorkingTrigger.TrueAction = new DoNothingAction();
+                WorkingTrigger.TrueAction = Actions.GetActions()[ActionId.DoNothing];
             if (WorkingTrigger.FalseAction == null)
-                WorkingTrigger.FalseAction = new DoNothingAction();
+                WorkingTrigger.FalseAction = Actions.GetActions()[ActionId.DoNothing];
+
+            UiHelper.AddButtonHoverAndClickGraphics(Color.FromRgb(0x72, 0x9f, 0xcf), _conditionBorder);
+            UiHelper.AddButtonHoverAndClickGraphics(Color.FromRgb(0x72, 0x9f, 0xcf), _thenActionBorder);
+            UiHelper.AddButtonHoverAndClickGraphics(Color.FromRgb(0x72, 0x9f, 0xcf), _elseActionBorder);
 
             UpdateUi();
         }
@@ -96,9 +97,9 @@ namespace CryptoRetriever.UI {
 
         private void UpdateUi() {
             _triggerNameTextBox.Text = WorkingTrigger.Name;
-            _conditionTb.Text = WorkingTrigger.Condition.GetId() + " - " + WorkingTrigger.Condition.GetStringValue(_dummyContext);
-            _thenActionTb.Text = WorkingTrigger.TrueAction.GetId() + " - " + WorkingTrigger.TrueAction.GetStringValue(_dummyContext);
-            _elseActionTb.Text = WorkingTrigger.FalseAction.GetId() + " - " + WorkingTrigger.FalseAction.GetStringValue(_dummyContext);
+            _conditionTb.Text = WorkingTrigger.Condition.GetLabel();
+            _thenActionTb.Text = WorkingTrigger.TrueAction.GetLabel();
+            _elseActionTb.Text = WorkingTrigger.FalseAction.GetLabel();
         }
     }
 }

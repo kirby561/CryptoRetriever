@@ -25,16 +25,24 @@
             <TextBox Name="_triggerNameTextBox" Text="" Margin="5" />
             
             <TextBlock Text="After Event" Style="{StaticResource TbHeader}" />
-            <TextBlock Text="New Tick" Style="{StaticResource TbTriggerEditorSummary}" />
-            
+            <Border Style="{StaticResource TriggerNodeBorder}">
+                <TextBlock Text="New Tick" Style="{StaticResource TriggerNodeTextBox}" />
+            </Border>
+
             <TextBlock Text="If" Style="{StaticResource TbHeader}" />
-            <TextBlock Name="_conditionTb" Text="Condition" MouseUp="OnConditionClicked" Style="{StaticResource TbTriggerEditorSummary}" />
+            <Border Name="_conditionBorder" MouseUp="OnConditionClicked" Style="{StaticResource TriggerNodeBorder}">
+                <TextBlock Name="_conditionTb" Text="Condition" Style="{StaticResource TriggerNodeTextBox}" />
+            </Border>
 
             <TextBlock Text="Then" Style="{StaticResource TbHeader}" />
-            <TextBlock Name="_thenActionTb" Text="Action" MouseUp="OnThenActionClicked" Style="{StaticResource TbTriggerEditorSummary}" />
+            <Border Name="_thenActionBorder" MouseUp="OnThenActionClicked"  Style="{StaticResource TriggerNodeBorder}">
+                <TextBlock Name="_thenActionTb" Text="Action" Style="{StaticResource TriggerNodeTextBox}" />
+            </Border>
 
             <TextBlock Text="Else" Style="{StaticResource TbHeader}" />
-            <TextBlock Name="_elseActionTb" Text="Action" MouseUp="OnElseActionClicked" Style="{StaticResource TbTriggerEditorSummary}" />
+            <Border Name="_elseActionBorder" MouseUp="OnElseActionClicked" Style="{StaticResource TriggerNodeBorder}">
+                <TextBlock Name="_elseActionTb" Text="Action" Style="{StaticResource TriggerNodeTextBox}" />
+            </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">

@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using CryptoRetriever.Data;
 using System.Windows.Media;
 using Utf8Json;
+using CryptoRetriever.Strats;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -23,9 +24,12 @@ namespace CryptoRetriever.UI {
         private Dictionary<String, ISource> _sources = new Dictionary<String, ISource>();
         private ISource _currentSource = null;
         private int _selectedGranularity = -1;
+        private StrategyManager _strategyManager;
 
-        public DatasetCreator() {
+        public DatasetCreator(StrategyManager manager) {
             InitializeComponent();
+
+            _strategyManager = manager;
 
             // Add all the sources
             CoinbaseSource coinbaseSource = new CoinbaseSource();
@@ -134,7 +138,7 @@ namespace CryptoRetriever.UI {
                                     MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + result.ErrorDetails);
                                 } else {
                                     // Open a dataset viewer
-                                    DatasetViewer viewer = new DatasetViewer();
+                                    DatasetViewer viewer = new DatasetViewer(_strategyManager);
                                     viewer.SetDataset(filePath, result.Value);
                                     viewer.Show();
                                 }

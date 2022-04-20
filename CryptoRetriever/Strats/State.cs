@@ -1,9 +1,10 @@
-﻿using System;
+﻿using CryptoRetriever.Utility.JsonObjects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
-    public class State {
+    public class State : IJsonable {
         private String _stateId;
 
         public String Summary {
@@ -16,8 +17,18 @@ namespace CryptoRetriever.Strats {
             return _stateId;
         }
 
-        public State(String stateId) {
+        public State(String stateId = "") {
             _stateId = stateId;
+        }
+
+        public JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("StateId", _stateId);
+            return obj;
+        }
+
+        public void FromJson(JsonObject json) {
+            _stateId = json.GetString("StateId");
         }
     }
 }

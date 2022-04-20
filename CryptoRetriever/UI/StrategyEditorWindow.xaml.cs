@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using CryptoRetriever.Filter;
 using CryptoRetriever.Strats;
+using CryptoRetriever.Utility.JsonObjects;
 using Utf8Json;
 
 namespace CryptoRetriever.UI {
@@ -21,6 +22,8 @@ namespace CryptoRetriever.UI {
     public partial class StrategyEditorWindow : Window {
         private Strategy _strategy; // The currently edited strategy
         private Strategy _result = null; // This will be set to the strategy when the editing is done
+        private StrategyManager _strategyManager;
+        private bool _isEditing = false;
 
         /// <summary>
         /// Gets the strategy modified or created by this editor or
@@ -32,11 +35,12 @@ namespace CryptoRetriever.UI {
             }
         }
 
-        public StrategyEditorWindow() {
+        public StrategyEditorWindow(StrategyManager manager) {
             InitializeComponent();
             SetWorkingStrategy(new Strategy());
 
             _strategy.States.Add(new State("Default"));
+            _strategyManager = manager;
         }
 
         /// <summary>
@@ -45,10 +49,13 @@ namespace CryptoRetriever.UI {
         /// </summary>
         /// <param name="strategyToEdit">The strategy to edit.</param>
         public void SetWorkingStrategy(Strategy strategyToEdit) {
+            _isEditing = true;
             _strategy = strategyToEdit;
             _nameTextBox.Text = strategyToEdit.Name;
             _accountStartingFiatTextBox.Text = "" + _strategy.Account.CurrencyBalance;
             _accountStartingAssetsTextBox.Text = "" + _strategy.Account.AssetBalance;
+            _exchangeTransactionFeeTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionFee;
+            _exchangeTransationTimeTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionTimeS;
             if (_strategy.Start != DateTime.MinValue)
                 _startDatePicker.SelectedDate = _strategy.Start;
             if (_strategy.End != DateTime.MinValue)
@@ -68,6 +75,11 @@ namespace CryptoRetriever.UI {
             String name = _nameTextBox.Text;
             if (String.IsNullOrWhiteSpace(name)) {
                 MessageBox.Show("You must enter a name.");
+                return;
+            }
+
+            if (!_isEditing && _strategyManager.GetStrategyByName(name) != null) {
+                MessageBox.Show("A strategy by that name already exists.");
                 return;
             }
 
@@ -125,6 +137,11 @@ namespace CryptoRetriever.UI {
             _result = _strategy;
 
             Close();
+
+            if (_isEditing)
+                _strategyManager.UpdateStrategy(_result);
+            else
+                _strategyManager.AddStrategy(_result);
         }
 
         private void OnAddFilterClicked(object sender, RoutedEventArgs e) {

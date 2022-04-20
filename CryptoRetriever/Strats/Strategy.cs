@@ -1,5 +1,6 @@
 ﻿using CryptoRetriever.Data;
 using CryptoRetriever.Filter;
+using CryptoRetriever.Utility.JsonObjects;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,9 +16,9 @@ namespace CryptoRetriever.Strats {
     /// perform on a historical dataset.
     /// </summary>
     public class Strategy {
-        public String Name { get; set; }
+        public String Name { get; set; } = "";
         public Account Account { get; set; } = new Account();
-        public ExchangeAssumptions ExchangeAssumptions { get; set; }
+        public ExchangeAssumptions ExchangeAssumptions { get; set; } = new ExchangeAssumptions();
         public ObservableCollection<IFilter> Filters { get; set; } = new ObservableCollection<IFilter>();
         public ObservableCollection<State> States { get; set; }  = new ObservableCollection<State>();
         public ObservableCollection<Trigger> Triggers { get; set; } = new ObservableCollection<Trigger>();
@@ -31,6 +32,60 @@ namespace CryptoRetriever.Strats {
             get {
                 return Name;
             }
+        }
+
+        public JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Name", Name)
+                .Put("Account", Account.ToJson())
+                .Put("ExchangeAssumptions", ExchangeAssumptions.ToJson())
+                .Put("Filters", Filters)
+                .Put("States", States)
+                .Put("Triggers", Triggers)
+                .Put("Start", Start)
+                .Put("End", End);
+            return obj;
+        }
+
+        public void FromJson(JsonObject obj) {
+            Name = obj.GetString("Name");
+            Account.FromJson(obj.GetObject("Account"));
+            ExchangeAssumptions.FromJson(obj.GetObject("ExchangeAssumptions"));
+
+            List<JsonObject> filters = obj.GetObjectArray("Filters");
+            if (filters != null) {
+                foreach (JsonObject filterObj in filters) {
+                    String filterType = filterObj.GetString("Type");
+                    if ("GaussianFilter".Equals(filterType)) {
+                        GaussianFilter filter = new GaussianFilter();
+                        filter.FromJson(filterObj);
+                        Filters.Add(filter);
+                    } else {
+                        throw new InvalidOperationException("Unsupported filter type in strategy: " + filterType);
+                    }
+                }
+            }
+
+            List<JsonObject> states = obj.GetObjectArray("States");
+            if (states != null) {
+                foreach (JsonObject stateObj in states) {
+                    State state = new State();
+                    state.FromJson(stateObj);
+                    States.Add(state);
+                }
+            }
+
+            List<JsonObject> triggers = obj.GetObjectArray("Triggers");
+            if (triggers != null) {
+                foreach (JsonObject triggerObj in triggers) {
+                    Trigger trigger = new Trigger();
+                    trigger.FromJson(triggerObj);
+                    Triggers.Add(trigger);
+                }
+            }
+
+            Start = obj.GetDateTime("Start");
+            End = obj.GetDateTime("End");
         }
     }
 

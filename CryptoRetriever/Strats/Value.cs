@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CryptoRetriever.Utility.JsonObjects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,7 +9,14 @@ namespace CryptoRetriever.Strats {
     /// </summary>
     public abstract class Value : ITreeNode {
         public abstract String GetId();
+        public abstract string GetDescription();
         public abstract String GetStringValue(StrategyRuntimeContext context);
+        public virtual String GetLabel() {
+            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+        }
+        public abstract Value Clone();
+        public abstract JsonObject ToJson();
+        public abstract void FromJson(JsonObject json);
         public virtual ITreeNode[] GetChildren() {
             // By default, no children
             return null;
@@ -22,6 +30,7 @@ namespace CryptoRetriever.Strats {
             return GetId();
         }
     }
+
     /// <summary>
     /// Represents a constant String value.
     /// </summary>
@@ -42,8 +51,27 @@ namespace CryptoRetriever.Strats {
             return "StringValue";
         }
 
+        public override String GetDescription() {
+            return "Represents some String value.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return GetValue(context);
+        }
+
+        public override Value Clone() {
+            return new StringValue(_value);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("Value", GetStringValue(null));
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            _value = json.GetString("Value");
         }
     }
 
@@ -62,7 +90,31 @@ namespace CryptoRetriever.Strats {
         }
 
         public override String GetId() {
-            return _variable.Id;
+            return "VariableStringValue";
+        }
+
+        public override String GetDescription() {
+            return "Represents a value that will be retrieved from a String variable when evaluated.";
+        }
+
+        public override String GetLabel() {
+            return _variable.Id + ": " + GetStringValue(new ExampleStrategyRunParams());
+        }
+
+        public override Value Clone() {
+            return new VariableStringValue((StringVariable)_variable.Clone());
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("Value", _variable.Id);
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            String varId = json.GetString("Value");
+            _variable = (StringVariable)Variables.GetStringVariables()[varId].Clone();
         }
     }
 
@@ -72,24 +124,43 @@ namespace CryptoRetriever.Strats {
     public class NumberValue : Value {
         private double _value = 0;
 
-        public virtual double GetValue(StrategyRuntimeContext context) {
-            return _value;
-        }
-
         public NumberValue() {
             _value = 0;
+        }
+
+        public NumberValue(double value) {
+            _value = value;
+        }
+
+        public virtual double GetValue(StrategyRuntimeContext context) {
+            return _value;
         }
 
         public override String GetId() {
             return "NumberValue";
         }
 
+        public override String GetDescription() {
+            return "Represents some Number value.";
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "" + GetValue(context);
         }
 
-        public NumberValue(double value) {
-            _value = value;
+        public override Value Clone() {
+            return new NumberValue(_value);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("Value", _value);
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            _value = json.GetDouble("Value");
         }
     }
 
@@ -108,7 +179,31 @@ namespace CryptoRetriever.Strats {
         }
 
         public override String GetId() {
-            return _variable.Id;
+            return "VariableNumberValue";
+        }
+
+        public override String GetDescription() {
+            return "Represents a number that will be retrieved from a variable when evaluated.";
+        }
+
+        public override String GetLabel() {
+            return _variable.Id + ": " + GetStringValue(new ExampleStrategyRunParams());
+        }
+
+        public override Value Clone() {
+            return new VariableNumberValue((NumberVariable)_variable.Clone());
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("Value", _variable.Id);
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            String varId = json.GetString("Value");
+            _variable = (NumberVariable)Variables.GetNumberVariables()[varId].Clone();
         }
     }
 
@@ -135,6 +230,14 @@ namespace CryptoRetriever.Strats {
             return "MathValue";
         }
 
+        public override String GetDescription() {
+            return "Represents a Number value that is calculated from 2 other Number values using a math operator.";
+        }
+
+        public override Value Clone() {
+            return new MathValue((NumberValue)LeftOperand.Clone(), (MathOperator)Operator.Clone(), (NumberValue)RightOperand.Clone());
+        }
+
         public override ITreeNode[] GetChildren() {
             return new ITreeNode[] { LeftOperand, Operator, RightOperand };
         }
@@ -148,6 +251,26 @@ namespace CryptoRetriever.Strats {
                 RightOperand = child as NumberValue;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("LeftOperand", LeftOperand.ToJson());
+            obj.Put("Operator", Operator.GetId());
+            obj.Put("RightOperand", RightOperand.ToJson());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            Dictionary<String, Value> values = Values.GetValues();
+            JsonObject leftOperandObj = json.GetObject("LeftOperand");
+            LeftOperand = (NumberValue)values[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand.FromJson(leftOperandObj);
+            Operator = (MathOperator)Operators.GetMathOperators()[json.GetString("Operator")].Clone();
+            JsonObject rightOperandObj = json.GetObject("RightOperand");
+            RightOperand = (NumberValue)values[rightOperandObj.GetString("Id")].Clone();
+            RightOperand.FromJson(rightOperandObj);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CryptoRetriever.Strats;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,7 +47,7 @@ namespace CryptoRetriever.UI {
             _actionsPanel.Children.Clear();
 
             if (_action == null)
-                _action = new DoNothingAction();
+                _action = Actions.GetActions()[ActionId.DoNothing];
 
             List<TreeUiEntry> nodes = new List<TreeUiEntry>();
             TreeUiEntry.PreOrderTraverseNodes(_action, null, 0, nodes, 0);
@@ -67,7 +68,7 @@ namespace CryptoRetriever.UI {
                 border.CornerRadius = new CornerRadius(5);
 
                 TextBlock block = new TextBlock();
-                block.Text = entry.Node.GetId() + " - " + entry.Node.GetStringValue(_context);
+                block.Text = entry.Node.GetLabel();
                 block.Padding = new Thickness(5);
                 block.Foreground = new SolidColorBrush(Colors.White);
                 block.FontSize = 14;
@@ -78,7 +79,7 @@ namespace CryptoRetriever.UI {
                     border.Child = block;
                     block.TextAlignment = TextAlignment.Center;
 
-                    if (entry.Node is DoNothingAction) {
+                    if (entry.Node.GetId().Equals(ActionId.NotSet)) {
                         backgroundColor = Colors.DarkOrange;
                         border.Background = new SolidColorBrush(backgroundColor);
                     } else {
@@ -165,10 +166,11 @@ namespace CryptoRetriever.UI {
             base.OnMouseDown(sender, e);
 
             StratAction action = _entry.Node as StratAction;
-            List<StratAction> options = Actions.GetActions();
+            Dictionary<String, StratAction> optionsDictionary = Actions.GetActions();
+            List<StratAction> options = optionsDictionary.Values.ToList();
             ListBoxDialog dialog = new ListBoxDialog();
             dialog.SetItemSource(
-                (StratAction act) => { return act.GetId() + " - " + act.GetStringValue(_window.GetDummyRuntimeContext()); },
+                (StratAction act) => { return act.GetLabel(); },
                 options);
             UiHelper.CenterWindowInWindow(dialog, _window);
             dialog.ShowDialog();
@@ -177,7 +179,8 @@ namespace CryptoRetriever.UI {
                 return; // Nothing selected so don't do anything.
 
             int index = dialog.SelectedIndex;
-            if (options[index] is NumberAction) {
+            StratAction selectedItem = options[index].Clone();
+            if (selectedItem is NumberAction) {
                 // String actions need a variable from the user, grab that first
                 ConstantVariableWindow constantDialog = new ConstantVariableWindow();
                 constantDialog.ShowVariableList = false;
@@ -190,11 +193,11 @@ namespace CryptoRetriever.UI {
                         NumberVariable numVar = new NumberVariable(
                             "NumberConstant",
                             (context) => { return new NumberValue(result); });
-                        NumberAction numAction = options[index] as NumberAction;
+                        NumberAction numAction = selectedItem as NumberAction;
                         numAction.Var = numVar;
                     }
                 }
-            } else if (options[index] is StringAction) {
+            } else if (selectedItem is StringAction) {
                 // String actions need a variable from the user, grab that first
                 ConstantVariableWindow constantDialog = new ConstantVariableWindow();
                 constantDialog.ShowVariableList = false;
@@ -205,20 +208,20 @@ namespace CryptoRetriever.UI {
                     StringVariable stringVar = new StringVariable(
                         "StringConstant",
                         (context) => { return new StringValue(result); });
-                    StringAction stringAction = options[index] as StringAction;
+                    StringAction stringAction = selectedItem as StringAction;
                     stringAction.Var = stringVar;
                 }
             }
 
-            OnIndexSelected(dialog.SelectedIndex, options);
+            OnItemSelected(selectedItem);
         }
 
-        protected virtual void OnIndexSelected(int index, List<StratAction> options) {
-            if (index >= 0) {
+        protected virtual void OnItemSelected(StratAction item) {
+            if (item != null) {
                 if (_entry.Parent == null) {
-                    _window.Action = options[index];
+                    _window.Action = item.Clone();
                 } else {
-                    _entry.Parent.SetChild(_entry.ChildIndexInParent, options[index]);
+                    _entry.Parent.SetChild(_entry.ChildIndexInParent, item.Clone());
                 }
                 _window.UpdateUi();
             }

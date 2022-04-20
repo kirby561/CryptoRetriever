@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CryptoRetriever.Utility.JsonObjects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +11,14 @@ namespace CryptoRetriever.Strats {
     public abstract class Condition : ITreeNode {
         public abstract bool IsTrue(StrategyRuntimeContext context);
         public abstract String GetId();
+        public abstract String GetDescription();
+        public abstract String GetLabel();
         public abstract String GetStringValue(StrategyRuntimeContext context);
+        public abstract Condition Clone();
+
+        public abstract JsonObject ToJson();
+        public abstract void FromJson(JsonObject json);
+
         public virtual ITreeNode[] GetChildren() {
             // By default, no children
             return null;
@@ -23,16 +31,6 @@ namespace CryptoRetriever.Strats {
 
         public override string ToString() {
             return GetId();
-        }
-
-        public Condition[] GetOptions() {
-            return new Condition[] {
-                new BoolCondition(true),
-                new BoolCondition(false),
-                new NumberComparison(),
-                new LogicComparison(),
-                new StringComparison()
-            };
         }
     }
 
@@ -61,8 +59,32 @@ namespace CryptoRetriever.Strats {
             return _name;
         }
 
+        public override string GetDescription() {
+            return "A condition that is either always true or always false.";
+        }
+
+        public override String GetLabel() {
+            return GetId();
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "" + IsTrue(context);
+        }
+
+        public override Condition Clone() {
+            return new BoolCondition(_name, _isTrue);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("Value", GetStringValue(null));
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            _name = json.GetString("Id");
+            _isTrue = "True".Equals(json.GetString("Value"));
         }
     }
 
@@ -96,8 +118,20 @@ namespace CryptoRetriever.Strats {
             return "NumberComparison";
         }
 
+        public override string GetDescription() {
+            return "Compares 2 numbers with the given operator and indicates if the result is true.";
+        }
+
+        public override String GetLabel() {
+            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "" + IsTrue(context);
+        }
+
+        public override Condition Clone() {
+            return new NumberComparison((NumberValue)LeftOperand.Clone(), (NumberComparisonOperator)Operator.Clone(), (NumberValue)RightOperand.Clone());
         }
 
         public override ITreeNode[] GetChildren() {
@@ -114,6 +148,26 @@ namespace CryptoRetriever.Strats {
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
         }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("LeftOperand", LeftOperand.ToJson());
+            obj.Put("Operator", Operator.GetId());
+            obj.Put("RightOperand", RightOperand.ToJson());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            Dictionary<String, Value> values = Values.GetValues();
+            JsonObject leftOperandObj = json.GetObject("LeftOperand");
+            LeftOperand = (NumberValue)values[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand.FromJson(leftOperandObj);
+            Operator = (NumberComparisonOperator)Operators.GetNumberComparisonOperators()[json.GetString("Operator")].Clone();
+            JsonObject rightOperandObj = json.GetObject("RightOperand");
+            RightOperand = (NumberValue)values[rightOperandObj.GetString("Id")].Clone();
+            RightOperand.FromJson(rightOperandObj);
+        }
     }
 
     /// <summary>
@@ -128,9 +182,9 @@ namespace CryptoRetriever.Strats {
 
         public LogicComparison() {
             // Some defaults
-            LeftOperand = new BoolCondition(false);
+            LeftOperand = new BoolCondition("False", false);
             Operator = new OrLogicOperator();
-            RightOperand = new BoolCondition(false);
+            RightOperand = new BoolCondition("False", false);
         }
 
         public LogicComparison(Condition left, LogicOperator op, Condition right) {
@@ -147,8 +201,20 @@ namespace CryptoRetriever.Strats {
             return "LogicComparison";
         }
 
+        public override string GetDescription() {
+            return "Compares 2 conditions with the given operator and indicates if the result is true.";
+        }
+
+        public override String GetLabel() {
+            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "" + IsTrue(context);
+        }
+
+        public override Condition Clone() {
+            return new LogicComparison((Condition)LeftOperand.Clone(), (LogicOperator)Operator.Clone(), (Condition)RightOperand.Clone());
         }
 
         public override ITreeNode[] GetChildren() {
@@ -164,6 +230,26 @@ namespace CryptoRetriever.Strats {
                 RightOperand = child as Condition;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("LeftOperand", LeftOperand.ToJson());
+            obj.Put("Operator", Operator.GetId());
+            obj.Put("RightOperand", RightOperand.ToJson());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            Dictionary<String, Condition> conditions = Conditions.GetConditions();
+            JsonObject leftOperandObj = json.GetObject("LeftOperand");
+            LeftOperand = conditions[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand.FromJson(leftOperandObj);
+            Operator = (LogicOperator)Operators.GetLogicOperators()[json.GetString("Operator")].Clone();
+            JsonObject rightOperandObj = json.GetObject("RightOperand");
+            RightOperand = conditions[rightOperandObj.GetString("Id")].Clone();
+            RightOperand.FromJson(rightOperandObj);
         }
     }
 
@@ -196,8 +282,20 @@ namespace CryptoRetriever.Strats {
             return "StringComparison";
         }
 
+        public override string GetDescription() {
+            return "Compares 2 strings with the given operator and indicates if the result is true.";
+        }
+
+        public override String GetLabel() {
+            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+        }
+
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "" + IsTrue(context);
+        }
+
+        public override Condition Clone() {
+            return new StringComparison((StringValue)LeftOperand.Clone(), (StringComparisonOperator)Operator.Clone(), (StringValue)RightOperand.Clone());
         }
 
         public override ITreeNode[] GetChildren() {
@@ -213,6 +311,26 @@ namespace CryptoRetriever.Strats {
                 RightOperand = child as StringValue;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("LeftOperand", LeftOperand.ToJson());
+            obj.Put("Operator", Operator.GetId());
+            obj.Put("RightOperand", RightOperand.ToJson());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            Dictionary<String, Value> values = Values.GetValues();
+            JsonObject leftOperandObj = json.GetObject("LeftOperand");
+            LeftOperand = (StringValue)values[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand.FromJson(leftOperandObj);
+            Operator = (StringComparisonOperator)Operators.GetStringComparisonOperators()[json.GetString("Operator")].Clone();
+            JsonObject rightOperandObj = json.GetObject("RightOperand");
+            RightOperand = (StringValue)values[rightOperandObj.GetString("Id")].Clone();
+            RightOperand.FromJson(rightOperandObj);
         }
     }
 }

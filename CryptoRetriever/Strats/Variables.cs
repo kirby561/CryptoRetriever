@@ -12,17 +12,17 @@ namespace CryptoRetriever.Strats {
         /// Returns the list of string variables that can be used by 
         /// triggers in this strategy.
         /// </returns>
-        public static List<StringVariable> GetStringVariables() {
-            var result = new List<StringVariable>();
-            result.Add(new StringVariable(
+        public static Dictionary<String, StringVariable> GetStringVariables() {
+            var result = new Dictionary<String, StringVariable>();
+            AddVar(result, new StringVariable(
                 "Strategy.Name",
                 (context) => { return new StringValue(context.Strategy.Name); }
             ));
-            result.Add(new StringVariable(
+            AddVar(result, new StringVariable(
                 "CurrentState",
                 (context) => { return new StringValue(context.CurrentState); }
             ));
-            result.Add(new StringVariable(
+            AddVar(result, new StringVariable(
                 "NextState",
                 (context) => { return new StringValue(context.NextState); }
             ));
@@ -33,25 +33,29 @@ namespace CryptoRetriever.Strats {
         /// Returns the list of number variables that can be used by 
         /// triggers in this strategy.
         /// </returns>
-        public static List<NumberVariable> GetNumberVariables() {
-            var result = new List<NumberVariable>();
-            result.Add(new NumberVariable(
+        public static Dictionary<String, NumberVariable> GetNumberVariables() {
+            var result = new Dictionary<String, NumberVariable>();
+            AddVar(result, new NumberVariable(
                 "Account.CurrencyBalance",
                 (context) => { return new NumberValue(context.Account.CurrencyBalance); }
             ));
-            result.Add(new NumberVariable(
+            AddVar(result, new NumberVariable(
                 "Account.AssetBalance",
                 (context) => { return new NumberValue(context.Account.CurrencyBalance); }
             ));
-            result.Add(new NumberVariable(
+            AddVar(result, new NumberVariable(
                 "CurrentTimestampSecs",
                 (context) => { return new NumberValue(context.GetCurrentTimestamp()); }
             ));
-            result.Add(new NumberVariable(
+            AddVar(result, new NumberVariable(
                 "CurrentDatapointIndex",
                 (context) => { return new NumberValue(context.CurrentDatapointIndex); }
             ));
             return result;
+        }
+
+        private static void AddVar<T>(Dictionary<String, T> dict, T var) where T : IVariable {
+            dict.Add(var.Id, var);
         }
     }
 }

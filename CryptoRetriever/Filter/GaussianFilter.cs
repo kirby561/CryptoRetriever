@@ -1,6 +1,8 @@
 ﻿using CryptoRetriever.Data;
+using CryptoRetriever.Utility.JsonObjects;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Windows;
 
@@ -11,14 +13,43 @@ namespace CryptoRetriever.Filter {
     /// the broader trends in the set.
     /// </summary>
     public class GaussianFilter : IFilter {
-        private double _sigma; // The standard deviation to use
-        private int _kernelSize; // The number of samples to use in each step.
-
         // Constants useful for below
         private double _oneOverSqrt2Pi = 1 / Math.Sqrt(2 * Math.PI);
         private double _oneOverSigma;
         private double _twoSigmaSquared;
         private double _oneOverSigmaTimesOneOverSqrt2Pi;
+
+        /// <summary>
+        /// Returns a string summary of this filter.
+        /// </summary>
+        public String Summary {
+            get {
+                return "Gaussian Filter (sigma = " + Sigma + ", kernelSize = " + KernelSize + ")";
+            }
+        }
+
+        /// <summary>
+        /// The number of samples to use in each step.
+        /// </summary>
+        public int KernelSize { get; set; }
+
+        /// <summary>
+        /// The standard deviation to use.
+        /// </summary>
+        private double _sigma;
+        public double Sigma {
+            get {
+                return _sigma;
+            }
+            set {
+                _sigma = value;
+
+                // Some handywork for later
+                _oneOverSigma = 1 / Sigma;
+                _twoSigmaSquared = 2 * Sigma * Sigma;
+                _oneOverSigmaTimesOneOverSqrt2Pi = _oneOverSigma * _oneOverSqrt2Pi;
+            }
+        }
 
         /// <summary>
         /// Creates a new GaussianFilter with the given sigma value.
@@ -38,23 +69,12 @@ namespace CryptoRetriever.Filter {
         ///      The (6, 3) sample will have more weight than the (1, 1) sample when calculating
         ///      the gaussian function at index 1 since 6 is closer to 5 than 1 is.
         /// </param>
-        public GaussianFilter(double sigma, int kernelSize = 9) {
-            _sigma = sigma;
-            _kernelSize = kernelSize;
+        public GaussianFilter(double sigma = 1, int kernelSize = 9) {
+            Sigma = sigma;
+            KernelSize = kernelSize;
 
             if (kernelSize % 2 == 0)
                 throw new ArgumentException("The kernel size must be odd.");
-
-            // Some handywork for later
-            _oneOverSigma = 1 / _sigma;
-            _twoSigmaSquared = 2 * _sigma * _sigma;
-            _oneOverSigmaTimesOneOverSqrt2Pi = _oneOverSigma * _oneOverSqrt2Pi;
-        }
-
-        public String Summary {
-            get {
-                return "Gaussian Filter (sigma = " + _sigma + ", kernelSize = " + _kernelSize + ")";
-            }
         }
 
         public Dataset Filter(Dataset input) {
@@ -71,8 +91,8 @@ namespace CryptoRetriever.Filter {
 
             Dataset output = new Dataset(input);
             if (isEvenlySpaced) {
-                double[] kernel = new double[_kernelSize];
-                ComputeKernelFixedSpacing(_kernelSize, kernel);
+                double[] kernel = new double[KernelSize];
+                ComputeKernelFixedSpacing(KernelSize, kernel);
                 for (int i = 0; i < input.Count; i++) {
                     ApplyKernel(kernel, input, output, i);
                 }
@@ -83,6 +103,19 @@ namespace CryptoRetriever.Filter {
             }
 
             return output;
+        }
+
+        public JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Type", "GaussianFilter");
+            obj.Put("KernelSize", KernelSize);
+            obj.Put("Sigma", Sigma);
+            return obj;
+        }
+
+        public void FromJson(JsonObject json) {
+            KernelSize = json.GetInt("KernelSize");
+            Sigma = json.GetDouble("Sigma");
         }
 
         private void ApplyKernel(double[] kernel, Dataset input, Dataset output, int index) {

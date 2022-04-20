@@ -1,10 +1,11 @@
 ﻿using CryptoRetriever.Source;
+using CryptoRetriever.Utility.JsonObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
-    public class Account {
+    public class Account : IJsonable {
         /// <summary>
         /// How much fiat currency is in this account such as USD.
         /// For the purposes of this class, "fiat currency" is just
@@ -33,6 +34,18 @@ namespace CryptoRetriever.Strats {
         /// <returns>A new Account instance with the same values.</returns>
         public Account Copy() {
             return new Account(CurrencyBalance, AssetBalance);
+        }
+
+        public JsonObject ToJson() {
+            JsonObject obj = new JsonObject()
+               .Put("CurrencyBalance", CurrencyBalance)
+               .Put("AssetBalance", AssetBalance);
+            return obj;
+        }
+
+        public void FromJson(JsonObject obj) {
+            CurrencyBalance = obj.GetDouble("CurrencyBalance");
+            AssetBalance = obj.GetDouble("AssetBalance");
         }
     }
 }

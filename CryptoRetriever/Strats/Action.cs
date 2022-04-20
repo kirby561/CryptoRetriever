@@ -1,12 +1,34 @@
-﻿using System;
+﻿using CryptoRetriever.Utility.JsonObjects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
+    public static class ActionType {
+        public static String MultiAction = "MultiAction";
+        public static String SimpleAction = "SimpleAction";
+    }
+
+    public static class ActionId {
+        public static readonly String BuyMax = "BuyMax";
+        public static readonly String SellMax = "SellMax";
+        public static readonly String ChangeStateTo = "ChangeStateTo";
+        public static readonly String ChangeNextStateTo = "ChangeNextStateTo";
+        public static readonly String DoNothing = "DoNothing";
+        public static readonly String NotSet = "NotSet";
+        public static readonly String MultiAction = "MultiAction";
+    }
+
     public abstract class StratAction : ITreeNode {
         public abstract void Execute(StrategyRuntimeContext context);
-        public abstract string GetStringValue(StrategyRuntimeContext context);
-        public abstract string GetId();
+        public abstract String GetStringValue(StrategyRuntimeContext context);
+        public abstract String GetId();
+        public abstract String GetDescription();
+        public abstract String GetLabel();
+        public abstract StratAction Clone();
+
+        public abstract JsonObject ToJson();
+        public abstract void FromJson(JsonObject json);
 
         public virtual ITreeNode[] GetChildren() {
             // No Children by default
@@ -44,7 +66,19 @@ namespace CryptoRetriever.Strats {
         }
 
         public override string GetId() {
-            return "MultiAction";
+            return ActionType.MultiAction;
+        }
+
+        public override String GetDescription() {
+            return "Runs 2 actions.";
+        }
+
+        public override String GetLabel() {
+            return GetId() + ": " + Action1.GetId() + " and " + Action2.GetId();
+        }
+
+        public override StratAction Clone() {
+            return new MultiAction((StratAction)Action1.Clone(), (StratAction)Action2.Clone());
         }
 
         public override ITreeNode[] GetChildren() {
@@ -59,16 +93,49 @@ namespace CryptoRetriever.Strats {
             else
                 throw new ArgumentOutOfRangeException("This action only has 2 children. Tried to set child at index " + index);
         }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            obj.Put("Action1", Action1.ToJson());
+            obj.Put("Action2", Action2.ToJson());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            Dictionary<String, StratAction> actions = Actions.GetActions();
+            JsonObject action1Json = json.GetObject("Action1");
+            JsonObject action2Json = json.GetObject("Action2");
+            StratAction action1 = actions[action1Json.GetString("Id")].Clone();
+            action1.FromJson(action1Json);
+            Action1 = action1;
+            StratAction action2 = actions[action2Json.GetString("Id")].Clone();
+            action2.FromJson(action2Json);
+            Action2 = action2;
+        }
     }
 
     /// <summary>
     /// A SimpleAction does one thing and does not need a parameters.
     /// </summary>
     public class SimpleAction : StratAction {
+        private String _description;
+        private String _id;
+
+        public override string GetId() {
+            return _id;
+        }
+
         /// <summary>
         /// Describes this action.
         /// </summary>
-        public String Description { get; private set; }
+        public override String GetDescription() {
+            return _description;
+        }
+
+        public override StratAction Clone() {
+            return new SimpleAction(_id, _description, ActionMethod);
+        }
 
         /// <summary>
         /// A method that takes in the strategy run context and performs
@@ -76,8 +143,9 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public Action<StrategyRuntimeContext> ActionMethod { get; private set; }
 
-        public SimpleAction(String description, Action<StrategyRuntimeContext> actionMethod) {
-            Description = description;
+        public SimpleAction(String id, String description, Action<StrategyRuntimeContext> actionMethod) {
+            _id = id;
+            _description = description;
             ActionMethod = actionMethod;
         }
 
@@ -86,37 +154,22 @@ namespace CryptoRetriever.Strats {
         }
 
         public override string GetStringValue(StrategyRuntimeContext context) {
-            return Description;
+            // No associated value
+            return "";
         }
 
-        public override string GetId() {
-            return "SimpleAction";
-        }
-    }
-
-    /// <summary>
-    /// A DoNothingAction is a SimpleAction that doesn't do anything.
-    /// </summary>
-    public class DoNothingAction : SimpleAction {
-        public DoNothingAction()
-            : base("Do nothing", null) { }
-
-        public override void Execute(StrategyRuntimeContext context) {
-            // Nothing to do
+        public override String GetLabel() {
+            return GetId();
         }
 
-        public override string GetStringValue(StrategyRuntimeContext context) {
-            return "Do nothing";
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            return obj;
         }
-    }
 
-    /// <summary>
-    /// Can be used to initialize a multi-action
-    /// and have the UI not display "Do Nothing"
-    /// </summary>
-    public class FutureAction : DoNothingAction {
-        public override string GetStringValue(StrategyRuntimeContext context) {
-            return "Action";
+        public override void FromJson(JsonObject json) {
+            // Nothing to do, the ID is inherent.
         }
     }
 
@@ -124,10 +177,15 @@ namespace CryptoRetriever.Strats {
     /// A NumberAction needs a NumberVariable from the user
     /// </summary>
     public class NumberAction : StratAction {
+        private String _id;
+        private String _description;
+
         /// <summary>
         /// Describes this action.
         /// </summary>
-        public String Description { get; private set; }
+        public override String GetDescription() {
+            return _description;
+        }
 
         /// <summary>
         /// The variable needed by this action.
@@ -140,8 +198,9 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public Action<StrategyRuntimeContext, NumberVariable> ActionMethod { get; private set; }
 
-        public NumberAction(String description, Action<StrategyRuntimeContext, NumberVariable> actionMethod, NumberVariable variable) {
-            Description = description;
+        public NumberAction(String id, String description, Action<StrategyRuntimeContext, NumberVariable> actionMethod, NumberVariable variable) {
+            _id = id;
+            _description = description;
             ActionMethod = actionMethod;
             Var = variable;
         }
@@ -151,14 +210,36 @@ namespace CryptoRetriever.Strats {
         }
 
         public override string GetStringValue(StrategyRuntimeContext context) {
-            String stringValue = Description;
+            String stringValue = "";
             if (Var != null)
-                stringValue = stringValue + ": '" + Var.VariableRetrievalMethod.Invoke(context).GetValue(context) + "'";
+                stringValue = Var.VariableRetrievalMethod.Invoke(context).GetValue(context) + "'";
             return stringValue;
         }
 
         public override string GetId() {
-            return "NumberAction";
+            return _id;
+        }
+
+        public override String GetLabel() {
+            String result = GetId();
+            String value = GetStringValue(new ExampleStrategyRunParams());
+            if (!String.IsNullOrWhiteSpace(value))
+                result += ": " + value;
+            return result;
+        }
+
+        public override StratAction Clone() {
+            return new NumberAction(_id, _description, ActionMethod, Var);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            // Nothing to do, the ID is inherent.
         }
     }
 
@@ -166,10 +247,19 @@ namespace CryptoRetriever.Strats {
     /// A StringAction needs a StringVariable from the user.
     /// </summary>
     public class StringAction : StratAction {
+        private String _id;
+        private String _description;
+
+        public override string GetId() {
+            return _id;
+        }
+
         /// <summary>
         /// Describes this action.
         /// </summary>
-        public String Description { get; private set; }
+        public override String GetDescription() {
+            return _description;
+        }
 
         /// <summary>
         /// The variable needed by this action.
@@ -183,9 +273,17 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public Action<StrategyRuntimeContext, StringVariable> ActionMethod { get; private set; }
 
-        public StringAction(String description, Action<StrategyRuntimeContext, StringVariable> actionMethod) {
-            Description = description;
+        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringVariable> actionMethod) {
+            _id = id;
+            _description = description;
             ActionMethod = actionMethod;
+        }
+
+        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringVariable> actionMethod, StringVariable var) {
+            _id = id;
+            _description = description;
+            ActionMethod = actionMethod;
+            Var = var;
         }
 
         public override void Execute(StrategyRuntimeContext context) {
@@ -193,14 +291,32 @@ namespace CryptoRetriever.Strats {
         }
 
         public override string GetStringValue(StrategyRuntimeContext context) {
-            String stringValue = Description;
+            String stringValue = "";
             if (Var != null)
                 stringValue = stringValue + ": '" + Var.VariableRetrievalMethod.Invoke(context).GetValue(context) + "'";
             return stringValue;
         }
 
-        public override string GetId() {
-            return "StringAction";
+        public override String GetLabel() {
+            String result = GetId();
+            String value = GetStringValue(new ExampleStrategyRunParams());
+            if (!String.IsNullOrWhiteSpace(value))
+                result += ": " + value;
+            return result;
+        }
+
+        public override StratAction Clone() {
+            return new StringAction(_id, _description, ActionMethod, Var);
+        }
+
+        public override JsonObject ToJson() {
+            JsonObject obj = new JsonObject();
+            obj.Put("Id", GetId());
+            return obj;
+        }
+
+        public override void FromJson(JsonObject json) {
+            // Nothing to do, the ID is inherent.
         }
     }
 }
