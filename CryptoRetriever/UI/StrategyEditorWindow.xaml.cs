@@ -24,6 +24,7 @@ namespace CryptoRetriever.UI {
         private Strategy _result = null; // This will be set to the strategy when the editing is done
         private StrategyManager _strategyManager;
         private bool _isEditing = false;
+        private String _originalName; // Keep track of the original name if editing so we can remove the old file
 
         /// <summary>
         /// Gets the strategy modified or created by this editor or
@@ -50,6 +51,7 @@ namespace CryptoRetriever.UI {
         /// <param name="strategyToEdit">The strategy to edit.</param>
         public void SetWorkingStrategy(Strategy strategyToEdit) {
             _isEditing = true;
+            _originalName = strategyToEdit.Name;
             _strategy = strategyToEdit;
             _nameTextBox.Text = strategyToEdit.Name;
             _accountStartingFiatTextBox.Text = "" + _strategy.Account.CurrencyBalance;
@@ -138,10 +140,13 @@ namespace CryptoRetriever.UI {
 
             Close();
 
-            if (_isEditing)
+            if (_isEditing) {
+                if (!_result.Name.Equals(_originalName))
+                    _strategyManager.DeleteStrategyByName(_originalName);
                 _strategyManager.UpdateStrategy(_result);
-            else
+            } else {
                 _strategyManager.AddStrategy(_result);
+            }
         }
 
         private void OnAddFilterClicked(object sender, RoutedEventArgs e) {

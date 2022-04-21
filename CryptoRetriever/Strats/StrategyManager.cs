@@ -6,6 +6,10 @@ using System.IO;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
+    /// <summary>
+    /// Manages a list of strategies and keeps them in sync with files
+    /// on disk that can be loaded on startup.
+    /// </summary>
     public class StrategyManager {
         private ObservableCollection<Strategy> _strategies = new ObservableCollection<Strategy>();
         private String _strategyDirectory;
@@ -15,6 +19,9 @@ namespace CryptoRetriever.Strats {
             _strategyDirectory = strategyDirectory;
         }
 
+        /// <returns>
+        /// Returns the list of strategies.
+        /// </returns>
         public ObservableCollection<Strategy> GetStrategies() {
             return _strategies;
         }
@@ -36,18 +43,28 @@ namespace CryptoRetriever.Strats {
             return false;
         }
 
+        /// <summary>
+        /// Updates the given strategy on disk.
+        /// </summary>
+        /// <param name="strategy">The strategy to update.</param>
+        /// <returns>Returns true if the strategy was removed or false otherwise.</returns>
         public bool UpdateStrategy(Strategy strategy) {
             Strategy strat = GetStrategyByName(strategy.Name);
 
             if (strat == null)
                 return false;
 
-            _strategies.Remove(strat);
+            // Delete the existing one so if it was renamed
+            // the old file gets removed.
+            DeleteStrategy(strategy);
             AddStrategy(strategy);
 
             return true;
         }
 
+        /// <summary>
+        /// Loads all the strategies in the default strategy directory.
+        /// </summary>
         public void LoadAll() {
             foreach (String path in Directory.GetFiles(_strategyDirectory, "*" + _strategyExt)) {
                 Strategy strat = LoadStrategyFromFile(path);
@@ -80,16 +97,41 @@ namespace CryptoRetriever.Strats {
             File.WriteAllText(filepath, strategy.ToJson().ToJsonString());
         }
 
-        public bool DeleteStrategyByName(String name) {
+        /// <summary>
+        /// Deletes the strategy with the given name. This includes
+        /// deleting the file on disk as well as removing it from the list.
+        /// </summary>
+        /// <param name="name">The name of the strategy to remove.</param>
+        public void DeleteStrategyByName(String name) {
             Strategy strategy = GetStrategyByName(name);
-            if (strategy == null)
-                return false;
+            if (strategy == null) {
+                // Check if there's a strategy on disk by that name
+                // and delete it if there is
+                String path = GetStrategyPath(name);
+                if (File.Exists(path))
+                    File.Delete(path);
 
-            _strategies.Remove(strategy);
-            File.Delete(_strategyDirectory + "/" + name + _strategyExt);
-            return true;
+                return;
+            }
+
+            DeleteStrategy(strategy);
         }
 
+        /// <summary>
+        /// Deletes the given strategy from the list of strategies and
+        /// from disk.
+        /// </summary>
+        /// <param name="strategy">The strategy to delete.</param>
+        public void DeleteStrategy(Strategy strategy) {
+            _strategies.Remove(strategy);
+            File.Delete(GetStrategyPath(strategy));
+        }
+
+        /// <summary>
+        /// Loads the strategy at the given filepath.
+        /// </summary>
+        /// <param name="filepath">A path to a strategy file.</param>
+        /// <returns>Returns the loaded strategy or null if the file does not exist.</returns>
         public Strategy LoadStrategyFromFile(String filepath) {
             if (!File.Exists(filepath))
                 return null;
@@ -98,6 +140,24 @@ namespace CryptoRetriever.Strats {
             Strategy strategy = new Strategy();
             strategy.FromJson(JsonObject.FromJsonBytes(jsonText));
             return strategy;
+        }
+
+        /// <summary>
+        /// Returns the default path on disk to the given strategy.
+        /// </summary>
+        /// <param name="strategy">The strategy.</param>
+        /// <returns>A path to the strategy on disk.</returns>
+        private String GetStrategyPath(Strategy strategy) {
+            return GetStrategyPath(strategy.Name);
+        }
+
+        /// <summary>
+        /// Returns the default path on disk to the given strategy name.
+        /// </summary>
+        /// <param name="strategyName">The name of the strategy.</param>
+        /// <returns>A path to the strategy on disk.</returns>
+        private String GetStrategyPath(String strategyName) {
+            return _strategyDirectory + "/" + strategyName + _strategyExt;
         }
     }
 }
