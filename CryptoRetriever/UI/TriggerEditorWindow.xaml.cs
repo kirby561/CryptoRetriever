@@ -45,6 +45,7 @@ namespace CryptoRetriever.UI {
             editor.Trigger = WorkingTrigger;
             UiHelper.CenterWindowInWindow(editor, this);
             editor.ShowDialog();
+            UpdateUi();
         }
 
         private void OnOkayClicked(object sender, RoutedEventArgs e) {
