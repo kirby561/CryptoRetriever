@@ -52,9 +52,9 @@ namespace CryptoRetriever.UI {
                 Stack<Panel> panelStack = new Stack<Panel>();
                 panelStack.Push(_conditionsPanel);
                 foreach (TreeUiEntry entry in nodes) {
-                    if (entry.Indentation < currentIndent) {
+                    while (entry.Indentation < currentIndent) {
                         panelStack.Pop();
-                        currentIndent = entry.Indentation;
+                        currentIndent--;
                     }
 
                     int indentPreMargin = 20;
@@ -77,7 +77,6 @@ namespace CryptoRetriever.UI {
                         if (entry.Node is Operator) {
                             backgroundColor = Colors.DarkGreen;
                             border.Background = new SolidColorBrush(backgroundColor);
-                            block.Text = entry.Node.GetStringValue(_dummyContext);
                         } else {
                             backgroundColor = Color.FromRgb(0x72, 0x9f, 0xcf);
                             border.Background = new SolidColorBrush(backgroundColor);

@@ -57,9 +57,9 @@ namespace CryptoRetriever.UI {
             Stack<Panel> panelStack = new Stack<Panel>();
             panelStack.Push(_actionsPanel);
             foreach (TreeUiEntry entry in nodes) {
-                if (entry.Indentation < currentIndent) {
+                while (entry.Indentation < currentIndent) {
                     panelStack.Pop();
-                    currentIndent = entry.Indentation;
+                    currentIndent--;
                 }
 
                 int indentPreMargin = 20;

@@ -16,7 +16,7 @@ namespace CryptoRetriever.Strats {
         public abstract Operator Clone();
         
         public virtual String GetLabel() {
-            return GetId();
+            return GetStringValue(null);
         }
 
         public virtual ITreeNode[] GetChildren() {
