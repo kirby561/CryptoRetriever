@@ -190,29 +190,29 @@ namespace CryptoRetriever.Strats {
         /// <summary>
         /// The variable needed by this action.
         /// </summary>
-        public NumberVariable Var { get; set; }
+        public NumberValue Value { get; set; }
 
         /// <summary>
         /// A method that takes in the strategy run context and performs
         /// and action.
         /// </summary>
-        public Action<StrategyRuntimeContext, NumberVariable> ActionMethod { get; private set; }
+        public Action<StrategyRuntimeContext, NumberValue> ActionMethod { get; private set; }
 
-        public NumberAction(String id, String description, Action<StrategyRuntimeContext, NumberVariable> actionMethod, NumberVariable variable) {
+        public NumberAction(String id, String description, Action<StrategyRuntimeContext, NumberValue> actionMethod, NumberValue numberValue) {
             _id = id;
             _description = description;
             ActionMethod = actionMethod;
-            Var = variable;
+            Value = numberValue;
         }
 
         public override void Execute(StrategyRuntimeContext context) {
-            ActionMethod.Invoke(context, Var);
+            ActionMethod.Invoke(context, Value);
         }
 
         public override string GetStringValue(StrategyRuntimeContext context) {
             String stringValue = "";
-            if (Var != null)
-                stringValue = Var.VariableRetrievalMethod.Invoke(context).GetValue(context) + "'";
+            if (Value != null)
+                stringValue = "" + Value.GetValue(context);
             return stringValue;
         }
 
@@ -229,17 +229,20 @@ namespace CryptoRetriever.Strats {
         }
 
         public override StratAction Clone() {
-            return new NumberAction(_id, _description, ActionMethod, Var);
+            return new NumberAction(_id, _description, ActionMethod, Value);
         }
 
         public override JsonObject ToJson() {
             JsonObject obj = new JsonObject();
             obj.Put("Id", GetId());
+            obj.Put("Value", Value.ToJson());
             return obj;
         }
 
         public override void FromJson(JsonObject json) {
-            // Nothing to do, the ID is inherent.
+            JsonObject val = json.GetObject("Value");
+            Value = (NumberValue)Values.GetValues()[val.GetString("Id")].Clone();
+            Value.FromJson(val);
         }
     }
 
@@ -265,35 +268,35 @@ namespace CryptoRetriever.Strats {
         /// The variable needed by this action.
         /// This needs to be set by the user.
         /// </summary>
-        public StringVariable Var { get; set; } = null;
+        public StringValue Value { get; set; } = null;
 
         /// <summary>
         /// A method that takes in the strategy run context and performs
         /// and action.
         /// </summary>
-        public Action<StrategyRuntimeContext, StringVariable> ActionMethod { get; private set; }
+        public Action<StrategyRuntimeContext, StringValue> ActionMethod { get; private set; }
 
-        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringVariable> actionMethod) {
+        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringValue> actionMethod) {
             _id = id;
             _description = description;
             ActionMethod = actionMethod;
         }
 
-        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringVariable> actionMethod, StringVariable var) {
+        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringValue> actionMethod, StringValue stringValue) {
             _id = id;
             _description = description;
             ActionMethod = actionMethod;
-            Var = var;
+            Value = stringValue;
         }
 
         public override void Execute(StrategyRuntimeContext context) {
-            ActionMethod.Invoke(context, Var);
+            ActionMethod.Invoke(context, Value);
         }
 
         public override string GetStringValue(StrategyRuntimeContext context) {
             String stringValue = "";
-            if (Var != null)
-                stringValue = stringValue + ": '" + Var.VariableRetrievalMethod.Invoke(context).GetValue(context) + "'";
+            if (Value != null)
+                stringValue = Value.GetValue(context);
             return stringValue;
         }
 
@@ -306,17 +309,20 @@ namespace CryptoRetriever.Strats {
         }
 
         public override StratAction Clone() {
-            return new StringAction(_id, _description, ActionMethod, Var);
+            return new StringAction(_id, _description, ActionMethod, Value);
         }
 
         public override JsonObject ToJson() {
             JsonObject obj = new JsonObject();
             obj.Put("Id", GetId());
+            obj.Put("Value", Value.ToJson());
             return obj;
         }
 
         public override void FromJson(JsonObject json) {
-            // Nothing to do, the ID is inherent.
+            JsonObject val = json.GetObject("Value");
+            Value = (StringValue)Values.GetValues()[val.GetString("Id")].Clone();
+            Value.FromJson(val);
         }
     }
 }

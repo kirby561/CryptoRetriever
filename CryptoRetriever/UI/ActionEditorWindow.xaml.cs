@@ -190,11 +190,9 @@ namespace CryptoRetriever.UI {
                     String resultString = constantDialog.Constant;
                     double result;
                     if (Double.TryParse(resultString, out result)) {
-                        NumberVariable numVar = new NumberVariable(
-                            "NumberConstant",
-                            (context) => { return new NumberValue(result); });
+                        NumberValue val = new NumberValue(result);
                         NumberAction numAction = selectedItem as NumberAction;
-                        numAction.Var = numVar;
+                        numAction.Value = val;
                     }
                 }
             } else if (selectedItem is StringAction) {
@@ -205,11 +203,9 @@ namespace CryptoRetriever.UI {
 
                 if (constantDialog.ResultType == ConstantVariableWindow.SelectionType.Constant) {
                     String result = constantDialog.Constant;
-                    StringVariable stringVar = new StringVariable(
-                        "StringConstant",
-                        (context) => { return new StringValue(result); });
+                    StringValue val = new StringValue(result);
                     StringAction stringAction = selectedItem as StringAction;
-                    stringAction.Var = stringVar;
+                    stringAction.Value = val;
                 }
             }
 
