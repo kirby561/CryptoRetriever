@@ -40,7 +40,6 @@ namespace CryptoRetriever.UI {
             InitializeComponent();
             SetWorkingStrategy(new Strategy());
 
-            _strategy.States.Add(new State("Default"));
             _strategyManager = manager;
         }
 
@@ -63,7 +62,7 @@ namespace CryptoRetriever.UI {
             if (_strategy.End != DateTime.MinValue)
                 _endDatePicker.SelectedDate = _strategy.End;
             _filtersView.ItemsSource = _strategy.Filters;
-            _statesView.ItemsSource = _strategy.States;
+            _userVars.ItemsSource = _strategy.UserVars;
             _triggersView.ItemsSource = _strategy.Triggers;
         }
 
@@ -73,7 +72,6 @@ namespace CryptoRetriever.UI {
 
         private void OnSaveButtonClicked(object sender, RoutedEventArgs e) {
             // Validate the name 
-            // ?? TODO: We need to check for duplicate names but there's no persistance yet
             String name = _nameTextBox.Text;
             if (String.IsNullOrWhiteSpace(name)) {
                 MessageBox.Show("You must enter a name.");
@@ -163,24 +161,45 @@ namespace CryptoRetriever.UI {
             UiHelper.RemoveSelectedItemsFromListBox(_strategy.Filters, _filtersView);
         }
 
-        private void OnAddStateClicked(object sender, RoutedEventArgs e) {
-            InputBoxDialog inputBox = new InputBoxDialog();
-            inputBox.Title = "New State";
-            inputBox.Message = "Enter a state ID";
-            inputBox.InitialText = "";
+        private void OnAddUserVarClicked(object sender, RoutedEventArgs e) {
+            UserVarDialog inputBox = new UserVarDialog();
+            inputBox.Title = "New User Var";
             UiHelper.CenterWindowInWindow(inputBox, this);
             inputBox.ShowDialog();
 
-            if (!String.IsNullOrEmpty(inputBox.EnteredText))
-                _strategy.States.Add(new State(inputBox.EnteredText));
+            IValue result = inputBox.Result;
+            while (result != null) {
+                if (!StrategyContainsVarName(inputBox.Result)) {
+                    _strategy.UserVars.Add(inputBox.Result);
+                    break;
+                } else {
+                    // Show it until they cancel or get one that works
+                    var repeat = new UserVarDialog();
+                    repeat.Title = inputBox.Title;
+                    repeat.SetWorkingValue(result);
+                    UiHelper.CenterWindowInWindow(repeat, this);
+                    repeat.ShowDialog();
+                    result = repeat.Result;
+                }
+            }
         }
 
-        private void OnRemoveStateClicked(object sender, RoutedEventArgs e) {
-            UiHelper.RemoveSelectedItemsFromListBox(_strategy.States, _statesView);
+        private bool StrategyContainsVarName(IValue valueToCheck) {
+            IVariable varToCheck = valueToCheck as IVariable;
+            foreach (IValue val in _strategy.UserVars) {
+                IVariable var = val as IVariable;
+                if (var.GetVariableName().Equals(varToCheck.GetVariableName()))
+                    return true;
+            }
+            return false;
+        }
+
+        private void OnRemoveUserVarClicked(object sender, RoutedEventArgs e) {
+            UiHelper.RemoveSelectedItemsFromListBox(_strategy.UserVars, _userVars);
         }
 
         private void OnAddTriggerClicked(object sender, RoutedEventArgs e) {
-            TriggerEditorWindow triggerEditor = new TriggerEditorWindow();
+            TriggerEditorWindow triggerEditor = new TriggerEditorWindow(_strategy);
             UiHelper.CenterWindowInWindow(triggerEditor, this);
             triggerEditor.ShowDialog();
 
@@ -191,7 +210,7 @@ namespace CryptoRetriever.UI {
 
         private void OnTriggerDoubleClicked(object sender, MouseButtonEventArgs e) {
             if (_triggersView.SelectedIndex >= 0) {
-                TriggerEditorWindow triggerEditor = new TriggerEditorWindow();
+                TriggerEditorWindow triggerEditor = new TriggerEditorWindow(_strategy);
                 UiHelper.CenterWindowInWindow(triggerEditor, this);
 
                 // ?? TODO: This should be a deep copy but there's no way to save conditions

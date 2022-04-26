@@ -12,8 +12,7 @@ namespace CryptoRetriever.Strats {
     public static class ActionId {
         public static readonly String BuyMax = "BuyMax";
         public static readonly String SellMax = "SellMax";
-        public static readonly String ChangeStateTo = "ChangeStateTo";
-        public static readonly String ChangeNextStateTo = "ChangeNextStateTo";
+        public static readonly String ChangeVariableTo = "ChangeVariableTo";
         public static readonly String DoNothing = "DoNothing";
         public static readonly String NotSet = "NotSet";
         public static readonly String MultiAction = "MultiAction";
@@ -74,7 +73,7 @@ namespace CryptoRetriever.Strats {
         }
 
         public override String GetLabel() {
-            return GetId() + ": " + Action1.GetId() + " and " + Action2.GetId();
+            return GetId();
         }
 
         public override StratAction Clone() {
@@ -174,87 +173,14 @@ namespace CryptoRetriever.Strats {
     }
 
     /// <summary>
-    /// A NumberAction needs a NumberVariable from the user
+    /// A ValueAction needs a Value selected from the user.
     /// </summary>
-    public class NumberAction : StratAction {
-        private String _id;
+    public class ValueChanger : StratAction {
         private String _description;
-
-        /// <summary>
-        /// Describes this action.
-        /// </summary>
-        public override String GetDescription() {
-            return _description;
-        }
-
-        /// <summary>
-        /// The variable needed by this action.
-        /// </summary>
-        public NumberValue Value { get; set; }
-
-        /// <summary>
-        /// A method that takes in the strategy run context and performs
-        /// and action.
-        /// </summary>
-        public Action<StrategyRuntimeContext, NumberValue> ActionMethod { get; private set; }
-
-        public NumberAction(String id, String description, Action<StrategyRuntimeContext, NumberValue> actionMethod, NumberValue numberValue) {
-            _id = id;
-            _description = description;
-            ActionMethod = actionMethod;
-            Value = numberValue;
-        }
-
-        public override void Execute(StrategyRuntimeContext context) {
-            ActionMethod.Invoke(context, Value);
-        }
-
-        public override string GetStringValue(StrategyRuntimeContext context) {
-            String stringValue = "";
-            if (Value != null)
-                stringValue = "" + Value.GetValue(context);
-            return stringValue;
-        }
+        private ToOperator _operator = new ToOperator(); // Just to indicate the change in the tree
 
         public override string GetId() {
-            return _id;
-        }
-
-        public override String GetLabel() {
-            String result = GetId();
-            String value = GetStringValue(new ExampleStrategyRunParams());
-            if (!String.IsNullOrWhiteSpace(value))
-                result += ": " + value;
-            return result;
-        }
-
-        public override StratAction Clone() {
-            return new NumberAction(_id, _description, ActionMethod, Value);
-        }
-
-        public override JsonObject ToJson() {
-            JsonObject obj = new JsonObject();
-            obj.Put("Id", GetId());
-            obj.Put("Value", Value.ToJson());
-            return obj;
-        }
-
-        public override void FromJson(JsonObject json) {
-            JsonObject val = json.GetObject("Value");
-            Value = (NumberValue)Values.GetValues()[val.GetString("Id")].Clone();
-            Value.FromJson(val);
-        }
-    }
-
-    /// <summary>
-    /// A StringAction needs a StringVariable from the user.
-    /// </summary>
-    public class StringAction : StratAction {
-        private String _id;
-        private String _description;
-
-        public override string GetId() {
-            return _id;
+            return "ValueChanger";
         }
 
         /// <summary>
@@ -265,64 +191,104 @@ namespace CryptoRetriever.Strats {
         }
 
         /// <summary>
-        /// The variable needed by this action.
-        /// This needs to be set by the user.
+        /// The variable that will be changed.
         /// </summary>
-        public StringValue Value { get; set; } = null;
+        public IValue OriginalValue { get; set; } = null;
 
         /// <summary>
-        /// A method that takes in the strategy run context and performs
-        /// and action.
+        /// The value to change to
         /// </summary>
-        public Action<StrategyRuntimeContext, StringValue> ActionMethod { get; private set; }
+        public IValue TargetValue { get; set; } = null;
 
-        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringValue> actionMethod) {
-            _id = id;
+        public ValueChanger(String description, IValue originalValue) {
             _description = description;
-            ActionMethod = actionMethod;
+            OriginalValue = originalValue;
+
+            if (originalValue.GetValueType() == ValueType.Number)
+                TargetValue = new SimpleNumberValue(0);
+            else if (originalValue.GetValueType() == ValueType.String)
+                TargetValue = new SimpleStringValue();
+            else
+                throw new NotSupportedException("Type not supported: " + originalValue.GetValueType());
         }
 
-        public StringAction(String id, String description, Action<StrategyRuntimeContext, StringValue> actionMethod, StringValue stringValue) {
-            _id = id;
+        public ValueChanger(String description, IValue originalValue, IValue targetValue) {
             _description = description;
-            ActionMethod = actionMethod;
-            Value = stringValue;
+            OriginalValue = originalValue;
+            TargetValue = targetValue;
+        }
+
+        public ValueType GetValueType() {
+            return OriginalValue.GetValueType();
         }
 
         public override void Execute(StrategyRuntimeContext context) {
-            ActionMethod.Invoke(context, Value);
+            IValue target = TargetValue;
+            // If the original is a uservar, use the context version
+            IVariable targetVar = TargetValue as IVariable;
+            if (targetVar != null) {
+                if (context.UserVars.ContainsKey(targetVar.GetVariableName()))
+                    target = context.UserVars[targetVar.GetVariableName()];
+            }
+
+            // Use the context's version since the one we were given could
+            // be a template not the current one.
+            IVariable originalVar = OriginalValue as IVariable;
+            context.UserVars[originalVar.GetVariableName()].SetFromValue(context, target);
         }
 
         public override string GetStringValue(StrategyRuntimeContext context) {
-            String stringValue = "";
-            if (Value != null)
-                stringValue = Value.GetValue(context);
-            return stringValue;
+            return ""; // No value makes sense here
         }
 
         public override String GetLabel() {
-            String result = GetId();
-            String value = GetStringValue(new ExampleStrategyRunParams());
-            if (!String.IsNullOrWhiteSpace(value))
-                result += ": " + value;
+            String result = "Change " + OriginalValue.GetLabel();
             return result;
         }
 
         public override StratAction Clone() {
-            return new StringAction(_id, _description, ActionMethod, Value);
+            if (TargetValue == null)
+                return new ValueChanger(_description, OriginalValue.Clone());
+            return new ValueChanger(_description, OriginalValue.Clone(), TargetValue.Clone());
+        }
+
+        public override ITreeNode[] GetChildren() {
+            return new ITreeNode[] { OriginalValue, _operator, TargetValue };
+        }
+
+        public override void SetChild(int index, ITreeNode child) {
+            if (index == 0)
+                OriginalValue = child as IValue;
+            else if (index == 1)
+                _operator = child as ToOperator;
+            else if (index == 2)
+                TargetValue = child as IValue;
+            else
+                throw new ArgumentOutOfRangeException("Index out of range: " + index);
         }
 
         public override JsonObject ToJson() {
             JsonObject obj = new JsonObject();
             obj.Put("Id", GetId());
-            obj.Put("Value", Value.ToJson());
+            obj.Put("Description", GetDescription());
+            obj.Put("OriginalValue", OriginalValue.ToJson());
+            if (TargetValue != null)
+                obj.Put("TargetValue", TargetValue.ToJson());
             return obj;
         }
 
         public override void FromJson(JsonObject json) {
-            JsonObject val = json.GetObject("Value");
-            Value = (StringValue)Values.GetValues()[val.GetString("Id")].Clone();
-            Value.FromJson(val);
+            JsonObject originalJson = json.GetObject("OriginalValue");
+            OriginalValue = Values.GetValues()[originalJson.GetString("Id")].Clone();
+            OriginalValue.FromJson(originalJson);
+
+            JsonObject targetJson = json.GetObject("TargetValue");
+            if (targetJson != null) {
+                TargetValue = Values.GetValues()[targetJson.GetString("Id")].Clone();
+                TargetValue.FromJson(targetJson);
+            }
+
+            _description = json.GetString("Description");
         }
     }
 }

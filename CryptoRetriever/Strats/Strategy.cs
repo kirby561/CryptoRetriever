@@ -20,7 +20,7 @@ namespace CryptoRetriever.Strats {
         public Account Account { get; set; } = new Account();
         public ExchangeAssumptions ExchangeAssumptions { get; set; } = new ExchangeAssumptions();
         public ObservableCollection<IFilter> Filters { get; set; } = new ObservableCollection<IFilter>();
-        public ObservableCollection<State> States { get; set; }  = new ObservableCollection<State>();
+        public ObservableCollection<IValue> UserVars { get; set; }  = new ObservableCollection<IValue>();
         public ObservableCollection<Trigger> Triggers { get; set; } = new ObservableCollection<Trigger>();
         public DateTime Start { get; set; } = DateTime.MinValue; // Min means use the dataset's start
         public DateTime End { get; set; } = DateTime.MinValue; // Min means use the dataset's end
@@ -34,13 +34,60 @@ namespace CryptoRetriever.Strats {
             }
         }
 
+        /// <returns>
+        /// Gets the current list of actions that apply to this Strategy.
+        /// This includes actions that are always applicable and actions that
+        /// depend on strategy parameters like UserVars.
+        /// </returns>
+        public Dictionary<String, StratAction> GetActions() {
+            var result = new Dictionary<String, StratAction>();
+            foreach (KeyValuePair<String, StratAction> action in Actions.GetActions())
+                result.Add(action.Key, action.Value);
+
+            // Add an action to change each user var
+            foreach (IValue userVarValue in UserVars) {
+                IVariable var = userVarValue as IVariable;
+                ValueChanger valAction = new ValueChanger(
+                    "Change " + var.GetVariableName(),
+                    userVarValue);
+                result.Add("Change" + var.GetVariableName(), valAction);
+            }
+
+            return result;
+        }
+
+        /// <returns>
+        /// Gets the current list of values that apply to this Strategy.
+        /// This includes values that are always applicable and values that
+        /// depend on strategy parameters like UserVars.
+        /// </returns>
+        public Dictionary<String, IValue> GetValuesOfType(ValueType type) {
+            var result = new Dictionary<String, IValue>();
+
+            foreach (KeyValuePair<String, IValue> pair in Values.GetNonVariableTypes())
+                if (type.Equals(pair.Value.GetValueType()))
+                    result.Add(pair.Key, pair.Value);
+
+            foreach (KeyValuePair<String, IValue> pair in Variables.GetReadOnlyVariablesOfType(type))
+                if (type.Equals(pair.Value.GetValueType()))
+                    result.Add(pair.Key, pair.Value);
+
+            foreach (IValue userVarValue in UserVars) {
+                IUserVariable userVar = (IUserVariable)userVarValue;
+                if (type.Equals(userVarValue.GetValueType()))
+                    result.Add(userVar.GetVariableName(), userVarValue);
+            }
+
+            return result;
+        }
+
         public JsonObject ToJson() {
             JsonObject obj = new JsonObject();
             obj.Put("Name", Name)
                 .Put("Account", Account.ToJson())
                 .Put("ExchangeAssumptions", ExchangeAssumptions.ToJson())
                 .Put("Filters", Filters)
-                .Put("States", States)
+                .Put("UserVars", UserVars)
                 .Put("Triggers", Triggers)
                 .Put("Start", Start)
                 .Put("End", End);
@@ -66,12 +113,12 @@ namespace CryptoRetriever.Strats {
                 }
             }
 
-            List<JsonObject> states = obj.GetObjectArray("States");
-            if (states != null) {
-                foreach (JsonObject stateObj in states) {
-                    State state = new State();
-                    state.FromJson(stateObj);
-                    States.Add(state);
+            List<JsonObject> userVars = obj.GetObjectArray("UserVars");
+            if (userVars != null) {
+                foreach (JsonObject userVarObj in userVars) {
+                    IValue userVar = Variables.GetUserVariableTypes()[userVarObj.GetString("Id")].Clone();
+                    userVar.FromJson(userVarObj);
+                    UserVars.Add(userVar);
                 }
             }
 
@@ -92,7 +139,7 @@ namespace CryptoRetriever.Strats {
     public class ExampleStrategy : Strategy {
         public ExampleStrategy() {
             Name = "ExampleStrategy";
-            States.Add(new State("Default"));
+            UserVars.Add(new UserStringVariable("Default", "None"));
         }
     }
 
@@ -106,9 +153,9 @@ namespace CryptoRetriever.Strats {
         }
     }
 
-    public class ExampleStrategyRunParams : StrategyRuntimeContext {
-        public ExampleStrategyRunParams() : base(new ExampleStrategy(), new ExampleDataset()) {
-            CurrentState = Strategy.States[0].GetId();
-        }
-    }
+    //public class ExampleStrategyRunParams : StrategyRuntimeContext {
+    //    public ExampleStrategyRunParams() : base(new ExampleStrategy(), new ExampleDataset()) {
+
+    //    }
+    //}
 }

@@ -93,18 +93,18 @@ namespace CryptoRetriever.Strats {
     /// the condition is true.
     /// </summary>
     public class NumberComparison : Condition {
-        public NumberValue LeftOperand { get; set; }
+        public INumberValue LeftOperand { get; set; }
         public NumberComparisonOperator Operator { get; set; }
-        public NumberValue RightOperand { get; set; }
+        public INumberValue RightOperand { get; set; }
 
         public NumberComparison() {
             // Some defaults
-            LeftOperand = new NumberValue(0);
+            LeftOperand = new SimpleNumberValue(0);
             Operator = new LessThanNumberOperator();
-            RightOperand = new NumberValue(0);
+            RightOperand = new SimpleNumberValue(0);
         }
 
-        public NumberComparison(NumberValue left, NumberComparisonOperator op, NumberValue right) {
+        public NumberComparison(INumberValue left, NumberComparisonOperator op, INumberValue right) {
             LeftOperand = left;
             Operator = op;
             RightOperand = right;
@@ -123,7 +123,7 @@ namespace CryptoRetriever.Strats {
         }
 
         public override String GetLabel() {
-            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+            return GetId();
         }
 
         public override String GetStringValue(StrategyRuntimeContext context) {
@@ -131,7 +131,7 @@ namespace CryptoRetriever.Strats {
         }
 
         public override Condition Clone() {
-            return new NumberComparison((NumberValue)LeftOperand.Clone(), (NumberComparisonOperator)Operator.Clone(), (NumberValue)RightOperand.Clone());
+            return new NumberComparison((INumberValue)LeftOperand.Clone(), (NumberComparisonOperator)Operator.Clone(), (INumberValue)RightOperand.Clone());
         }
 
         public override ITreeNode[] GetChildren() {
@@ -140,11 +140,11 @@ namespace CryptoRetriever.Strats {
 
         public override void SetChild(int index, ITreeNode child) {
             if (index == 0)
-                LeftOperand = child as NumberValue;
+                LeftOperand = (INumberValue)child;
             else if (index == 1)
-                Operator = child as NumberComparisonOperator;
+                Operator = (NumberComparisonOperator)child;
             else if (index == 2)
-                RightOperand = child as NumberValue;
+                RightOperand = (INumberValue)child;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
         }
@@ -159,13 +159,13 @@ namespace CryptoRetriever.Strats {
         }
 
         public override void FromJson(JsonObject json) {
-            Dictionary<String, Value> values = Values.GetValues();
+            Dictionary<String, IValue> values = Values.GetValues();
             JsonObject leftOperandObj = json.GetObject("LeftOperand");
-            LeftOperand = (NumberValue)values[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand = (INumberValue)values[leftOperandObj.GetString("Id")].Clone();
             LeftOperand.FromJson(leftOperandObj);
             Operator = (NumberComparisonOperator)Operators.GetNumberComparisonOperators()[json.GetString("Operator")].Clone();
             JsonObject rightOperandObj = json.GetObject("RightOperand");
-            RightOperand = (NumberValue)values[rightOperandObj.GetString("Id")].Clone();
+            RightOperand = (INumberValue)values[rightOperandObj.GetString("Id")].Clone();
             RightOperand.FromJson(rightOperandObj);
         }
     }
@@ -206,7 +206,7 @@ namespace CryptoRetriever.Strats {
         }
 
         public override String GetLabel() {
-            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+            return GetId();
         }
 
         public override String GetStringValue(StrategyRuntimeContext context) {
@@ -223,11 +223,11 @@ namespace CryptoRetriever.Strats {
 
         public override void SetChild(int index, ITreeNode child) {
             if (index == 0)
-                LeftOperand = child as Condition;
+                LeftOperand = (Condition)child;
             else if (index == 1)
-                Operator = child as LogicOperator;
+                Operator = (LogicOperator)child;
             else if (index == 2)
-                RightOperand = child as Condition;
+                RightOperand = (Condition)child;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
         }
@@ -257,18 +257,18 @@ namespace CryptoRetriever.Strats {
     /// A condition who's truth is determined by comparing 2 strings.
     /// </summary>
     public class StringComparison : Condition {
-        public StringValue LeftOperand { get; private set; }
+        public IStringValue LeftOperand { get; private set; }
         public StringComparisonOperator Operator { get; private set; }
-        public StringValue RightOperand { get; private set; }
+        public IStringValue RightOperand { get; private set; }
 
         public StringComparison() {
             // Some defaults
-            LeftOperand = new StringValue("String1");
+            LeftOperand = new SimpleStringValue("String1");
             Operator = new EqualsStringOperator();
-            RightOperand = new StringValue("String2");
+            RightOperand = new SimpleStringValue("String2");
         }
 
-        public StringComparison(StringValue left, StringComparisonOperator op, StringValue right) {
+        public StringComparison(IStringValue left, StringComparisonOperator op, IStringValue right) {
             LeftOperand = left;
             Operator = op;
             RightOperand = right;
@@ -287,7 +287,7 @@ namespace CryptoRetriever.Strats {
         }
 
         public override String GetLabel() {
-            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
+            return GetId();
         }
 
         public override String GetStringValue(StrategyRuntimeContext context) {
@@ -295,7 +295,7 @@ namespace CryptoRetriever.Strats {
         }
 
         public override Condition Clone() {
-            return new StringComparison((StringValue)LeftOperand.Clone(), (StringComparisonOperator)Operator.Clone(), (StringValue)RightOperand.Clone());
+            return new StringComparison((IStringValue)LeftOperand.Clone(), (StringComparisonOperator)Operator.Clone(), (IStringValue)RightOperand.Clone());
         }
 
         public override ITreeNode[] GetChildren() {
@@ -304,11 +304,11 @@ namespace CryptoRetriever.Strats {
 
         public override void SetChild(int index, ITreeNode child) {
             if (index == 0)
-                LeftOperand = child as StringValue;
+                LeftOperand = (IStringValue)child;
             else if (index == 1)
-                Operator = child as StringComparisonOperator;
+                Operator = (StringComparisonOperator)child;
             else if (index == 2)
-                RightOperand = child as StringValue;
+                RightOperand = (IStringValue)child;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
         }
@@ -323,13 +323,13 @@ namespace CryptoRetriever.Strats {
         }
 
         public override void FromJson(JsonObject json) {
-            Dictionary<String, Value> values = Values.GetValues();
+            Dictionary<String, IValue> values = Values.GetValues();
             JsonObject leftOperandObj = json.GetObject("LeftOperand");
-            LeftOperand = (StringValue)values[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand = (IStringValue)values[leftOperandObj.GetString("Id")].Clone();
             LeftOperand.FromJson(leftOperandObj);
             Operator = (StringComparisonOperator)Operators.GetStringComparisonOperators()[json.GetString("Operator")].Clone();
             JsonObject rightOperandObj = json.GetObject("RightOperand");
-            RightOperand = (StringValue)values[rightOperandObj.GetString("Id")].Clone();
+            RightOperand = (IStringValue)values[rightOperandObj.GetString("Id")].Clone();
             RightOperand.FromJson(rightOperandObj);
         }
     }

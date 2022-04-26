@@ -15,6 +15,8 @@ namespace CryptoRetriever.Strats {
                 AddOperator(operators, op);
             foreach (Operator op in GetLogicOperators().Values)
                 AddOperator(operators, op);
+            foreach (Operator op in GetToOperators().Values)
+                AddOperator(operators, op);
 
             return operators;
         }
@@ -42,7 +44,7 @@ namespace CryptoRetriever.Strats {
             return operators;
         }
 
-        public static Dictionary<string, Operator> GetNumberComparisonOperators() {
+        public static Dictionary<String, Operator> GetNumberComparisonOperators() {
             var operators = new Dictionary<String, Operator>();
 
             AddOperator(operators, new LessThanNumberOperator());
@@ -53,7 +55,15 @@ namespace CryptoRetriever.Strats {
             return operators;
         }
 
-        public static Dictionary<string, Operator> GetLogicOperators() {
+        public static Dictionary<String, Operator> GetToOperators() {
+            var operators = new Dictionary<String, Operator>();
+
+            AddOperator(operators, new ToOperator());
+
+            return operators;
+        }
+
+        public static Dictionary<String, Operator> GetLogicOperators() {
             var operators = new Dictionary<String, Operator>();
 
             AddOperator(operators, new AndLogicOperator());

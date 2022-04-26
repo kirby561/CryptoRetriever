@@ -80,18 +80,18 @@
                     </ListView.ItemTemplate>
                 </ListView>
 
-                <!-- States -->
+                <!-- User Vars -->
                 <Grid Margin="0 20 0 0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="States" Style="{StaticResource TbHeader}" />
-                    <Button Click="OnAddStateClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
-                    <Button Click="OnRemoveStateClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                    <TextBlock Text="User Variables" Style="{StaticResource TbHeader}" />
+                    <Button Click="OnAddUserVarClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveUserVarClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
-                <ListView Name="_statesView" MinHeight="25">
+                <ListView Name="_userVars" MinHeight="25">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />

@@ -36,13 +36,15 @@ namespace CryptoRetriever.UI {
         /// </summary>
         public Trigger Trigger { get; private set; } = null;
 
-        public TriggerEditorWindow() {
+        private Strategy _strategy;
+
+        public TriggerEditorWindow(Strategy strategy) {
             InitializeComponent();
+            _strategy = strategy;
         }
 
         private void OnConditionClicked(object sender, MouseButtonEventArgs e) {
-            ConditionEditorWindow editor = new ConditionEditorWindow();
-            editor.Trigger = WorkingTrigger;
+            ConditionEditorWindow editor = new ConditionEditorWindow(_strategy, WorkingTrigger);
             UiHelper.CenterWindowInWindow(editor, this);
             editor.ShowDialog();
             UpdateUi();
@@ -79,7 +81,7 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnThenActionClicked(object sender, MouseButtonEventArgs e) {
-            ActionEditorWindow editor = new ActionEditorWindow();
+            ActionEditorWindow editor = new ActionEditorWindow(_strategy);
             editor.Action = WorkingTrigger.TrueAction;
             UiHelper.CenterWindowInWindow(editor, this);
             editor.ShowDialog();
@@ -88,7 +90,7 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnElseActionClicked(object sender, MouseButtonEventArgs e) {
-            ActionEditorWindow editor = new ActionEditorWindow();
+            ActionEditorWindow editor = new ActionEditorWindow(_strategy);
             editor.Action = WorkingTrigger.FalseAction;
             UiHelper.CenterWindowInWindow(editor, this);
             editor.ShowDialog();

@@ -37,10 +37,36 @@ namespace CryptoRetriever.Strats {
     }
 
     /// <summary>
+    /// An operator that doesn't do anything but indicates that one
+    /// operand is being set to another operand.
+    /// </summary>
+    public class ToOperator : Operator {
+        public override String GetStringValue(StrategyRuntimeContext context) {
+            return "to";
+        }
+
+        public override String GetDescription() {
+            return "Indicates that the first operand is being set to the second operand.";
+        }
+
+        public override Operator Clone() {
+            return new ToOperator();
+        }
+        
+        public override String GetId() {
+            return "ToOperator";
+        }
+
+        public override Dictionary<String, Operator> GetOptions() {
+            return Operators.GetToOperators();
+        }
+    }
+
+    /// <summary>
     /// Does a math operation on 2 numbers.
     /// </summary>
     public abstract class MathOperator : Operator {
-        public abstract NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context);
+        public abstract INumberValue Operate(INumberValue num1, INumberValue num2, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
         public abstract override String GetDescription();
         public abstract override Operator Clone();
@@ -53,8 +79,8 @@ namespace CryptoRetriever.Strats {
     }
 
     public class AdditionOperator : MathOperator {
-        public override NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context) {
-            return new NumberValue(num1.GetValue(context) + num2.GetValue(context));
+        public override INumberValue Operate(INumberValue num1, INumberValue num2, StrategyRuntimeContext context) {
+            return new SimpleNumberValue(num1.GetValue(context) + num2.GetValue(context));
         }
 
         public override String GetId() {
@@ -75,8 +101,8 @@ namespace CryptoRetriever.Strats {
     }
 
     public class SubtractionOperator : MathOperator {
-        public override NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context) {
-            return new NumberValue(num1.GetValue(context) - num2.GetValue(context));
+        public override INumberValue Operate(INumberValue num1, INumberValue num2, StrategyRuntimeContext context) {
+            return new SimpleNumberValue(num1.GetValue(context) - num2.GetValue(context));
         }
 
         public override String GetId() {
@@ -97,8 +123,8 @@ namespace CryptoRetriever.Strats {
     }
 
     public class MultiplicationOperator : MathOperator {
-        public override NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context) {
-            return new NumberValue(num1.GetValue(context) * num2.GetValue(context));
+        public override INumberValue Operate(INumberValue num1, INumberValue num2, StrategyRuntimeContext context) {
+            return new SimpleNumberValue(num1.GetValue(context) * num2.GetValue(context));
         }
 
         public override String GetId() {
@@ -119,8 +145,8 @@ namespace CryptoRetriever.Strats {
     }
 
     public class DivisionOperator : MathOperator {
-        public override NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context) {
-            return new NumberValue(num1.GetValue(context) / num2.GetValue(context));
+        public override INumberValue Operate(INumberValue num1, INumberValue num2, StrategyRuntimeContext context) {
+            return new SimpleNumberValue(num1.GetValue(context) / num2.GetValue(context));
         }
 
         public override String GetId() {
@@ -141,8 +167,8 @@ namespace CryptoRetriever.Strats {
     }
 
     public class ExponentOperator : MathOperator {
-        public override NumberValue Operate(NumberValue num1, NumberValue num2, StrategyRuntimeContext context) {
-            return new NumberValue(Math.Pow(num1.GetValue(context), num2.GetValue(context)));
+        public override INumberValue Operate(INumberValue num1, INumberValue num2, StrategyRuntimeContext context) {
+            return new SimpleNumberValue(Math.Pow(num1.GetValue(context), num2.GetValue(context)));
         }
 
         public override String GetId() {
@@ -166,7 +192,7 @@ namespace CryptoRetriever.Strats {
     /// The options for comparing 2 strings
     /// </summary>
     public abstract class StringComparisonOperator : Operator {
-        public abstract Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context);
+        public abstract Condition Compare(IStringValue left, IStringValue right, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
         public abstract override String GetDescription();
         public override String GetId() {
@@ -179,7 +205,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class LessThanStringOperator : StringComparisonOperator {
-        public override Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(IStringValue left, IStringValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) < 0);
         }
 
@@ -201,7 +227,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class GreaterThanStringOperator : StringComparisonOperator {
-        public override Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(IStringValue left, IStringValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) > 0);
         }
 
@@ -223,7 +249,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class EqualsStringOperator : StringComparisonOperator {
-        public override Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(IStringValue left, IStringValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) == 0);
         }
 
@@ -245,7 +271,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class DoesNotEqualStringOperator : StringComparisonOperator {
-        public override Condition Compare(StringValue left, StringValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(IStringValue left, IStringValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context).CompareTo(right.GetValue(context)) != 0);
         }
 
@@ -270,7 +296,7 @@ namespace CryptoRetriever.Strats {
     /// The options for comparing 2 numbers
     /// </summary>
     public abstract class NumberComparisonOperator : Operator {
-        public abstract Condition Compare(NumberValue left, NumberValue right, StrategyRuntimeContext context);
+        public abstract Condition Compare(INumberValue left, INumberValue right, StrategyRuntimeContext context);
         public abstract override String GetStringValue(StrategyRuntimeContext context);
         public abstract override String GetDescription();
         public override String GetId() {
@@ -283,7 +309,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class LessThanNumberOperator : NumberComparisonOperator {
-        public override Condition Compare(NumberValue left, NumberValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(INumberValue left, INumberValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context) < right.GetValue(context));
         }
 
@@ -305,7 +331,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class GreaterThanNumberOperator : NumberComparisonOperator {
-        public override Condition Compare(NumberValue left, NumberValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(INumberValue left, INumberValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context) > right.GetValue(context));
         }
 
@@ -327,7 +353,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class EqualsNumberOperator : NumberComparisonOperator {
-        public override Condition Compare(NumberValue left, NumberValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(INumberValue left, INumberValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context) == right.GetValue(context));
         }
 
@@ -349,7 +375,7 @@ namespace CryptoRetriever.Strats {
     }
 
     public class DoesNotEqualNumberOperator : NumberComparisonOperator {
-        public override Condition Compare(NumberValue left, NumberValue right, StrategyRuntimeContext context) {
+        public override Condition Compare(INumberValue left, INumberValue right, StrategyRuntimeContext context) {
             return new BoolCondition(left.GetValue(context) != right.GetValue(context));
         }
 

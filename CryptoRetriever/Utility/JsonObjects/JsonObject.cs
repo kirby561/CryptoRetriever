@@ -26,6 +26,8 @@ namespace CryptoRetriever.Utility.JsonObjects {
         }
 
         public JsonObject GetObject(String key) {
+            if (!Children.ContainsKey(key))
+                return null;
             return new JsonObject((Dictionary<String, object>)Children[key]);
         }
 

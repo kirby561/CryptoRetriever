@@ -31,14 +31,6 @@ namespace CryptoRetriever.Strats {
         /// </returns>
         String GetLabel();
 
-        /// <summary>
-        /// This gets the current value of the node as a string given the
-        /// current context.
-        /// </summary>
-        /// <param name="context">The runtime context which may or may not be needed to get the value.</param>
-        /// <returns>Returns the current value as a string.</returns>
-        String GetStringValue(StrategyRuntimeContext context);
-
         /// <returns>
         /// Returns an array of the child nodes of this node.
         /// </returns>

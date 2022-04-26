@@ -4,26 +4,60 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
+    public enum ValueType {
+        String,
+        Number
+    }
+
     /// <summary>
     /// Represents a value that can be used by conditions, operators and actions.
     /// </summary>
-    public abstract class Value : ITreeNode {
+    public interface IValue : ITreeNode, IJsonable {
+        /// <summary>
+        /// This gets the current value of the node as a string given the
+        /// current context.
+        /// </summary>
+        /// <param name="context">The runtime context which may or may not be needed to get the value.</param>
+        /// <returns>Returns the current value as a string.</returns>
+        String GetStringValue(StrategyRuntimeContext context);
+
+        void SetFromValue(StrategyRuntimeContext context, IValue otherValue);
+        void SetValueFromString(StrategyRuntimeContext context, String val);
+
+        IValue Clone();
+        ValueType GetValueType();
+    }
+
+    public abstract class Value : IValue {
         public abstract String GetId();
-        public abstract string GetDescription();
+        public abstract String GetDescription();
         public abstract String GetStringValue(StrategyRuntimeContext context);
-        public virtual String GetLabel() {
-            return GetId() + ": " + GetStringValue(new ExampleStrategyRunParams());
-        }
-        public abstract Value Clone();
+        public abstract void SetFromValue(StrategyRuntimeContext context, IValue otherValue);
+        public abstract void SetValueFromString(StrategyRuntimeContext context, String val);
+        public abstract IValue Clone();
+        public abstract ValueType GetValueType();
         public abstract JsonObject ToJson();
         public abstract void FromJson(JsonObject json);
+
+        public virtual String GetLabel() {
+            String result = GetId();
+            return result;
+        }
+
         public virtual ITreeNode[] GetChildren() {
             // By default, no children
             return null;
         }
+
         public virtual void SetChild(int index, ITreeNode child) {
             // By default, no children
             throw new Exception("This node has no children");
+        }
+
+        public String Summary {
+            get {
+                return GetLabel();
+            }
         }
 
         public override string ToString() {
@@ -31,36 +65,61 @@ namespace CryptoRetriever.Strats {
         }
     }
 
-    /// <summary>
-    /// Represents a constant String value.
-    /// </summary>
-    public class StringValue : Value {
-        private String _value = "";
-
-        public virtual String GetValue(StrategyRuntimeContext context) {
-            return _value;
-        }
-
-        protected StringValue() { }
-
-        public StringValue(String value) {
-            _value = value;
-        }
-
+    public abstract class TypeValue<T> : Value {
         public override String GetId() {
-            return "StringValue";
+            return GetValueType().ToString() + "Value";
         }
 
         public override String GetDescription() {
-            return "Represents some String value.";
+            return "Represents some " + GetValueType().ToString() + " value.";
         }
 
-        public override String GetStringValue(StrategyRuntimeContext context) {
-            return GetValue(context);
+        public override void SetFromValue(StrategyRuntimeContext context, IValue otherValue) {
+            SetValueFromString(context, otherValue.GetStringValue(context));
         }
 
-        public override Value Clone() {
-            return new StringValue(_value);
+        public abstract T GetValue(StrategyRuntimeContext context);
+    }
+
+    public interface INumberValue : IValue {
+        public double GetValue(StrategyRuntimeContext context);
+    }
+
+    public interface IStringValue : IValue {
+        public String GetValue(StrategyRuntimeContext context);
+    }
+
+    /// <summary>
+    /// Simple values are typed values that just have a member for their value.
+    /// </summary>
+    /// <typeparam name="T">The type of this value.</typeparam>
+    public abstract class SimpleValue<T> : TypeValue<T> {
+        protected T _value = default;
+
+        protected SimpleValue() { }
+
+        public SimpleValue(T value) {
+            _value = value;
+        }
+
+        public override T GetValue(StrategyRuntimeContext context) {
+            return _value;
+        }
+
+        public override String GetId() {
+            return "Simple" + GetValueType().ToString() + "Value";
+        }
+
+        public override string GetLabel() {
+            return GetId() + " (" + _value + ")";
+        }
+
+        public override String GetDescription() {
+            return "Represents some " + GetValueType().ToString() + " value.";
+        }
+
+        public override void SetFromValue(StrategyRuntimeContext context, IValue otherValue) {
+            SetValueFromString(context, otherValue.GetStringValue(context));
         }
 
         public override JsonObject ToJson() {
@@ -71,139 +130,55 @@ namespace CryptoRetriever.Strats {
         }
 
         public override void FromJson(JsonObject json) {
-            _value = json.GetString("Value");
+            SetValueFromString(null, json.GetString("Value"));
         }
     }
 
     /// <summary>
-    /// Represents a string that is retrieved from a variable.
+    /// Represents a constant String value.
     /// </summary>
-    public class VariableStringValue : StringValue {
-        private StringVariable _variable;
+    public class SimpleStringValue : SimpleValue<String>, IStringValue {
+        public SimpleStringValue() { }
+        public SimpleStringValue(String val) : base(val) { }
 
-        public override String GetValue(StrategyRuntimeContext context) {
-            return _variable.VariableRetrievalMethod.Invoke(context).GetValue(context);
+        public override String GetStringValue(StrategyRuntimeContext context) {
+            return GetValue(context);
         }
 
-        public VariableStringValue(StringVariable variable) {
-            _variable = variable;
+        public override void SetValueFromString(StrategyRuntimeContext context, string val) {
+            _value = val;
         }
 
-        public override String GetId() {
-            return "VariableStringValue";
+        public override ValueType GetValueType() {
+            return ValueType.String;
         }
 
-        public override String GetDescription() {
-            return "Represents a value that will be retrieved from a String variable when evaluated.";
-        }
-
-        public override String GetLabel() {
-            return _variable.Id + ": " + GetStringValue(new ExampleStrategyRunParams());
-        }
-
-        public override Value Clone() {
-            return new VariableStringValue((StringVariable)_variable.Clone());
-        }
-
-        public override JsonObject ToJson() {
-            JsonObject obj = new JsonObject();
-            obj.Put("Id", GetId());
-            obj.Put("Value", _variable.Id);
-            return obj;
-        }
-
-        public override void FromJson(JsonObject json) {
-            String varId = json.GetString("Value");
-            _variable = (StringVariable)Variables.GetStringVariables()[varId].Clone();
+        public override IValue Clone() {
+            return new SimpleStringValue(_value);
         }
     }
 
     /// <summary>
-    /// Represents a constant Number value (double).
+    /// Represents a constant String value.
     /// </summary>
-    public class NumberValue : Value {
-        private double _value = 0;
-
-        public NumberValue() {
-            _value = 0;
-        }
-
-        public NumberValue(double value) {
-            _value = value;
-        }
-
-        public virtual double GetValue(StrategyRuntimeContext context) {
-            return _value;
-        }
-
-        public override String GetId() {
-            return "NumberValue";
-        }
-
-        public override String GetDescription() {
-            return "Represents some Number value.";
-        }
+    public class SimpleNumberValue : SimpleValue<double>, INumberValue {
+        public SimpleNumberValue() : base(0) { }
+        public SimpleNumberValue(double val) : base(val) { }
 
         public override String GetStringValue(StrategyRuntimeContext context) {
             return "" + GetValue(context);
         }
 
-        public override Value Clone() {
-            return new NumberValue(_value);
+        public override void SetValueFromString(StrategyRuntimeContext context, string val) {
+            _value = Double.Parse(val);
         }
 
-        public override JsonObject ToJson() {
-            JsonObject obj = new JsonObject();
-            obj.Put("Id", GetId());
-            obj.Put("Value", _value);
-            return obj;
+        public override ValueType GetValueType() {
+            return ValueType.Number;
         }
 
-        public override void FromJson(JsonObject json) {
-            _value = json.GetDouble("Value");
-        }
-    }
-
-    /// <summary>
-    /// Represents a number that is retrieved from a variable.
-    /// </summary>
-    public class VariableNumberValue : NumberValue {
-        private NumberVariable _variable;
-
-        public override double GetValue(StrategyRuntimeContext context) {
-            return _variable.VariableRetrievalMethod.Invoke(context).GetValue(context);
-        }
-
-        public VariableNumberValue(NumberVariable variable) {
-            _variable = variable;
-        }
-
-        public override String GetId() {
-            return "VariableNumberValue";
-        }
-
-        public override String GetDescription() {
-            return "Represents a number that will be retrieved from a variable when evaluated.";
-        }
-
-        public override String GetLabel() {
-            return _variable.Id + ": " + GetStringValue(new ExampleStrategyRunParams());
-        }
-
-        public override Value Clone() {
-            return new VariableNumberValue((NumberVariable)_variable.Clone());
-        }
-
-        public override JsonObject ToJson() {
-            JsonObject obj = new JsonObject();
-            obj.Put("Id", GetId());
-            obj.Put("Value", _variable.Id);
-            return obj;
-        }
-
-        public override void FromJson(JsonObject json) {
-            String varId = json.GetString("Value");
-            _variable = (NumberVariable)Variables.GetNumberVariables()[varId].Clone();
+        public override IValue Clone() {
+            return new SimpleNumberValue(_value);
         }
     }
 
@@ -211,12 +186,12 @@ namespace CryptoRetriever.Strats {
     /// A Number that calculates its value using 2 other numbers
     /// and a MathOperator.
     /// </summary>
-    public class MathValue : NumberValue {
-        public NumberValue LeftOperand { get; private set; }
+    public class MathValue : TypeValue<double>, INumberValue {
+        public INumberValue LeftOperand { get; private set; }
         public MathOperator Operator { get; private set; }
-        public NumberValue RightOperand { get; private set; }
+        public INumberValue RightOperand { get; private set; }
 
-        public MathValue(NumberValue left, MathOperator op, NumberValue right) {
+        public MathValue(INumberValue left, MathOperator op, INumberValue right) {
             LeftOperand = left;
             Operator = op;
             RightOperand = right;
@@ -234,8 +209,20 @@ namespace CryptoRetriever.Strats {
             return "Represents a Number value that is calculated from 2 other Number values using a math operator.";
         }
 
-        public override Value Clone() {
-            return new MathValue((NumberValue)LeftOperand.Clone(), (MathOperator)Operator.Clone(), (NumberValue)RightOperand.Clone());
+        public override ValueType GetValueType() {
+            return ValueType.Number;
+        }
+
+        public override IValue Clone() {
+            return new MathValue((INumberValue)LeftOperand.Clone(), (MathOperator)Operator.Clone(), (INumberValue)RightOperand.Clone());
+        }
+
+        public override string GetStringValue(StrategyRuntimeContext context) {
+            return "" + GetValue(context);
+        }
+
+        public override void SetValueFromString(StrategyRuntimeContext context, string val) {
+            throw new NotSupportedException();
         }
 
         public override ITreeNode[] GetChildren() {
@@ -244,11 +231,11 @@ namespace CryptoRetriever.Strats {
 
         public override void SetChild(int index, ITreeNode child) {
             if (index == 0)
-                LeftOperand = child as NumberValue;
+                LeftOperand = (INumberValue)child;
             else if (index == 1)
-                Operator = child as MathOperator;
+                Operator = (MathOperator)child;
             else if (index == 2)
-                RightOperand = child as NumberValue;
+                RightOperand = (INumberValue)child;
             else
                 throw new ArgumentOutOfRangeException("Index out of range: " + index);
         }
@@ -263,13 +250,13 @@ namespace CryptoRetriever.Strats {
         }
 
         public override void FromJson(JsonObject json) {
-            Dictionary<String, Value> values = Values.GetValues();
+            Dictionary<String, IValue> values = Values.GetValues();
             JsonObject leftOperandObj = json.GetObject("LeftOperand");
-            LeftOperand = (NumberValue)values[leftOperandObj.GetString("Id")].Clone();
+            LeftOperand = (INumberValue)values[leftOperandObj.GetString("Id")].Clone();
             LeftOperand.FromJson(leftOperandObj);
             Operator = (MathOperator)Operators.GetMathOperators()[json.GetString("Operator")].Clone();
             JsonObject rightOperandObj = json.GetObject("RightOperand");
-            RightOperand = (NumberValue)values[rightOperandObj.GetString("Id")].Clone();
+            RightOperand = (INumberValue)values[rightOperandObj.GetString("Id")].Clone();
             RightOperand.FromJson(rightOperandObj);
         }
     }
