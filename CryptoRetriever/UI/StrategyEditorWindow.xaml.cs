@@ -161,6 +161,14 @@ namespace CryptoRetriever.UI {
             UiHelper.RemoveSelectedItemsFromListBox(_strategy.Filters, _filtersView);
         }
 
+        private void OnMoveFilterUpClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemUpInListBox(_strategy.Filters, _filtersView);
+        }
+
+        private void OnMoveFilterDownClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemDownInListBox(_strategy.Filters, _filtersView);
+        }
+
         private void OnAddUserVarClicked(object sender, RoutedEventArgs e) {
             UserVarDialog inputBox = new UserVarDialog();
             inputBox.Title = "New User Var";
@@ -184,18 +192,16 @@ namespace CryptoRetriever.UI {
             }
         }
 
-        private bool StrategyContainsVarName(IValue valueToCheck) {
-            IVariable varToCheck = valueToCheck as IVariable;
-            foreach (IValue val in _strategy.UserVars) {
-                IVariable var = val as IVariable;
-                if (var.GetVariableName().Equals(varToCheck.GetVariableName()))
-                    return true;
-            }
-            return false;
-        }
-
         private void OnRemoveUserVarClicked(object sender, RoutedEventArgs e) {
             UiHelper.RemoveSelectedItemsFromListBox(_strategy.UserVars, _userVars);
+        }
+
+        private void OnMoveUserVarUpClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemUpInListBox(_strategy.UserVars, _userVars);
+        }
+
+        private void OnMoveUserVarDownClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemDownInListBox(_strategy.UserVars, _userVars);
         }
 
         private void OnAddTriggerClicked(object sender, RoutedEventArgs e) {
@@ -226,6 +232,24 @@ namespace CryptoRetriever.UI {
 
         private void OnRemoveTriggerClicked(object sender, RoutedEventArgs e) {
             UiHelper.RemoveSelectedItemsFromListBox(_strategy.Triggers, _triggersView);
+        }
+
+        private void OnMoveTriggerUpClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemUpInListBox(_strategy.Triggers, _triggersView);
+        }
+
+        private void OnMoveTriggerDownClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemDownInListBox(_strategy.Triggers, _triggersView);
+        }
+
+        private bool StrategyContainsVarName(IValue valueToCheck) {
+            IVariable varToCheck = valueToCheck as IVariable;
+            foreach (IValue val in _strategy.UserVars) {
+                IVariable var = val as IVariable;
+                if (var.GetVariableName().Equals(varToCheck.GetVariableName()))
+                    return true;
+            }
+            return false;
         }
     }
 }

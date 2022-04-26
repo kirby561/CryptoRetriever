@@ -67,10 +67,14 @@
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Filters" Style="{StaticResource TbHeader}" />
-                    <Button Click="OnAddFilterClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
-                    <Button Click="OnRemoveFilterClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                    <Button Click="OnMoveFilterUpClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListUpButton}" />
+                    <Button Click="OnMoveFilterDownClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListDownButton}" />
+                    <Button Click="OnAddFilterClicked" Grid.Column="3" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveFilterClicked" Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
                 <ListView Name="_filtersView" MinHeight="25">
                     <ListView.ItemTemplate>
@@ -86,10 +90,14 @@
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="User Variables" Style="{StaticResource TbHeader}" />
-                    <Button Click="OnAddUserVarClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
-                    <Button Click="OnRemoveUserVarClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                    <Button Click="OnMoveUserVarUpClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListUpButton}" />
+                    <Button Click="OnMoveUserVarDownClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListDownButton}" />
+                    <Button Click="OnAddUserVarClicked" Grid.Column="3" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveUserVarClicked" Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
                 <ListView Name="_userVars" MinHeight="25">
                     <ListView.ItemTemplate>
@@ -105,10 +113,14 @@
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Triggers" Style="{StaticResource TbHeader}" />
-                    <Button Click="OnAddTriggerClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
-                    <Button Click="OnRemoveTriggerClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
+                    <Button Click="OnMoveTriggerUpClicked" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource ListUpButton}" />
+                    <Button Click="OnMoveTriggerDownClicked" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource ListDownButton}" />
+                    <Button Click="OnAddTriggerClicked" Grid.Column="3" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
+                    <Button Click="OnRemoveTriggerClicked" Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
                 <ListView Name="_triggersView" MouseDoubleClick="OnTriggerDoubleClicked" MinHeight="25">
                     <ListView.ItemTemplate>

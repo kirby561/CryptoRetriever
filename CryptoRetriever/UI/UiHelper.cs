@@ -31,7 +31,7 @@ namespace CryptoRetriever.UI {
         /// </summary>
         /// <param name="color">The color to shade.</param>
         /// <param name="percent">The percent to shade it by. 0.20 = 20% brighter, -0.20 = 20% darker.</param>
-        /// <returns></returns>
+        /// <returns>Returns the shaded color.</returns>
         public static Color ShadeColor(Color color, double percent) {
             double r = color.R;
             double b = color.B;
@@ -96,6 +96,38 @@ namespace CryptoRetriever.UI {
             }
             foreach (T item in itemsToRemove) {
                 list.Remove(item);
+            }
+        }
+
+        /// <summary>
+        /// Moves the first selected item up in the given listbox.
+        /// </summary>
+        /// <typeparam name="T">The type of the collection in the listbox.</typeparam>
+        /// <param name="list">The list of items.</param>
+        /// <param name="listbox">The listbox showing the items.</param>
+        public static void MoveSelectedItemUpInListBox<T>(ObservableCollection<T> list, ListBox listbox) {
+            if (listbox.SelectedIndex > 0) {
+                int indexAbove = listbox.SelectedIndex - 1;
+                T selectedItem = (T)listbox.SelectedItem;
+                list.Remove(selectedItem);
+                list.Insert(indexAbove, selectedItem);
+                listbox.SelectedIndex = indexAbove;
+            }
+        }
+
+        /// <summary>
+        /// Moves the first selected item down in the given listbox.
+        /// </summary>
+        /// <typeparam name="T">The type of the collection in the listbox.</typeparam>
+        /// <param name="list">The list of items.</param>
+        /// <param name="listbox">The listbox showing the items.</param>
+        public static void MoveSelectedItemDownInListBox<T>(ObservableCollection<T> list, ListBox listbox) {
+            if (listbox.SelectedIndex >= 0 && listbox.SelectedIndex < list.Count - 1) {
+                int indexBelow = listbox.SelectedIndex + 1;
+                T selectedItem = (T)listbox.SelectedItem;
+                list.Remove(selectedItem);
+                list.Insert(indexBelow, selectedItem);
+                listbox.SelectedIndex = indexBelow;
             }
         }
     }
