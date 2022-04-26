@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CryptoRetriever.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,14 +21,24 @@ namespace CryptoRetriever.Data {
         // Mouse hover dependencies
         private Point _mouseHoverPointPx;
         private bool _mouseHoverPointEnabled = false;
-        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Color.FromRgb(0x72, 0x9f, 0xcf)/*Colors.Green*/, 10, 2, 14.0);
+        private HoverPointOptions _hoverPointOptions = new HoverPointOptions(Color.FromRgb(0x72, 0x9f, 0xcf), 10, 2, 14.0);
         private Ellipse _hoverPointEllipse;
         private TextBlock _hoverPointText;
         private Rectangle _hoverPointTextBackground;
 
-        // Drawing pieces
-        private Geometry _datasetGeometry;
-        private Path _datasetPath;
+        // Datasets - Keep track of the original and post-filter so we
+        // can display them together for reference. The filtered one can
+        // be null if the dataset has not been filtered.
+        private Dataset _originalDataset;
+        private Dataset _filteredDataset = null;
+
+        // Dataset drawing pieces
+        private Geometry _originalDatasetGeometry;
+        private Path _originalDatasetPath;
+        private Geometry _filteredDatasetGeometry;
+        private Path _filteredDatasetPath;
+
+        // Axis drawing pieces
         private Line _xAxis;
         private Line _yAxis;
         private TextBlock _xAxisLabel;
@@ -38,6 +49,7 @@ namespace CryptoRetriever.Data {
         private bool _areXGridlinesEnabled = true;
         private bool _areYGridlinesEnabled = true;
         private bool _startRangeAt0 = false; // True to lock the bottom of the bounding range to 0
+        private bool _showOriginalDataset = true;
 
         // Colors
         private SolidColorBrush _axisBrush = new SolidColorBrush(Color.FromRgb(0x72, 0x9f, 0xcf));// Colors.Green);
@@ -50,8 +62,9 @@ namespace CryptoRetriever.Data {
         private static readonly double Y_AXIS_X_OFFSET = X_AXIS_X_OFFSET + 50; // Distance from the left of the window to the Y axis in pixels
         private static readonly double Y_AXIS_Y_OFFSET = 50; // Distance from the bottom of the window to the bototm of the Y axis in pixels
 
-        private static readonly int DATA_ZINDEX = -1;
-        private static readonly int GRIDLINE_ZINDEX = -2;
+        private static readonly int FILTERED_DATA_ZINDEX = -1;
+        private static readonly int ORIGINAL_DATA_ZINDEX = -2;
+        private static readonly int GRIDLINE_ZINDEX = -3;
 
         // Calculated transforms
         //     Pixel space is from the top left of the canvas in pixels, down is positive.
@@ -67,44 +80,70 @@ namespace CryptoRetriever.Data {
         private Range _boundingDomain;
         private Range _boundingRange;
 
-        public GraphRenderer(Canvas canvas, Dataset dataset) {
+        public GraphRenderer(Canvas canvas, Dataset originalDataset) : this(canvas, originalDataset, null) { }
+
+        public GraphRenderer(Canvas canvas, Dataset originalDataset, Dataset filteredDataset) {
             _canvas = canvas;
-            _renderParams.Dataset = dataset;
+            _originalDataset = originalDataset;
+            _filteredDataset = filteredDataset;
 
             // Initialize a geometry for the dataset
-            StreamGeometry geometry = new StreamGeometry();
-            using (StreamGeometryContext stream = geometry.Open()) {
-                if (_renderParams.Dataset.Points.Count > 0) {
-                    Point p1 = _renderParams.Dataset.Points[0];
-                    stream.BeginFigure(p1, false, false);
-                } else {
-                    return; // Nothing to draw
-                }
+            Tuple<Geometry, Path> originalGeomAndPath = CalculateGeometryAndPath(_originalDataset);
+            _originalDatasetGeometry = originalGeomAndPath.Item1;
+            _originalDatasetPath = originalGeomAndPath.Item2;
 
-                for (int i = 1; i < _renderParams.Dataset.Points.Count; i++) {
-                    Point p = _renderParams.Dataset.Points[i];
-                    stream.LineTo(p, true, true);
-                }
-
-                _datasetGeometry = geometry;
-
-                _datasetPath = new Path();
-                _datasetPath.Data = geometry;
-                Canvas.SetLeft(_datasetPath, 0);
-                Canvas.SetTop(_datasetPath, 0);
-                Canvas.SetRight(_datasetPath, 0);
-                Canvas.SetBottom(_datasetPath, 0);
+            if (_filteredDataset != null) {
+                Tuple<Geometry, Path> filteredGeomAndPath = CalculateGeometryAndPath(_filteredDataset);
+                _filteredDatasetGeometry = filteredGeomAndPath.Item1;
+                _filteredDatasetPath = filteredGeomAndPath.Item2;
             }
 
-            SolidColorBrush brush = new SolidColorBrush(_renderParams.LineOptions.Color);
-            _datasetPath.Stroke = brush;
-            _datasetPath.StrokeThickness = _renderParams.LineOptions.Thickness;
-            _datasetPath.IsHitTestVisible = false;
+            SolidColorBrush foregroundBrush = new SolidColorBrush(_renderParams.ForegroundDataLineOptions.Color);
+            SolidColorBrush backgroundBrush = new SolidColorBrush(_renderParams.BackgroundDataLineOptions.Color);
+            if (_filteredDataset != null) {
+                SetPathStroke(_originalDatasetPath, backgroundBrush, _renderParams.BackgroundDataLineOptions.Thickness);
+                SetPathStroke(_filteredDatasetPath, foregroundBrush, _renderParams.ForegroundDataLineOptions.Thickness);
+            } else {
+                SetPathStroke(_originalDatasetPath, foregroundBrush, _renderParams.ForegroundDataLineOptions.Thickness);
+            }
 
             // Start the domain/range to fit the data
             InitializeDomainAndRange();
 
             _canvas.LayoutUpdated += OnCanvasLayoutUpdates;
+        }
+
+        private void SetPathStroke(Path path, Brush brush, double thickness) {
+            path.Stroke = brush;
+            path.StrokeThickness = thickness;
+            path.IsHitTestVisible = false;
+        }
+
+        private Tuple<Geometry, Path> CalculateGeometryAndPath(Dataset dataset) {
+            Path path = null;
+            StreamGeometry geometry = new StreamGeometry();
+            using (StreamGeometryContext stream = geometry.Open()) {
+                if (dataset.Points.Count > 0) {
+                    Point p1 = dataset.Points[0];
+                    stream.BeginFigure(p1, false, false);
+                } else {
+                    return new Tuple<Geometry, Path>(new RectangleGeometry(), new Path()); // Nothing to draw
+                }
+
+                for (int i = 1; i < dataset.Points.Count; i++) {
+                    Point p = dataset.Points[i];
+                    stream.LineTo(p, true, true);
+                }
+
+                path = new Path();
+                path.Data = geometry;
+                Canvas.SetLeft(path, 0);
+                Canvas.SetTop(path, 0);
+                Canvas.SetRight(path, 0);
+                Canvas.SetBottom(path, 0);
+            }
+
+            return new Tuple<Geometry, Path>(geometry, path);
         }
 
         /// <summary>
@@ -188,6 +227,20 @@ namespace CryptoRetriever.Data {
         }
 
         /// <summary>
+        /// True if the original dataset should still be
+        /// shown when the dataset is filtered.
+        /// </summary>
+        public bool ShowOriginalDataset {
+            get {
+                return _showOriginalDataset;
+            }
+            set {
+                _showOriginalDataset = value;
+                UpdateAll();
+            }
+        }
+
+        /// <summary>
         /// Sets formatters that are used when displaying x or y coordinates to the user.
         /// This can be used to convert/display the units they are in, add a dollar symbol, 
         /// control the number of decimal places, etc..
@@ -234,11 +287,20 @@ namespace CryptoRetriever.Data {
             double minY = double.PositiveInfinity;
             double maxY = double.NegativeInfinity;
 
-            foreach (Point p in _renderParams.Dataset.Points) {
+            foreach (Point p in _originalDataset.Points) {
                 if (p.X < minX) minX = p.X;
                 if (p.Y < minY) minY = p.Y;
                 if (p.X > maxX) maxX = p.X;
                 if (p.Y > maxY) maxY = p.Y;
+            }
+
+            if (_filteredDataset != null) {
+                foreach (Point p in _filteredDataset.Points) {
+                    if (p.X < minX) minX = p.X;
+                    if (p.Y < minY) minY = p.Y;
+                    if (p.X > maxX) maxX = p.X;
+                    if (p.Y > maxY) maxY = p.Y;
+                }
             }
 
             _boundingDomain = new Range(minX, maxX);
@@ -299,8 +361,8 @@ namespace CryptoRetriever.Data {
             return _renderParams.Range;
         }
 
-        public Dataset GetDataset() {
-            return _renderParams.Dataset;
+        public Dataset GetOriginalDataset() {
+            return _originalDataset;
         }
 
         public bool IsZoomedOut() {
@@ -397,25 +459,24 @@ namespace CryptoRetriever.Data {
         /// <summary>
         /// Applies transformations to data
         /// </summary>
-        private void UpdateData()
-        {
-            if (_datasetPath != null)
-                _canvas.Children.Remove(_datasetPath);
+        private void UpdateData() {
+            if (_originalDatasetPath != null)
+                _canvas.Children.Remove(_originalDatasetPath);
 
-			double xAxisSize = _xAxis.X2 - _yAxis.X1;
+            if (_filteredDatasetPath != null)
+                _canvas.Children.Remove(_filteredDatasetPath);
+
+            double xAxisSize = _xAxis.X2 - _yAxis.X1;
 			double yAxisSize = _xAxis.Y1 - _yAxis.Y1;
 
-			//double xScale = _renderParams.CanvasSizePx.Width / (_renderParams.Domain.End - _renderParams.Domain.Start);
 			double xScale = xAxisSize / (_renderParams.Domain.End - _renderParams.Domain.Start);
 
-            //double yScale = _renderParams.CanvasSizePx.Height / (_renderParams.Range.End - _renderParams.Range.Start);
             double yScale = yAxisSize / (_renderParams.Range.End - _renderParams.Range.Start);
 
             Matrix layoutTransform = new Matrix();
 
             // Shift the curve to 0 so the first point starts at the top left
             layoutTransform.Translate(-_renderParams.Domain.Start, -_renderParams.Range.Start);
-            //layoutTransform.Translate(-_renderParams.Domain.Start + _xAxisLabel.DesiredSize.Width + 50, -_renderParams.Range.Start + _yAxis.Y1);
 
             // Now map left to right on the curve to left to right on the screen. The -yScale is to flip
             //     the coordinates since the canvas has 0, 0 at the top left and positive is down.
@@ -431,11 +492,11 @@ namespace CryptoRetriever.Data {
             if (_pixelToDataSpaceTransform.HasInverse)
                 _pixelToDataSpaceTransform.Invert();
 
-            _datasetGeometry.Transform = new MatrixTransform(layoutTransform);
+            _originalDatasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
             // Clip to within the axis bounds if we've been laid out.
             if (_renderParams.CanvasSizePx.Width > 0 && _renderParams.CanvasSizePx.Height > 0) {
-                _datasetPath.Clip = new RectangleGeometry(
+                RectangleGeometry clipGeometry = new RectangleGeometry(
                     new Rect(
                         Y_AXIS_X_OFFSET,
                         0,
@@ -443,17 +504,31 @@ namespace CryptoRetriever.Data {
                         _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET
                     )
                 );
+
+                _originalDatasetPath.Clip = clipGeometry;
+
+                if (_filteredDatasetPath != null)
+                    _filteredDatasetPath.Clip = clipGeometry;
             }
 
-            Canvas.SetZIndex(_datasetPath, DATA_ZINDEX);
-            _canvas.Children.Add(_datasetPath);
+            // Show the original dataset if there's no filtered dataset
+            // or if the user wants to show it too
+            if (_filteredDatasetPath == null || _showOriginalDataset) {
+                Canvas.SetZIndex(_originalDatasetPath, ORIGINAL_DATA_ZINDEX);
+                _canvas.Children.Add(_originalDatasetPath);
+            }
+
+            if (_filteredDatasetPath != null) {
+                _filteredDatasetGeometry.Transform = new MatrixTransform(layoutTransform);
+                Canvas.SetZIndex(_filteredDatasetPath, FILTERED_DATA_ZINDEX);
+                _canvas.Children.Add(_filteredDatasetPath);
+            }
         }       
 
         /// <summary>
         /// Set up tick marks on axis
         /// </summary>
-        private void UpdateGraphScales()
-		{
+        private void UpdateGraphScales() {
             for (int i = 0; i < _graphTicks.Count; i++) {
                 _canvas.Children.Remove(_graphTicks[i]);
             }
@@ -627,8 +702,9 @@ namespace CryptoRetriever.Data {
             // First get the mouse location in data space
             Point mousePositionInDataSpace = _pixelToDataSpaceTransform.Transform(_mouseHoverPointPx);
 
+            Dataset dataset = GetActiveDataset();
+
             // Get the data's Y point from here
-            Dataset dataset = _renderParams.Dataset;
             double closestX = dataset.GetClosestXTo(mousePositionInDataSpace.X);
             DataResult yValue = dataset.ValueAt(closestX);
             if (yValue.Succeeded) {
@@ -736,8 +812,7 @@ namespace CryptoRetriever.Data {
         /// respect to x-axis.
         /// </summary>
         /// <returns></returns>
-        private Tuple<string, Point[]> GetDomainTickData()
-        {
+        private Tuple<string, Point[]> GetDomainTickData() {
             double seconds = GetDomain().End - GetDomain().Start;
             double minutes = seconds / 60;
             double hours = minutes / 60;
@@ -865,8 +940,7 @@ namespace CryptoRetriever.Data {
         /// </param>
         /// <param name="seconds">The UTC timestamp of a point.</param>
         /// <returns>Returns the calculated UTC timestamp of the tick at the given granularity.</returns>
-        private double GetUnitBeginning(string unitType, double seconds)
-		{
+        private double GetUnitBeginning(string unitType, double seconds) {
             long utcTimestampSeconds = (long)Math.Round(seconds);
             DateTime utcDateTime = DateTimeConstant.UnixStart.AddSeconds(utcTimestampSeconds);
             DateTime utcBegin;
@@ -893,6 +967,20 @@ namespace CryptoRetriever.Data {
             }
 
             return seconds - (utcDateTime - utcBegin).TotalSeconds;
+        }
+
+        /// <summary>
+        /// Returns the latest dataset version. If the dataset was filtered,
+        /// it will return that one. Otherwise it will return the original.
+        /// </summary>
+        /// <returns>Returns the active dataset.</returns>
+        private Dataset GetActiveDataset() {
+            Dataset dataset;
+            if (_filteredDataset != null)
+                dataset = _filteredDataset;
+            else
+                dataset = _originalDataset;
+            return dataset;
         }
     }
 
@@ -962,19 +1050,19 @@ namespace CryptoRetriever.Data {
     }
 
     class RenderParams {
-        public Dataset Dataset { get; set; }
         public Range Domain { get; set; } = new Range();
         public Range Range { get; set; } = new Range();
         public Size CanvasSizePx { get; set; } = new Size();
-        public LineOptions LineOptions { get; set; } = new LineOptions(Colors.White, 1.0);
+        public LineOptions ForegroundDataLineOptions { get; set; } = new LineOptions(Colors.White, 1.0);
+        public LineOptions BackgroundDataLineOptions { get; set; } = new LineOptions(Colors.DarkGray, 0.5);
 
         public RenderParams Clone() {
             RenderParams clone = new RenderParams();
-            clone.Dataset = Dataset; // Treat the Dataset as immutable.
             clone.Domain = Domain.Clone();
             clone.Range = Range.Clone();
             clone.CanvasSizePx = new Size(CanvasSizePx.Width, CanvasSizePx.Height);
-            clone.LineOptions = new LineOptions(LineOptions.Color, LineOptions.Thickness);
+            clone.ForegroundDataLineOptions = new LineOptions(ForegroundDataLineOptions.Color, ForegroundDataLineOptions.Thickness);
+            clone.BackgroundDataLineOptions = new LineOptions(BackgroundDataLineOptions.Color, BackgroundDataLineOptions.Thickness);
             return clone;
         }
 
@@ -982,26 +1070,22 @@ namespace CryptoRetriever.Data {
             if (other == null)
                 return false;
 
-            return other.Dataset == Dataset &&
-                other.Domain.IsEqual(Domain) &&
+            return other.Domain.IsEqual(Domain) &&
                 other.Range.IsEqual(Range) &&
                 other.CanvasSizePx.Equals(CanvasSizePx) &&
-                other.LineOptions.IsEqual(LineOptions);
+                other.ForegroundDataLineOptions.IsEqual(ForegroundDataLineOptions) &&
+                other.BackgroundDataLineOptions.IsEqual(BackgroundDataLineOptions);
         }
     }
 
-    class DollarFormatter : ICoordinateFormatter
-    {
-        public string Format(double coordinate)
-        {
+    class DollarFormatter : ICoordinateFormatter {
+        public string Format(double coordinate) {
             return "$" + ((decimal)coordinate).ToString("N");
         }
     }
 
-    class TimestampToDateFormatter : ICoordinateFormatter
-    {
-        public string Format(double coordinate)
-        {
+    class TimestampToDateFormatter : ICoordinateFormatter {
+        public string Format(double coordinate) {
             long utcTimestampSeconds = (long)Math.Round(coordinate);
             DateTime unixStart = DateTimeConstant.UnixStart;
             DateTime localDateTime = unixStart.AddSeconds(utcTimestampSeconds).ToLocalTime();

@@ -144,7 +144,7 @@ namespace CryptoRetriever.Data {
             double domainRangeFactor = 1.0 / zoomFactor; 
 
             // Get dataset limits
-            Dataset dataset = _graphRenderer.GetDataset();
+            Dataset dataset = _graphRenderer.GetOriginalDataset();
             if (dataset.Points == null || dataset.Points.Count < 2)
                 return; // No point in zooming if we have 0 or only 1 point
 

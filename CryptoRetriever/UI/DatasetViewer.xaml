@@ -65,6 +65,7 @@
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Hor. Gridlines" Checked="OnHorizGridlinesVisibleCheckboxChecked" Unchecked="OnHorizGridlinesVisibleCheckboxChecked" Margin="5" />
                             <CheckBox Foreground="White" IsChecked="True" Content="Show Vert. Gridlines" Checked="OnVertGridlinesVisibleCheckboxChecked" Unchecked="OnVertGridlinesVisibleCheckboxChecked" Margin="5" />
                             <CheckBox Foreground="White" IsChecked="False" Content="Start Range at 0" Checked="OnStartRangeAt0CheckboxChecked" Unchecked="OnStartRangeAt0CheckboxChecked" Margin="5" />
+                            <CheckBox Foreground="White" IsChecked="true" Content="Show Original Dataset" Checked="OnShowOriginalDatasetCheckboxChecked" Unchecked="OnShowOriginalDatasetCheckboxChecked" Margin="5" />
                         </StackPanel>
                     </ScrollViewer>
                 </kfso:DockablePanel.HostedContent>

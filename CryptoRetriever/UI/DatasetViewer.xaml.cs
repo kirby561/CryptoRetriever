@@ -20,7 +20,8 @@ namespace CryptoRetriever.UI {
     public sealed partial class DatasetViewer : Window {
         // Allow any panel to dock anywhere in this window
         private DockManager _dockManager = new DockManager();
-        private Dataset _dataset;
+        private Dataset _originalDataset;
+        private Dataset _filteredDataset;
         private String _filePath;
         private GraphRenderer _renderer;
         private GraphController _graphController;
@@ -53,9 +54,16 @@ namespace CryptoRetriever.UI {
             _dockPanelSpotRight.ChildrenChanged += OnStationChildrenChanged;
         }
 
-        public void SetDataset(String filePath, Dataset dataset) {
+        public void SetDataset(String filePath, Dataset originalDataset) {
+            SetDataset(filePath, originalDataset, null);
+        }
+
+        public void SetDataset(String filePath, Dataset originalDataset, Dataset filteredDataset) {
+            bool showOriginalDataset = true;
+
             // Detach the current renderer if any
             if (_renderer != null) {
+                showOriginalDataset = _renderer.ShowOriginalDataset; // Maintain setting
                 _renderer.Cleanup();
                 _renderer = null;
                 _graphController = null;
@@ -64,23 +72,25 @@ namespace CryptoRetriever.UI {
             _filePath = filePath;
             String filename = Path.GetFileName(filePath);
             _window.Title = filename;
-            _dataset = dataset;
-            _renderer = new GraphRenderer(_graphCanvas, _dataset);
+            _originalDataset = originalDataset;
+            _filteredDataset = filteredDataset;
+            _renderer = new GraphRenderer(_graphCanvas, _originalDataset, _filteredDataset);
             // Set the formatters for how to display the timestamps and values. These could be
             // configurable in the future and also could depend on the currency that is being used.
             _renderer.SetCoordinateFormatters(new TimestampToDateFormatter(), new DollarFormatter());
             _renderer.UpdateAll();
+            _renderer.ShowOriginalDataset = showOriginalDataset;
 
             _graphController = new GraphController(_renderer);
         }
 
         private void OnExportClicked(object sender, RoutedEventArgs e) {
             ExportDatasetOptionsDialog exportOptionsWindow = new ExportDatasetOptionsDialog();
-            exportOptionsWindow.SetDataset(_dataset);
+            exportOptionsWindow.SetDataset(GetActiveDataset());
             bool? result = exportOptionsWindow.ShowDialog();
             if (result == true) {
                 ExportDatasetOptions options = exportOptionsWindow.GetOptions();
-                ExportDataset(_dataset, options);
+                ExportDataset(GetActiveDataset(), options);
             }
         }
 
@@ -201,6 +211,15 @@ namespace CryptoRetriever.UI {
             _renderer.ShouldStartRangeAt0 = (isChecked.HasValue && isChecked.Value) ? true : false;
         }
 
+        private void OnShowOriginalDatasetCheckboxChecked(object sender, RoutedEventArgs e) {
+            if (_renderer == null)
+                return; // The dataset has not been set yet
+
+            CheckBox checkbox = sender as CheckBox;
+            bool? isChecked = checkbox.IsChecked;
+            _renderer.ShowOriginalDataset = (isChecked.HasValue && isChecked.Value) ? true : false;
+        }
+
         /// <summary>
         /// Focuses the window the given element is in. This can be used to bring
         /// it into view if it is behind other windows (such as a floating dockable panel
@@ -222,20 +241,20 @@ namespace CryptoRetriever.UI {
 
         private void OnGaussianBlurClicked(object sender, RoutedEventArgs e) {
             _lastFilter = new GaussianFilter(1);
-            Dataset output = _lastFilter.Filter(_dataset);
-            SetDataset(_filePath, output);
+            Dataset output = _lastFilter.Filter(GetActiveDataset());
+            SetDataset(_filePath, _originalDataset, output);
         }
 
         private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {
             if (_lastFilter != null) {
-                Dataset output = _lastFilter.Filter(_dataset);
-                SetDataset(_filePath, output);
+                Dataset output = _lastFilter.Filter(GetActiveDataset());
+                SetDataset(_filePath, _originalDataset, output);
             }
         }
 
         private void OnSaveClicked(object sender, RoutedEventArgs e) {
             DatasetWriter writer = new DatasetWriter();
-            Result result = writer.WriteFile(_dataset, _filePath);
+            Result result = writer.WriteFile(GetActiveDataset(), _filePath);
             if (!result.Succeeded) {
                 MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + result.ErrorDetails);
             }
@@ -246,7 +265,8 @@ namespace CryptoRetriever.UI {
 
             if (getPathResult.Succeeded) {
                 DatasetWriter writer = new DatasetWriter();
-                Result writeResult = writer.WriteFile(_dataset, getPathResult.Value);
+                Dataset dataset = GetActiveDataset();
+                Result writeResult = writer.WriteFile(dataset, getPathResult.Value);
                 if (!writeResult.Succeeded) {
                     MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + writeResult.ErrorDetails);
                 }
@@ -304,10 +324,24 @@ namespace CryptoRetriever.UI {
             }
 
             Strategy strategy = StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex];
-            StrategyEngine engine = new StrategyEngine(strategy, _dataset);
+            StrategyEngine engine = new StrategyEngine(strategy, _originalDataset);
             engine.Run();
 
             MessageBox.Show(engine.RunContext.ToString());
+        }
+
+        /// <summary>
+        /// Returns the latest dataset version. If the dataset was filtered,
+        /// it will return that one. Otherwise it will return the original.
+        /// </summary>
+        /// <returns>Returns the active dataset.</returns>
+        private Dataset GetActiveDataset() {
+            Dataset dataset;
+            if (_filteredDataset != null)
+                dataset = _filteredDataset;
+            else
+                dataset = _originalDataset;
+            return dataset;
         }
     }
 }
