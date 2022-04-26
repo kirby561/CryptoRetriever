@@ -553,8 +553,8 @@ namespace CryptoRetriever.Data {
                 using (StreamGeometryContext stream = verticalGridlineGeometry.Open()) {
                     double yStart = Y_AXIS_Y_OFFSET;
                     double yEnd = _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET;
-                    stream.BeginFigure(new Point(domainTickData.Item2[0].X, Y_AXIS_Y_OFFSET), false, false);
-                    stream.LineTo(new Point(domainTickData.Item2[0].X, _renderParams.CanvasSizePx.Height - Y_AXIS_Y_OFFSET - X_AXIS_Y_OFFSET), true, false);
+                    stream.BeginFigure(new Point(domainTickData.Item2[0].X, yStart), false, false); // Starts at the top
+                    stream.LineTo(new Point(domainTickData.Item2[0].X, yEnd), true, false);
 
                     for (int i = 1; i < domainTickData.Item2.Length; i++) {
                         Point top = new Point(domainTickData.Item2[i].X, yStart);
