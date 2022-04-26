@@ -39,7 +39,7 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public void FilterDataset() {
             foreach (IFilter filter in RunContext.Strategy.Filters) {
-                RunContext.Dataset = filter.Filter(RunContext.Dataset);
+                RunContext.FilteredDataset = filter.Filter(RunContext.FilteredDataset);
             }
         }
 

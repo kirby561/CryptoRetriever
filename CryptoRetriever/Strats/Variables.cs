@@ -59,6 +59,14 @@ namespace CryptoRetriever.Strats {
             AddVar(result, new VariableNumberValue(
                 "Account.AssetBalance",
                 (context) => { return context.Account.CurrencyBalance; }
+            )); 
+            AddVar(result, new VariableNumberValue(
+                 "Dataset.CurrentPrice",
+                 (context) => { return context.Dataset.Points[context.CurrentDatapointIndex].Y; }
+            ));
+            AddVar(result, new VariableNumberValue(
+                 "Dataset.CurrentFilteredPrice",
+                 (context) => { return context.FilteredDataset.Points[context.CurrentDatapointIndex].Y; }
             ));
             AddVar(result, new VariableNumberValue(
                 "CurrentTimestampSecs",

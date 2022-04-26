@@ -37,6 +37,12 @@ namespace CryptoRetriever.Strats {
         public Dataset Dataset { get; set; }
 
         /// <summary>
+        /// Gets the filtered dataset (after all filters have been applied).
+        /// The original dataset is returned if the dataset has not been filtered.
+        /// </summary>
+        public Dataset FilteredDataset { get; set; }
+
+        /// <summary>
         /// A dictionary of user variables and their current values.
         /// The dictionary is indexed by Variable Name.
         /// </summary>
@@ -137,6 +143,7 @@ namespace CryptoRetriever.Strats {
         public StrategyRuntimeContext(Strategy strategy, Dataset dataset) {
             Strategy = strategy;
             Dataset = dataset;
+            FilteredDataset = dataset;
             Account = strategy.Account.Copy();
 
             UserVars = new Dictionary<String, IValue>();
