@@ -49,6 +49,11 @@ namespace CryptoRetriever.Strats {
         public Dictionary<String, IValue> UserVars { get; protected set; }
 
         /// <summary>
+        /// A list of the user variable values by tick for debugging.
+        /// </summary>
+        public List<Dictionary<String, IValue>> DebugUserVars = new List<Dictionary<String, IValue>>();
+
+        /// <summary>
         /// The current datapoint index in Dataset.
         /// </summary>
         public int CurrentDatapointIndex { get; set; } = 0;

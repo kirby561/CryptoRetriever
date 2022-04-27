@@ -29,6 +29,12 @@ namespace CryptoRetriever.Strats {
             // dataset.
             for (int i = 0; i < RunContext.Dataset.Count; i++) {
                 Step();
+
+                // Snapshot the user variables
+                var dictCopy = new Dictionary<String, IValue>();
+                foreach (KeyValuePair<String, IValue> pair in RunContext.UserVars)
+                    dictCopy.Add(pair.Key, pair.Value.Clone());
+                RunContext.DebugUserVars.Add(dictCopy);
             }
         }
 

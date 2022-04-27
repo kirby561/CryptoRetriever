@@ -327,6 +327,8 @@ namespace CryptoRetriever.UI {
             StrategyEngine engine = new StrategyEngine(strategy, _originalDataset);
             engine.Run();
 
+            SetDataset(_filePath, _originalDataset, engine.RunContext.FilteredDataset);
+            _renderer.Transactions = engine.RunContext.Transactions;
             MessageBox.Show(engine.RunContext.ToString());
         }
 

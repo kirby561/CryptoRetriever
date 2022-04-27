@@ -1,4 +1,5 @@
-﻿using CryptoRetriever.UI;
+﻿using CryptoRetriever.Strats;
+using CryptoRetriever.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,12 @@ namespace CryptoRetriever.Data {
         private Geometry _filteredDatasetGeometry;
         private Path _filteredDatasetPath;
 
+        // Transactions drawing pieces
+        private List<Transaction> _transactions = null;
+        private List<FrameworkElement> _transactionMarkers = new List<FrameworkElement>();
+        private Path _buyIndicatorPath;
+        private Path _sellIndicatorPath;
+
         // Axis drawing pieces
         private Line _xAxis;
         private Line _yAxis;
@@ -55,6 +62,8 @@ namespace CryptoRetriever.Data {
         private SolidColorBrush _axisBrush = new SolidColorBrush(Color.FromRgb(0x72, 0x9f, 0xcf));// Colors.Green);
         private SolidColorBrush _gridlineBrush = new SolidColorBrush(Color.FromRgb(0x44, 0x44, 0x44));// Colors.Green);
         private SolidColorBrush _foregroundColor = new SolidColorBrush(Colors.White); // Color of data and text
+        private SolidColorBrush _buyBrush = new SolidColorBrush(Colors.Red); // Color for buy indicator
+        private SolidColorBrush _sellBrush = new SolidColorBrush(Colors.Green); // Color for sell indicator
 
         // Constants
         private static readonly double X_AXIS_X_OFFSET = 50; // Distance from the left of the window to the left of the X axis in pixels
@@ -88,12 +97,12 @@ namespace CryptoRetriever.Data {
             _filteredDataset = filteredDataset;
 
             // Initialize a geometry for the dataset
-            Tuple<Geometry, Path> originalGeomAndPath = CalculateGeometryAndPath(_originalDataset);
+            Tuple<Geometry, Path> originalGeomAndPath = CalculateGeometryAndPath(_originalDataset.Points);
             _originalDatasetGeometry = originalGeomAndPath.Item1;
             _originalDatasetPath = originalGeomAndPath.Item2;
 
             if (_filteredDataset != null) {
-                Tuple<Geometry, Path> filteredGeomAndPath = CalculateGeometryAndPath(_filteredDataset);
+                Tuple<Geometry, Path> filteredGeomAndPath = CalculateGeometryAndPath(_filteredDataset.Points);
                 _filteredDatasetGeometry = filteredGeomAndPath.Item1;
                 _filteredDatasetPath = filteredGeomAndPath.Item2;
             }
@@ -113,37 +122,20 @@ namespace CryptoRetriever.Data {
             _canvas.LayoutUpdated += OnCanvasLayoutUpdates;
         }
 
+        public List<Transaction> Transactions {
+            get {
+                return _transactions;
+            }
+            set {
+                _transactions = value;
+                UpdateTransactions();
+            }
+        }
+
         private void SetPathStroke(Path path, Brush brush, double thickness) {
             path.Stroke = brush;
             path.StrokeThickness = thickness;
             path.IsHitTestVisible = false;
-        }
-
-        private Tuple<Geometry, Path> CalculateGeometryAndPath(Dataset dataset) {
-            Path path = null;
-            StreamGeometry geometry = new StreamGeometry();
-            using (StreamGeometryContext stream = geometry.Open()) {
-                if (dataset.Points.Count > 0) {
-                    Point p1 = dataset.Points[0];
-                    stream.BeginFigure(p1, false, false);
-                } else {
-                    return new Tuple<Geometry, Path>(new RectangleGeometry(), new Path()); // Nothing to draw
-                }
-
-                for (int i = 1; i < dataset.Points.Count; i++) {
-                    Point p = dataset.Points[i];
-                    stream.LineTo(p, true, true);
-                }
-
-                path = new Path();
-                path.Data = geometry;
-                Canvas.SetLeft(path, 0);
-                Canvas.SetTop(path, 0);
-                Canvas.SetRight(path, 0);
-                Canvas.SetBottom(path, 0);
-            }
-
-            return new Tuple<Geometry, Path>(geometry, path);
         }
 
         /// <summary>
@@ -376,6 +368,7 @@ namespace CryptoRetriever.Data {
         public void UpdateAll() {
             UpdateAxis();
             UpdateData();
+            UpdateTransactions();
             UpdateGraphScales();
             UpdateHoverPoint();
         }
@@ -523,7 +516,77 @@ namespace CryptoRetriever.Data {
                 Canvas.SetZIndex(_filteredDatasetPath, FILTERED_DATA_ZINDEX);
                 _canvas.Children.Add(_filteredDatasetPath);
             }
-        }       
+        }
+
+        /// <summary>
+        /// Updates the transaction indicators if any Transactions are set.
+        /// </summary>
+        private void UpdateTransactions() {
+            foreach (FrameworkElement fe in _transactionMarkers)
+                _canvas.Children.Remove(fe);
+            _transactionMarkers.Clear();
+
+            if (_transactions == null)
+                return;
+
+            StreamGeometry buyGeometry = new StreamGeometry();
+            bool buyStarted = false;
+            StreamGeometry sellGeometry = new StreamGeometry();
+            bool sellStarted = false;
+            using (StreamGeometryContext buyStream = buyGeometry.Open()) {
+                using (StreamGeometryContext sellStream = sellGeometry.Open()) {
+                    foreach (Transaction transaction in _transactions) {
+                        double moneyRecieved = transaction.CurrencyTransferred;
+                        double timestamp = (transaction.TransactionTime - DateTime.UnixEpoch).TotalSeconds;
+
+                        Point curvePoint = new Point(timestamp, _originalDataset.ValueAt(timestamp).Result);
+                        Point curvePointPx = _dataToPixelSpaceTransform.Transform(curvePoint);
+                        Point bottomPx = new Point(curvePointPx.X, _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET);
+
+                        if (moneyRecieved < 0) {
+                            // Buy
+                            if (!buyStarted) {
+                                buyStream.BeginFigure(curvePointPx, true, false);
+                                buyStarted = true;
+                            } else {
+                                buyStream.LineTo(curvePointPx, false, false);
+                            }
+                            buyStream.LineTo(bottomPx, true, false);
+                        } else {
+                            // Sell
+                            if (!sellStarted) {
+                                sellStream.BeginFigure(curvePointPx, true, false);
+                                sellStarted = true;
+                            } else {
+                                sellStream.LineTo(curvePointPx, false, false);
+                            }
+                            sellStream.LineTo(bottomPx, true, false);
+                        }
+                    }
+                }
+            }
+
+            _buyIndicatorPath = new Path();
+            _buyIndicatorPath.Data = buyGeometry;
+            SetPathStroke(_buyIndicatorPath, _buyBrush, 1);
+            Canvas.SetLeft(_buyIndicatorPath, 0);
+            Canvas.SetTop(_buyIndicatorPath, 0);
+            Canvas.SetRight(_buyIndicatorPath, 0);
+            Canvas.SetBottom(_buyIndicatorPath, 0);
+
+            _sellIndicatorPath = new Path();
+            _sellIndicatorPath.Data = sellGeometry;
+            SetPathStroke(_sellIndicatorPath, _sellBrush, 2);
+            Canvas.SetLeft(_sellIndicatorPath, 0);
+            Canvas.SetTop(_sellIndicatorPath, 0);
+            Canvas.SetRight(_sellIndicatorPath, 0);
+            Canvas.SetBottom(_sellIndicatorPath, 0);
+
+            _transactionMarkers.Add(_buyIndicatorPath);
+            _canvas.Children.Add(_buyIndicatorPath);
+            _transactionMarkers.Add(_sellIndicatorPath);
+            _canvas.Children.Add(_sellIndicatorPath);
+        }
 
         /// <summary>
         /// Set up tick marks on axis
@@ -967,6 +1030,38 @@ namespace CryptoRetriever.Data {
             }
 
             return seconds - (utcDateTime - utcBegin).TotalSeconds;
+        }
+
+        /// <summary>
+        /// Calculates the geometry and path for the given list of points.
+        /// </summary>
+        /// <param name="dataset">The list to calculate from.</param>
+        /// <returns>Returns the geometry and the path as a Tuple, respectively.</returns>
+        private Tuple<Geometry, Path> CalculateGeometryAndPath(List<Point> points) {
+            Path path = null;
+            StreamGeometry geometry = new StreamGeometry();
+            using (StreamGeometryContext stream = geometry.Open()) {
+                if (points.Count > 0) {
+                    Point p1 = points[0];
+                    stream.BeginFigure(p1, false, false);
+                } else {
+                    return new Tuple<Geometry, Path>(new RectangleGeometry(), new Path()); // Nothing to draw
+                }
+
+                for (int i = 1; i < points.Count; i++) {
+                    Point p = points[i];
+                    stream.LineTo(p, true, true);
+                }
+
+                path = new Path();
+                path.Data = geometry;
+                Canvas.SetLeft(path, 0);
+                Canvas.SetTop(path, 0);
+                Canvas.SetRight(path, 0);
+                Canvas.SetBottom(path, 0);
+            }
+
+            return new Tuple<Geometry, Path>(geometry, path);
         }
 
         /// <summary>
