@@ -10,6 +10,11 @@ namespace CryptoRetriever.Strats {
     /// </summary>
     public class Transaction {
         /// <summary>
+        /// The datapoint index of the sample this transaction was made on.
+        /// </summary>
+        public int DatapointIndex { get; private set; }
+
+        /// <summary>
         /// The exact time the purchase occurred.
         /// </summary>
         public DateTime TransactionTime { get; private set; }
@@ -37,12 +42,19 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public double AssetTransferred { get; private set; }
 
-        public Transaction(DateTime time, double fee, double currencyTransferred, double assetTransferred, Account account) {
+        /// <summary>
+        /// The amount of currency per 1 asset when this transaction was made.
+        /// </summary>
+        public double CurrentPrice { get; private set; }
+
+        public Transaction(int datapointIndex, DateTime time, double fee, double currencyTransferred, double assetTransferred, Account account, double currentPrice) {
+            DatapointIndex = datapointIndex;
             TransactionTime = time;
             TransactionFee = fee;
             CurrencyTransferred = currencyTransferred;
             AssetTransferred = assetTransferred;
             Account = account;
+            CurrentPrice = currentPrice;
         }
     }
 }

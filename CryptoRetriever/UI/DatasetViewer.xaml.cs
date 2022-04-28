@@ -329,7 +329,14 @@ namespace CryptoRetriever.UI {
 
             SetDataset(_filePath, _originalDataset, engine.RunContext.FilteredDataset);
             _renderer.Transactions = engine.RunContext.Transactions;
-            MessageBox.Show(engine.RunContext.ToString());
+
+            StrategyResultsView resultsView = new StrategyResultsView();
+            resultsView.RunContext = engine.RunContext;
+            DockablePanel panel = new DockablePanel();
+            panel.TitleText = "Run Results";
+            panel.DockManager = _dockManager;
+            panel.HostedContent = resultsView;
+            panel.Dock(_dockPanelSpotRight);
         }
 
         /// <summary>

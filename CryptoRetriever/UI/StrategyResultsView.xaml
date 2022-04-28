@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="CryptoRetriever.UI.StrategyResultsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CryptoRetriever.UI"
+             mc:Ignorable="d" 
+             Background="#00001a"
+             d:DesignHeight="450" d:DesignWidth="400">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="10">
+            <TextBlock Name="_strategyNameTb" Text="" HorizontalAlignment="Center" Style="{StaticResource TbTitle}" />
+            
+            <!-- Account -->
+            <TextBlock Text="Account Gains" Style="{StaticResource TbHeader}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Change" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_valueChangeTb" Grid.Row="0" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Currency" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_currencyTb" Grid.Row="1" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Assets" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_assetsTb" Grid.Row="2" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+            </Grid>
+        </StackPanel>
+        
+        <!-- Transactions -->
+        <ListView Grid.Row="1" Margin="10" VerticalAlignment="Stretch" Name="_transactionsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Datapoint" DisplayMemberBinding="{Binding DatapointIndex}"/>
+                    <GridViewColumn Width="Auto" Header="Timestamp (s)" DisplayMemberBinding="{Binding TimestampS}"/>
+                    <GridViewColumn Width="Auto" Header="Currency" DisplayMemberBinding="{Binding Currency}"/>
+                    <GridViewColumn Width="Auto" Header="Assets" DisplayMemberBinding="{Binding Assets}"/>
+                    <GridViewColumn Width="Auto" Header="Fee" DisplayMemberBinding="{Binding Fee}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

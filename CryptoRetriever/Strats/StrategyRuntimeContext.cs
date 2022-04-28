@@ -99,7 +99,7 @@ namespace CryptoRetriever.Strats {
             if (maxPurchaseAmount > 0) {
                 if (LastTransactionCompleted()) {
                     double purchaseCost = maxPurchaseAmount * price;
-                    Transaction transaction = new Transaction(CurrentDateTime, fee, -purchaseCost, maxPurchaseAmount, Account);
+                    Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, -purchaseCost, maxPurchaseAmount, Account, price);
                     PerformTransaction(transaction);
                 } else {
                     Errors.Add(new StrategyError(
@@ -124,7 +124,7 @@ namespace CryptoRetriever.Strats {
             if (maxSellAmount > 0) {
                 if (LastTransactionCompleted()) {
                     double sellRevenue = maxSellAmount * price;
-                    Transaction transaction = new Transaction(CurrentDateTime, fee, sellRevenue, -maxSellAmount, Account);
+                    Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, sellRevenue, -maxSellAmount, Account, price);
                     PerformTransaction(transaction);
                 } else {
                     Errors.Add(new StrategyError(

@@ -489,15 +489,7 @@ namespace CryptoRetriever.Data {
 
             // Clip to within the axis bounds if we've been laid out.
             if (_renderParams.CanvasSizePx.Width > 0 && _renderParams.CanvasSizePx.Height > 0) {
-                RectangleGeometry clipGeometry = new RectangleGeometry(
-                    new Rect(
-                        Y_AXIS_X_OFFSET,
-                        0,
-                        _renderParams.CanvasSizePx.Width - Y_AXIS_X_OFFSET,
-                        _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET
-                    )
-                );
-
+                RectangleGeometry clipGeometry = GetGraphClipArea();
                 _originalDatasetPath.Clip = clipGeometry;
 
                 if (_filteredDatasetPath != null)
@@ -527,6 +519,9 @@ namespace CryptoRetriever.Data {
             _transactionMarkers.Clear();
 
             if (_transactions == null)
+                return;
+
+            if (_renderParams.CanvasSizePx.Width == 0 || _renderParams.CanvasSizePx.Height == 0)
                 return;
 
             StreamGeometry buyGeometry = new StreamGeometry();
@@ -569,6 +564,8 @@ namespace CryptoRetriever.Data {
             _buyIndicatorPath = new Path();
             _buyIndicatorPath.Data = buyGeometry;
             SetPathStroke(_buyIndicatorPath, _buyBrush, 1);
+            _buyIndicatorPath.StrokeDashArray = new DoubleCollection(new double[] { 8, 5 });
+            _buyIndicatorPath.Clip = GetGraphClipArea();
             Canvas.SetLeft(_buyIndicatorPath, 0);
             Canvas.SetTop(_buyIndicatorPath, 0);
             Canvas.SetRight(_buyIndicatorPath, 0);
@@ -576,7 +573,9 @@ namespace CryptoRetriever.Data {
 
             _sellIndicatorPath = new Path();
             _sellIndicatorPath.Data = sellGeometry;
-            SetPathStroke(_sellIndicatorPath, _sellBrush, 2);
+            SetPathStroke(_sellIndicatorPath, _sellBrush, 1);
+            _sellIndicatorPath.StrokeDashArray = new DoubleCollection(new double[] { 10, 5 });
+            _sellIndicatorPath.Clip = GetGraphClipArea();
             Canvas.SetLeft(_sellIndicatorPath, 0);
             Canvas.SetTop(_sellIndicatorPath, 0);
             Canvas.SetRight(_sellIndicatorPath, 0);
@@ -1077,6 +1076,17 @@ namespace CryptoRetriever.Data {
                 dataset = _originalDataset;
             return dataset;
         }
+
+        private RectangleGeometry GetGraphClipArea() {
+            return new RectangleGeometry(
+                    new Rect(
+                        Y_AXIS_X_OFFSET,
+                        0,
+                        _renderParams.CanvasSizePx.Width - Y_AXIS_X_OFFSET,
+                        _renderParams.CanvasSizePx.Height - X_AXIS_Y_OFFSET
+                    )
+            );
+        }
     }
 
     class HoverPointOptions {
@@ -1170,21 +1180,6 @@ namespace CryptoRetriever.Data {
                 other.CanvasSizePx.Equals(CanvasSizePx) &&
                 other.ForegroundDataLineOptions.IsEqual(ForegroundDataLineOptions) &&
                 other.BackgroundDataLineOptions.IsEqual(BackgroundDataLineOptions);
-        }
-    }
-
-    class DollarFormatter : ICoordinateFormatter {
-        public string Format(double coordinate) {
-            return "$" + ((decimal)coordinate).ToString("N");
-        }
-    }
-
-    class TimestampToDateFormatter : ICoordinateFormatter {
-        public string Format(double coordinate) {
-            long utcTimestampSeconds = (long)Math.Round(coordinate);
-            DateTime unixStart = DateTimeConstant.UnixStart;
-            DateTime localDateTime = unixStart.AddSeconds(utcTimestampSeconds).ToLocalTime();
-            return localDateTime.ToString("G");
         }
     }
 }
