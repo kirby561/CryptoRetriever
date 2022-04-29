@@ -31,6 +31,7 @@ namespace CryptoRetriever.UI {
 
             // Create the filters combo list items
             _filterTypes.Add("Gaussian");
+            _filterTypes.Add("LeftGaussian");
             _filterTypesComboBox.ItemsSource = _filterTypes;
             _filterTypesComboBox.SelectedIndex = 0;
         }
@@ -47,6 +48,7 @@ namespace CryptoRetriever.UI {
 
             switch (filterId) {
                 case "Gaussian":
+                case "LeftGaussian":
                     String sigmaStr = _sigmaTextBox.Text;
                     String kernelSizeStr = _kernelSizeTextBox.Text;
 
@@ -62,7 +64,10 @@ namespace CryptoRetriever.UI {
                         return;
                     }
 
-                    _result = new GaussianFilter(sigma, kernelSize);
+                    if (filterId.Equals("Gaussian"))
+                        _result = new GaussianFilter(sigma, kernelSize);
+                    else
+                        _result = new LeftGaussianFilter(sigma, kernelSize);
 
                     break;
                 default:

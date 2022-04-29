@@ -107,6 +107,10 @@ namespace CryptoRetriever.Strats {
                         GaussianFilter filter = new GaussianFilter();
                         filter.FromJson(filterObj);
                         Filters.Add(filter);
+                    } else if ("LeftGaussianFilter".Equals(filterType)) {
+                        LeftGaussianFilter filter = new LeftGaussianFilter();
+                        filter.FromJson(filterObj);
+                        Filters.Add(filter);
                     } else {
                         throw new InvalidOperationException("Unsupported filter type in strategy: " + filterType);
                     }

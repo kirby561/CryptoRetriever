@@ -44,6 +44,7 @@
             </MenuItem>
             <MenuItem Header="_Filter">
                 <MenuItem Header="_Gaussian Blur" Click="OnGaussianBlurClicked" />
+                <MenuItem Header="_Left Gaussian Blur" Click="OnLeftGaussianBlurClicked" />
                 <Separator />
                 <MenuItem Header="_Repeat Last" Click="OnRepeatLastFilterClicked" />
             </MenuItem>

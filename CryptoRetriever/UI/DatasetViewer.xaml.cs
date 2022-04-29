@@ -245,6 +245,12 @@ namespace CryptoRetriever.UI {
             SetDataset(_filePath, _originalDataset, output);
         }
 
+        private void OnLeftGaussianBlurClicked(object sender, RoutedEventArgs e) {
+            _lastFilter = new LeftGaussianFilter(1);
+            Dataset output = _lastFilter.Filter(GetActiveDataset());
+            SetDataset(_filePath, _originalDataset, output);
+        }
+
         private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {
             if (_lastFilter != null) {
                 Dataset output = _lastFilter.Filter(GetActiveDataset());
