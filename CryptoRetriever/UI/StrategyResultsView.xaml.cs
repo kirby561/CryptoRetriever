@@ -20,6 +20,7 @@ namespace CryptoRetriever.UI {
     public partial class StrategyResultsView : UserControl {
         private StrategyRuntimeContext _runContext;
         private ICoordinateFormatter _currencyFormatter = new DollarFormatter();
+        private ObservableCollection<UserVarUiEntry> _userVarList = new ObservableCollection<UserVarUiEntry>();
 
         public StrategyRuntimeContext RunContext {
             get {
@@ -43,6 +44,8 @@ namespace CryptoRetriever.UI {
             // Account
             double originalValue = (strategy.Account.CurrencyBalance + strategy.Account.AssetBalance * originalPrice);
             double currentValue = (_runContext.Account.CurrencyBalance + _runContext.Account.AssetBalance * price);
+            _accountValueTb.Text = _currencyFormatter.Format(currentValue);
+
             double valueChange = currentValue - originalValue;
             _valueChangeTb.Text = _currencyFormatter.Format(valueChange) + " (" + TrimDouble("" + 100 * valueChange / originalValue) + "%)";
             if (valueChange < 0)
@@ -65,6 +68,18 @@ namespace CryptoRetriever.UI {
             else
                 assets += "+" + TrimDouble("" + assetDifference) + ")";
             _assetsTb.Text = assets;
+
+            // User Vars
+            _userVarList.Clear();
+            foreach (KeyValuePair<String, IValue> pair in _runContext.UserVars) {
+                UserVarUiEntry entry = new UserVarUiEntry() {
+                    VarName = pair.Key,
+                    Type = pair.Value.GetValueType().ToString(),
+                    Value = pair.Value.GetStringValue(_runContext)
+                };
+                _userVarList.Add(entry);
+            }
+            _userVarsView.ItemsSource = _userVarList;
 
             // Transactions
             var transactionList = new ObservableCollection<TransactionUiEntry>();

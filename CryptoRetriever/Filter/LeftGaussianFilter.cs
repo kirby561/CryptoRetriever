@@ -174,6 +174,7 @@ namespace CryptoRetriever.Filter {
             double previousX = dataset.Points[0].X;
             double largestSpace = Double.MinValue;
             double smallestSpace = Double.MaxValue;
+            int smallestIndex = -1;
             for (int i = 1; i < dataset.Count; i++) {
                 double currentX = dataset.Points[i].X;
                 double spacing = (currentX - previousX);
@@ -182,8 +183,10 @@ namespace CryptoRetriever.Filter {
 
                 if (largestSpace < spacing)
                     largestSpace = spacing;
-                if (smallestSpace > spacing)
+                if (smallestSpace > spacing) {
                     smallestSpace = spacing;
+                    smallestIndex = i;
+                }
             }
 
             // Check if the percent difference from the average

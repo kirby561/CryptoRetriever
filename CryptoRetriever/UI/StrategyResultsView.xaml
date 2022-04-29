@@ -17,6 +17,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -34,18 +37,34 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Change" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                <TextBlock Name="_valueChangeTb" Grid.Row="0" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Currency" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                <TextBlock Name="_currencyTb" Grid.Row="1" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Assets" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                <TextBlock Name="_assetsTb" Grid.Row="2" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Value" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_accountValueTb" Grid.Row="0" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Change" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_valueChangeTb" Grid.Row="1" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Currency" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_currencyTb" Grid.Row="2" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Assets" HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                <TextBlock Name="_assetsTb" Grid.Row="3" Grid.Column="1" Text="?" HorizontalAlignment="Left" Style="{StaticResource TbValue2}" />
             </Grid>
         </StackPanel>
         
+        <!-- User Vars -->
+        <TextBlock Grid.Row="1" Margin="10 5 10 0" Text="User Variables" Style="{StaticResource TbHeader}" />
+        <ListView Grid.Row="2" Margin="10" VerticalAlignment="Stretch" Name="_userVarsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Variable Name" DisplayMemberBinding="{Binding VarName}"/>
+                    <GridViewColumn Width="Auto" Header="Type" DisplayMemberBinding="{Binding Type}"/>
+                    <GridViewColumn Width="Auto" Header="Value" DisplayMemberBinding="{Binding Value}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
         <!-- Transactions -->
-        <ListView Grid.Row="1" Margin="10" VerticalAlignment="Stretch" Name="_transactionsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <TextBlock Grid.Row="3" Margin="10 5 10 0" Text="Transactions" Style="{StaticResource TbHeader}" />
+        <ListView Grid.Row="4" Margin="10" VerticalAlignment="Stretch" Name="_transactionsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto" Header="Datapoint" DisplayMemberBinding="{Binding DatapointIndex}"/>
