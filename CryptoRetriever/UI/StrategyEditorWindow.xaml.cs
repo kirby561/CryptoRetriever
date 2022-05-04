@@ -64,6 +64,7 @@ namespace CryptoRetriever.UI {
             _filtersView.ItemsSource = _strategy.Filters;
             _userVars.ItemsSource = _strategy.UserVars;
             _triggersView.ItemsSource = _strategy.Triggers;
+            _userVarRunners.ItemsSource = _strategy.VariableRunners;
         }
 
         private void OnCancelButtonClicked(object sender, RoutedEventArgs e) {
@@ -202,6 +203,28 @@ namespace CryptoRetriever.UI {
 
         private void OnMoveUserVarDownClicked(object sender, RoutedEventArgs e) {
             UiHelper.MoveSelectedItemDownInListBox(_strategy.UserVars, _userVars);
+        }
+
+        private void OnMoveUserVarRunnerUpClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemUpInListBox(_strategy.VariableRunners, _userVarRunners);
+        }
+
+        private void OnMoveUserVarRunnerDownClicked(object sender, RoutedEventArgs e) {
+            UiHelper.MoveSelectedItemDownInListBox(_strategy.VariableRunners, _userVarRunners);
+        }
+
+        private void OnAddUserVarRunnerClicked(object sender, RoutedEventArgs e) {
+            VariableRunnerDialog dialog = new VariableRunnerDialog(_strategy);
+            dialog.Title = "New Variable Runner";
+            UiHelper.CenterWindowInWindow(dialog, this);
+            dialog.ShowDialog();
+
+            if (dialog.Result != null)
+                _strategy.VariableRunners.Add(dialog.Result);
+        }
+
+        private void OnRemoveUserVarRunnerClicked(object sender, RoutedEventArgs e) {
+            UiHelper.RemoveSelectedItemsFromListBox(_strategy.VariableRunners, _userVarRunners);
         }
 
         private void OnAddTriggerClicked(object sender, RoutedEventArgs e) {

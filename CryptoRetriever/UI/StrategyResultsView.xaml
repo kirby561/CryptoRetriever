@@ -52,7 +52,7 @@
         
         <!-- User Vars -->
         <TextBlock Grid.Row="1" Margin="10 5 10 0" Text="User Variables" Style="{StaticResource TbHeader}" />
-        <ListView Grid.Row="2" Margin="10" VerticalAlignment="Stretch" Name="_userVarsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <ListView Grid.Row="2" Margin="10" Name="_userVarsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto" Header="Variable Name" DisplayMemberBinding="{Binding VarName}"/>
@@ -64,7 +64,7 @@
 
         <!-- Transactions -->
         <TextBlock Grid.Row="3" Margin="10 5 10 0" Text="Transactions" Style="{StaticResource TbHeader}" />
-        <ListView Grid.Row="4" Margin="10" VerticalAlignment="Stretch" Name="_transactionsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <ListView Grid.Row="4" Margin="10" Name="_transactionsView" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto" Header="Datapoint" DisplayMemberBinding="{Binding DatapointIndex}"/>

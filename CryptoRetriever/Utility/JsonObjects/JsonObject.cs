@@ -43,12 +43,14 @@ namespace CryptoRetriever.Utility.JsonObjects {
         }
 
         public List<JsonObject> GetObjectArray(String key) {
-            List<object> arrayObjects = (List<object>)Children[key];
-            if (arrayObjects != null) {
-                List<JsonObject> result = new List<JsonObject>();
-                foreach (Dictionary<String, object> childCollection in arrayObjects)
-                    result.Add(new JsonObject(childCollection));
-                return result;
+            if (Children.ContainsKey(key)) {
+                List<object> arrayObjects = (List<object>)Children[key];
+                if (arrayObjects != null) {
+                    List<JsonObject> result = new List<JsonObject>();
+                    foreach (Dictionary<String, object> childCollection in arrayObjects)
+                        result.Add(new JsonObject(childCollection));
+                    return result;
+                }
             }
             return null;
         }

@@ -20,8 +20,9 @@ namespace CryptoRetriever.Strats {
         public Account Account { get; set; } = new Account();
         public ExchangeAssumptions ExchangeAssumptions { get; set; } = new ExchangeAssumptions();
         public ObservableCollection<IFilter> Filters { get; set; } = new ObservableCollection<IFilter>();
-        public ObservableCollection<IValue> UserVars { get; set; }  = new ObservableCollection<IValue>();
+        public ObservableCollection<IValue> UserVars { get; set; } = new ObservableCollection<IValue>();
         public ObservableCollection<Trigger> Triggers { get; set; } = new ObservableCollection<Trigger>();
+        public ObservableCollection<VariableRunner> VariableRunners { get; set; } = new ObservableCollection<VariableRunner>();
         public DateTime Start { get; set; } = DateTime.MinValue; // Min means use the dataset's start
         public DateTime End { get; set; } = DateTime.MinValue; // Min means use the dataset's end
 
@@ -89,6 +90,7 @@ namespace CryptoRetriever.Strats {
                 .Put("Filters", Filters)
                 .Put("UserVars", UserVars)
                 .Put("Triggers", Triggers)
+                .Put("VariableRunners", VariableRunners)
                 .Put("Start", Start)
                 .Put("End", End);
             return obj;
@@ -132,6 +134,15 @@ namespace CryptoRetriever.Strats {
                     Trigger trigger = new Trigger();
                     trigger.FromJson(triggerObj);
                     Triggers.Add(trigger);
+                }
+            }
+
+            List<JsonObject> runners = obj.GetObjectArray("VariableRunners");
+            if (runners != null) {
+                foreach (JsonObject runnerObj in runners) {
+                    VariableRunner runner = new VariableRunner();
+                    runner.FromJson(runnerObj);
+                    VariableRunners.Add(runner);
                 }
             }
 

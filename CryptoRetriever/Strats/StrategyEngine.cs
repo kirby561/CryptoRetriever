@@ -2,6 +2,7 @@
 using CryptoRetriever.Filter;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 
@@ -10,10 +11,21 @@ using System.Windows;
 /// </summary>
 namespace CryptoRetriever.Strats {
     public class StrategyEngine {
+        private Strategy _strategy;
+        private Dataset _originalDataset;
+        private Dataset _filteredDataset;
+
+        private bool _isDebugEnabled = false;
+
+        /// <summary>
+        /// The context with the highest value (if there are VariableRunners) is placed
+        /// here after execution is complete.
+        /// </summary>
         public StrategyRuntimeContext RunContext { get; private set; }
 
         public StrategyEngine(Strategy strategy, Dataset dataset) {
-            RunContext = new StrategyRuntimeContext(strategy, dataset);
+            _strategy = strategy;
+            _originalDataset = dataset;
         }
 
         /// <summary>
@@ -23,18 +35,68 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public void Run() {
             // Run all the filters first
-            FilterDataset();
+            FilterDataset(_strategy.Filters);
 
             // Run the whole thing by stepping thru the whole
             // dataset.
-            for (int i = 0; i < RunContext.Dataset.Count; i++) {
-                Step();
+            if (_strategy.VariableRunners.Count > 0) {
+                Stack<VariableRunner> runners = new Stack<VariableRunner>();
+                foreach (VariableRunner runner in _strategy.VariableRunners)
+                    runners.Push(runner);
+                PopRunnersAndRunIterations(runners, new Dictionary<String, double>());
+            } else {
+                StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
+                workingRunContext.FilteredDataset = _filteredDataset;
+                RunIteration(workingRunContext, new Dictionary<String, double>());
+                RunContext = workingRunContext;
+            }            
+        }
+
+        /// <summary>
+        /// Stacks for loops for each variable in remainingRunners and calls RunIteration for each combination of those variables.
+        /// </summary>
+        /// <param name="remainingRunners">The list of variables to run.</param>
+        /// <param name="runnerValues">A dictionary to keep track of the current value of each. Provide a new dictionary to start.</param>
+        private void PopRunnersAndRunIterations(Stack<VariableRunner> remainingRunners, Dictionary<String, double> runnerValues) {
+            VariableRunner runner = remainingRunners.Pop();
+            for (double val = runner.Start; val <= runner.End; val += runner.Step) {
+                runnerValues[runner.Variable.GetVariableName()] = val;
+                if (remainingRunners.Count > 0) {
+                    PopRunnersAndRunIterations(remainingRunners, runnerValues);
+                } else {
+                    StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
+                    workingRunContext.FilteredDataset = _filteredDataset;
+                    workingRunContext.UserVars[runner.Variable.GetVariableName()].SetValueFromString(workingRunContext, "" + val);
+                    RunIteration(workingRunContext, runnerValues);
+
+                    double accountVal = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[workingRunContext.CurrentDatapointIndex - 1].Y);
+                    if (RunContext == null || accountVal > ValueOf(RunContext.Account, RunContext.Dataset.Points[RunContext.CurrentDatapointIndex - 1].Y)) {
+                        RunContext = workingRunContext;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Runs through the dataset executing the conditions/triggers for each point for the given context.
+        /// Variable values can be passed in to change variables prior to running.
+        /// </summary>
+        /// <param name="workingContext">The context to use when executing.</param>
+        /// <param name="runnerValues">A dictionary of variables to set in the context prior to running. The first string is the variable name, the second is its value.</param>
+        private void RunIteration(StrategyRuntimeContext workingContext, Dictionary<String, double> runnerValues) {
+            foreach (KeyValuePair<String, double> pair in runnerValues)
+                workingContext.UserVars[pair.Key].SetValueFromString(workingContext, "" + pair.Value);
+
+            for (int i = 0; i < workingContext.Dataset.Count; i++) {
+                Step(workingContext);
 
                 // Snapshot the user variables
                 var dictCopy = new Dictionary<String, IValue>();
-                foreach (KeyValuePair<String, IValue> pair in RunContext.UserVars)
+                foreach (KeyValuePair<String, IValue> pair in workingContext.UserVars)
                     dictCopy.Add(pair.Key, pair.Value.Clone());
-                RunContext.DebugUserVars.Add(dictCopy);
+
+                if (_isDebugEnabled)
+                    workingContext.DebugUserVars.Add(dictCopy);
             }
         }
 
@@ -43,26 +105,37 @@ namespace CryptoRetriever.Strats {
         /// The filters are run in the order they appear in the strategy.
         /// The original dataset is unmodified.
         /// </summary>
-        public void FilterDataset() {
-            foreach (IFilter filter in RunContext.Strategy.Filters) {
-                RunContext.FilteredDataset = filter.Filter(RunContext.FilteredDataset);
+        public void FilterDataset(ObservableCollection<IFilter> filters) {
+            _filteredDataset = _originalDataset;
+            foreach (IFilter filter in filters) {
+                _filteredDataset = filter.Filter(_filteredDataset);
             }
         }
 
         /// <summary>
         /// Move to the next datapoint in the dataset.
         /// </summary>
-        public void Step() {
-            foreach (Trigger trigger in RunContext.Strategy.Triggers) {
-                if (trigger.Condition.IsTrue(RunContext)) {
+        public void Step(StrategyRuntimeContext context) {
+            foreach (Trigger trigger in context.Strategy.Triggers) {
+                if (trigger.Condition.IsTrue(context)) {
                     if (trigger.TrueAction != null)
-                        trigger.TrueAction.Execute(RunContext);
+                        trigger.TrueAction.Execute(context);
                 } else if (trigger.FalseAction != null) {
-                    trigger.FalseAction.Execute(RunContext);
+                    trigger.FalseAction.Execute(context);
                 }
             }
 
-            RunContext.CurrentDatapointIndex++;
+            context.CurrentDatapointIndex++;
+        }
+
+        /// <summary>
+        /// Gets the value of the given account given the current price of the asset.
+        /// </summary>
+        /// <param name="account">The account to value.</param>
+        /// <param name="price">The current price of the asset.</param>
+        /// <returns></returns>
+        private double ValueOf(Account account, double price) {
+            return account.CurrencyBalance + account.AssetBalance * price;
         }
     }
 }

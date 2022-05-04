@@ -126,6 +126,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="UI\VariableRunnerDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\UserVarDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -134,6 +137,10 @@
   <ItemGroup>
     <Page Update="UI\ConditionEditorWindow.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="UI\VariableRunnerDialog.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="UI\UserVarDialog.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

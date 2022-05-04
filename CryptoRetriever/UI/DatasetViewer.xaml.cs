@@ -262,7 +262,7 @@ namespace CryptoRetriever.UI {
             DatasetWriter writer = new DatasetWriter();
             Result result = writer.WriteFile(GetActiveDataset(), _filePath);
             if (!result.Succeeded) {
-                MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + result.ErrorDetails);
+                MessageBox.Show("UH OH! Couldn't write the dataset to a file: " + result.ErrorDetails);
             }
         }
 
@@ -274,7 +274,7 @@ namespace CryptoRetriever.UI {
                 Dataset dataset = GetActiveDataset();
                 Result writeResult = writer.WriteFile(dataset, getPathResult.Value);
                 if (!writeResult.Succeeded) {
-                    MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + writeResult.ErrorDetails);
+                    MessageBox.Show("UH OH! Couldn't write the dataset to a file: " + writeResult.ErrorDetails);
                 }
             }
         }
