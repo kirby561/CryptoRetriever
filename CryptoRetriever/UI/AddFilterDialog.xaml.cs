@@ -19,11 +19,16 @@ namespace CryptoRetriever.UI {
     public partial class AddFilterDialog : Window {
         private ObservableCollection<String> _filterTypes = new ObservableCollection<String>();
         private IFilter _result = null; // Set when the create button is pressed
+        private IFilter _workingFilter;
 
         public IFilter Filter {
             get {
                 return _result;
             }
+        }
+
+        public void SetWorkingFilter(IFilter filter) {
+            _workingFilter = filter;
         }
 
         public AddFilterDialog() {
@@ -76,6 +81,24 @@ namespace CryptoRetriever.UI {
             }
 
             Close();
+        }
+
+        private void OnWindowLoaded(object sender, RoutedEventArgs e) {
+            if (_workingFilter != null) {
+                if (_workingFilter is GaussianFilter) {
+                    GaussianFilter filter = (GaussianFilter)_workingFilter;
+                    _sigmaTextBox.Text = "" + filter.Sigma;
+                    _kernelSizeTextBox.Text = "" + filter.KernelSize;
+                    _filterTypesComboBox.SelectedValue = "Gaussian";
+                } else if (_workingFilter is LeftGaussianFilter) {
+                    LeftGaussianFilter filter = (LeftGaussianFilter)_workingFilter;
+                    _sigmaTextBox.Text = "" + filter.Sigma;
+                    _kernelSizeTextBox.Text = "" + filter.KernelSize;
+                    _filterTypesComboBox.SelectedValue = "LeftGaussian";
+                } else {
+                    throw new Exception("Filter type not supported: " + _workingFilter.Summary);
+                }
+            }
         }
     }
 }

@@ -170,6 +170,21 @@ namespace CryptoRetriever.UI {
             UiHelper.MoveSelectedItemDownInListBox(_strategy.Filters, _filtersView);
         }
 
+        private void OnFiltersDoubleClicked(object sender, MouseButtonEventArgs e) {
+            int selectedIndex = _filtersView.SelectedIndex;
+            if (selectedIndex >= 0) {
+                AddFilterDialog addFilterDialog = new AddFilterDialog();
+                addFilterDialog.SetWorkingFilter(_strategy.Filters[selectedIndex]);
+                UiHelper.CenterWindowInWindow(addFilterDialog, this);
+                addFilterDialog.ShowDialog();
+
+                if (addFilterDialog.Filter != null) {
+                    _strategy.Filters.RemoveAt(selectedIndex);
+                    _strategy.Filters.Insert(selectedIndex, addFilterDialog.Filter);
+                }
+            }
+        }
+
         private void OnAddUserVarClicked(object sender, RoutedEventArgs e) {
             UserVarDialog inputBox = new UserVarDialog();
             inputBox.Title = "New User Var";
@@ -213,6 +228,29 @@ namespace CryptoRetriever.UI {
             UiHelper.MoveSelectedItemDownInListBox(_strategy.VariableRunners, _userVarRunners);
         }
 
+        private void OnUserVariablesDoubleClicked(object sender, MouseButtonEventArgs e) {
+            int selectedVarIndex = _userVars.SelectedIndex;
+            if (selectedVarIndex >= 0) {
+                IValue result = _strategy.UserVars[_userVars.SelectedIndex];
+                String beforeName = ((IUserVariable)result).GetVariableName();
+                while (result != null) {
+                    // Show it until they cancel or get one that works
+                    var repeat = new UserVarDialog();
+                    repeat.Title = "Editing User Var";
+                    repeat.SetWorkingValue(result);
+                    UiHelper.CenterWindowInWindow(repeat, this);
+                    repeat.ShowDialog();
+                    result = repeat.Result;
+
+                    if (result != null) {
+                        _strategy.UserVars.RemoveAt(selectedVarIndex);
+                        _strategy.UserVars.Insert(selectedVarIndex, result);
+                        break;
+                    }
+                }
+            }
+        }
+
         private void OnAddUserVarRunnerClicked(object sender, RoutedEventArgs e) {
             VariableRunnerDialog dialog = new VariableRunnerDialog(_strategy);
             dialog.Title = "New Variable Runner";
@@ -225,6 +263,18 @@ namespace CryptoRetriever.UI {
 
         private void OnRemoveUserVarRunnerClicked(object sender, RoutedEventArgs e) {
             UiHelper.RemoveSelectedItemsFromListBox(_strategy.VariableRunners, _userVarRunners);
+        }
+
+        private void OnUserVariableRunnersDoubleClicked(object sender, MouseButtonEventArgs e) {
+            if (_userVarRunners.SelectedIndex >= 0) {
+                VariableRunnerDialog dialog = new VariableRunnerDialog(_strategy);
+                dialog.SetWorkingValue(_strategy.VariableRunners[_userVarRunners.SelectedIndex]);
+                UiHelper.CenterWindowInWindow(dialog, this);
+                dialog.ShowDialog();
+
+                if (dialog.Result != null)
+                    _strategy.VariableRunners[_userVarRunners.SelectedIndex] = dialog.Result;
+            }
         }
 
         private void OnAddTriggerClicked(object sender, RoutedEventArgs e) {

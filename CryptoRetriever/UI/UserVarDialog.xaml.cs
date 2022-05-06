@@ -90,7 +90,7 @@ namespace CryptoRetriever.UI {
 
         private void OnEnterTextKeyDown(object sender, KeyEventArgs e) {
             if (e.Key == Key.Enter) {
-                Close();
+                OnCreateButtonClicked(null, null);
             }
         }
     }

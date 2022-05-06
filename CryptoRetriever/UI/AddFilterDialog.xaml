@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CryptoRetriever.UI"
         mc:Ignorable="d"
         Background="#00001a"
+        Loaded="OnWindowLoaded"
         Title="Create Filter" Height="300" Width="300">
     <Window.Resources>
         <ResourceDictionary>

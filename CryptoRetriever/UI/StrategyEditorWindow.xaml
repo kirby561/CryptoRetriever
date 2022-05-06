@@ -64,7 +64,7 @@
                 <!-- Filters -->
                 <Grid Margin="0 20 0 0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -76,7 +76,7 @@
                     <Button Click="OnAddFilterClicked" Grid.Column="3" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
                     <Button Click="OnRemoveFilterClicked" Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
-                <ListView Name="_filtersView" MinHeight="25">
+                <ListView Name="_filtersView" MouseDoubleClick="OnFiltersDoubleClicked" MinHeight="25">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
@@ -87,7 +87,7 @@
                 <!-- User Vars -->
                 <Grid Margin="0 20 0 0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -99,7 +99,7 @@
                     <Button Click="OnAddUserVarClicked" Grid.Column="3" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
                     <Button Click="OnRemoveUserVarClicked" Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
-                <ListView Name="_userVars" MinHeight="25">
+                <ListView Name="_userVars" MouseDoubleClick="OnUserVariablesDoubleClicked" MinHeight="25">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
@@ -110,7 +110,7 @@
                 <!-- User Var Runners -->
                 <Grid Margin="0 20 0 0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -122,7 +122,7 @@
                     <Button Click="OnAddUserVarRunnerClicked" Grid.Column="3" HorizontalAlignment="Right" Style="{StaticResource ListAddButton}" />
                     <Button Click="OnRemoveUserVarRunnerClicked" Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource ListRemoveButton}" />
                 </Grid>
-                <ListView Name="_userVarRunners" MinHeight="25">
+                <ListView Name="_userVarRunners" MouseDoubleClick="OnUserVariableRunnersDoubleClicked" MinHeight="25">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Summary}" Style="{StaticResource TbListItem}" />
@@ -133,7 +133,7 @@
                 <!-- Triggers -->
                 <Grid Margin="0 20 0 0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
