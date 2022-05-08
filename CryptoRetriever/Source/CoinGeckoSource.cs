@@ -66,13 +66,13 @@ namespace CryptoRetriever.Source {
             return listResultTask;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange rangeLocal, int secondsPerSample = 86400) {
             Task<DatasetResult> result = new Task<DatasetResult>(() => {
                 // CoinGecko only supports 1 day at a time
                 DatasetResult datasetResult = new DatasetResult();
-                DateTime start = range.Start;
-                DateTime end = range.End;
-                TimeSpan span = end - start;
+                DateTime startUtc = rangeLocal.Start.ToUniversalTime();
+                DateTime endUtc = rangeLocal.End.ToUniversalTime();
+                TimeSpan span = endUtc - startUtc;
                 int numDays = span.Days + 1;
 
                 bool succeeded = true;
@@ -81,7 +81,7 @@ namespace CryptoRetriever.Source {
                 for (int i = 0; i < numDays; i++) {
                     CheckRateLimit();
 
-                    DateTime time = start.AddDays(i);
+                    DateTime time = startUtc.AddDays(i);
                     String dateStringForDay = time.ToString("dd-MM-yyyy");
                     String currencyId = asset.Id;
                     String url = "https://api.coingecko.com/api/v3/coins/" + currencyId + "/history?date=" + dateStringForDay + "&localization=false";

@@ -66,7 +66,7 @@ namespace CryptoRetriever.Source {
             return listResultTask;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange fullRange, int secondsPerSample) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange fullRangeLocal, int secondsPerSample) {
             Task<DatasetResult> result = new Task<DatasetResult>(() => {
                 // The coinbase library being used doesn't support coinbase pro
                 // which is the only way to get history. It's no problem though
@@ -75,9 +75,10 @@ namespace CryptoRetriever.Source {
 
                 // According to the API documentation, the response can contain a maximum of 300 candles (datapoints).
                 // so we need to split the request up into multiple.
+                DateRange fullRangeUtc = new DateRange(fullRangeLocal.Start.ToUniversalTime(), fullRangeLocal.End.ToUniversalTime());
                 const int maxSamplesPerRequest = 300; // This is defined by the API
                 const double precisionErrorOffset = 0.001; // The range in seconds should always be an integer but add a bit in case of precision error in the double.
-                long secondsInRange = (long)((fullRange.End - fullRange.Start).TotalSeconds + precisionErrorOffset);
+                long secondsInRange = (long)((fullRangeUtc.End - fullRangeUtc.Start).TotalSeconds + precisionErrorOffset);
                 long numSamples = secondsInRange / secondsPerSample;
                 long numRequests = numSamples / maxSamplesPerRequest;
                 if (numSamples % maxSamplesPerRequest > 0)
@@ -89,14 +90,14 @@ namespace CryptoRetriever.Source {
 
                 // Run a separate request for each piece of the full date range.
                 for (int i = 0; i < numRequests; i++) {
-                    DateTime start = fullRange.Start.AddSeconds(i * maxSamplesPerRequest * secondsPerSample);
+                    DateTime start = fullRangeUtc.Start.AddSeconds(i * maxSamplesPerRequest * secondsPerSample);
                     DateTime end = start.AddSeconds(maxSamplesPerRequest * secondsPerSample - 1); // -1 because we don't want duplicate samples on the edges of each range
 
-                    if (end > fullRange.End)
-                        end = fullRange.End;
+                    if (end > fullRangeUtc.End)
+                        end = fullRangeUtc.End;
 
-                    String startUtc = start.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
-                    String endUtc = end.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
+                    String startUtc = start.ToString("yyyy-MM-ddTHH:mm:ss");
+                    String endUtc = end.ToString("yyyy-MM-ddTHH:mm:ss");
                     String product = asset.Name.ToUpper() + "-" + asset.Currency.ToUpper();
                     int granularity = secondsPerSample;
 
