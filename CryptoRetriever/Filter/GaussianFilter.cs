@@ -83,7 +83,7 @@ namespace CryptoRetriever.Filter {
                 return new Dataset(input);
             }
 
-            Tuple<bool, double> isEvenlySpacedAndSpacing = IsEvenlySpaced(input);
+            Tuple<bool, double> isEvenlySpacedAndSpacing = input.IsEvenlySpaced();
             bool isEvenlySpaced = isEvenlySpacedAndSpacing.Item1;
             double spacing = isEvenlySpacedAndSpacing.Item2;
             if (!isEvenlySpaced)
@@ -168,44 +168,6 @@ namespace CryptoRetriever.Filter {
 
         private void ComputeKernelDynamicSpacing(int kernelSize, int index, Dataset dataset, double[] kernelOutput) {
             // ?? TODO
-        }
-
-        /// <summary>
-        /// Checks if the dataset is evenly spaced. If it is, the second return param
-        /// will be the approximate spacing. Assumes the dataset is at least 2 items.
-        /// </summary>
-        /// <param name="dataset">The dataset to check.</param>
-        /// <param name="allowedPercentDifference">The allowed percent difference from the average to be considered even. Defaults to 0.1%</param>
-        /// <returns>A pair with the first being true if the dataset is evenly spaced and if so the second being the amount it is spaced by.</returns>
-        private Tuple<bool, double> IsEvenlySpaced(Dataset dataset, double allowedPercentDifference = 0.1) {
-            double totalSpacing = 0;
-            int numSpaces = dataset.Count - 1;
-            double previousX = dataset.Points[0].X;
-            double largestSpace = Double.MinValue;
-            double smallestSpace = Double.MaxValue;
-            for (int i = 1; i < dataset.Count; i++) {
-                double currentX = dataset.Points[i].X;
-                double spacing = (currentX - previousX);
-                totalSpacing += spacing;
-                previousX = currentX;
-
-                if (largestSpace < spacing)
-                    largestSpace = spacing;
-                if (smallestSpace > spacing)
-                    smallestSpace = spacing;
-            }
-
-            // Check if the percent difference from the average
-            // to the smallest and largest spaces are greater than
-            // the allowed spacing.
-            double averageSpacing = totalSpacing / numSpaces;
-            if (100 * ((largestSpace - averageSpacing) / averageSpacing) > allowedPercentDifference)
-                return new Tuple<bool, double>(false, averageSpacing);
-            if (100 * ((averageSpacing - smallestSpace) / averageSpacing) > allowedPercentDifference)
-                return new Tuple<bool, double>(false, averageSpacing);
-
-            // We're evenly spaced within the tolerance.
-            return new Tuple<bool, double>(true, averageSpacing);
         }
 
         /// <summary>

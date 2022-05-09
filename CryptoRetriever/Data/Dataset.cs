@@ -202,6 +202,47 @@ namespace CryptoRetriever.Data {
             else
                 return Points[right].X;
         }
+
+        /// <summary>
+        /// Checks if this dataset is evenly spaced. If it is, the second return param
+        /// will be the approximate spacing. Assumes the dataset is at least 2 items.
+        /// </summary>
+        /// <param name="dataset">The dataset to check.</param>
+        /// <param name="allowedPercentDifference">The allowed percent difference from the average to be considered even. Defaults to 0.1%</param>
+        /// <returns>A pair with the first being true if the dataset is evenly spaced and if so the second being the amount it is spaced by.</returns>
+        public Tuple<bool, double> IsEvenlySpaced(double allowedPercentDifference = 0.1) {
+            double totalSpacing = 0;
+            int numSpaces = Count - 1;
+            double previousX = Points[0].X;
+            double largestSpace = Double.MinValue;
+            double smallestSpace = Double.MaxValue;
+            int smallestIndex = -1;
+            for (int i = 1; i < Count; i++) {
+                double currentX = Points[i].X;
+                double spacing = (currentX - previousX);
+                totalSpacing += spacing;
+                previousX = currentX;
+
+                if (largestSpace < spacing)
+                    largestSpace = spacing;
+                if (smallestSpace > spacing) {
+                    smallestSpace = spacing;
+                    smallestIndex = i;
+                }
+            }
+
+            // Check if the percent difference from the average
+            // to the smallest and largest spaces are greater than
+            // the allowed spacing.
+            double averageSpacing = totalSpacing / numSpaces;
+            if (100 * ((largestSpace - averageSpacing) / averageSpacing) > allowedPercentDifference)
+                return new Tuple<bool, double>(false, averageSpacing);
+            if (100 * ((averageSpacing - smallestSpace) / averageSpacing) > allowedPercentDifference)
+                return new Tuple<bool, double>(false, averageSpacing);
+
+            // We're evenly spaced within the tolerance.
+            return new Tuple<bool, double>(true, averageSpacing);
+        }
     }
 
     public class DataResult {

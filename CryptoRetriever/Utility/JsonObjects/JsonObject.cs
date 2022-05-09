@@ -73,6 +73,18 @@ namespace CryptoRetriever.Utility.JsonObjects {
             return (bool)Children[key];
         }
 
+        public JsonObject Put(String key, long num) {
+            // Store longs as strings to ensure no data loss
+            String numStr = "" + num;
+            return Put(key, numStr);
+        }
+
+        public long GetLong(String key) {
+            // Longs are stored as strings to prevent data loss
+            String numStr = GetString(key);
+            return long.Parse(numStr);
+        }
+
         public JsonObject Put(String key, int num) {
             Children.Add(key, num);
             return this;

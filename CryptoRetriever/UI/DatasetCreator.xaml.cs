@@ -10,6 +10,7 @@ using CryptoRetriever.Data;
 using System.Windows.Media;
 using Utf8Json;
 using CryptoRetriever.Strats;
+using CryptoRetriever.Filter;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -126,6 +127,19 @@ namespace CryptoRetriever.UI {
                         DatasetResult result = taskResult.Result;
 
                         if (result.Succeeded && result.Value.Points.Count > 0) {
+                            // Check if the dataset is evenly spaced
+                            if (!result.Value.IsEvenlySpaced().Item1) {
+                                // If not, offer to correct it with interpolation (They may not want this)
+                                MessageBoxResult userWantsEvenSpacingResponse = MessageBox.Show(
+                                    "The dataset has either some missing samples, duplicates, or other irregularities. Would you like to fill them in with interpolation?",
+                                    "Uneven Dataset Spacing",
+                                    MessageBoxButton.OKCancel);
+                                if (userWantsEvenSpacingResponse == MessageBoxResult.OK) {
+                                    ResamplerFilter filter = new ResamplerFilter((long)Math.Round(result.Value.Granularity));
+                                    result.Value = filter.Filter(result.Value);
+                                }
+                            }
+
                             try {
                                 String filePath = _selectedOutput.Text;
                                 String dir = Path.GetDirectoryName(filePath);
@@ -135,7 +149,7 @@ namespace CryptoRetriever.UI {
                                 DatasetWriter writer = new DatasetWriter();
                                 Result writeResult = writer.WriteFile(result.Value, filePath);
                                 if (!writeResult.Succeeded) {
-                                    MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + result.ErrorDetails);
+                                    MessageBox.Show("UH OH! Couldn't write the dataset to a file: " + result.ErrorDetails);
                                 } else {
                                     // Open a dataset viewer
                                     DatasetViewer viewer = new DatasetViewer(_strategyManager);
@@ -146,7 +160,7 @@ namespace CryptoRetriever.UI {
                                 Close();
                             } catch (Exception ex) {
                                 dialog.Close();
-                                MessageBox.Show("UH OH! Couldnt write the dataset to a file: " + ex.Message);
+                                MessageBox.Show("UH OH! Couldn't write the dataset to a file: " + ex.Message);
                             }
                         } else {
                             dialog.Close();
