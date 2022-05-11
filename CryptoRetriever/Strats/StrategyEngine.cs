@@ -3,7 +3,9 @@ using CryptoRetriever.Filter;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Windows;
 
 /// <summary>
@@ -16,6 +18,10 @@ namespace CryptoRetriever.Strats {
         private Dataset _filteredDataset;
 
         private bool _isDebugEnabled = false;
+
+        // Used to keep track of how many tasks are still running
+        private object _runContextLock = new object();
+        private int _taskCompleteCount = 0;
 
         /// <summary>
         /// The context with the highest value (if there are VariableRunners) is placed
@@ -40,10 +46,19 @@ namespace CryptoRetriever.Strats {
             // Run the whole thing by stepping thru the whole
             // dataset.
             if (_strategy.VariableRunners.Count > 0) {
-                Stack<VariableRunner> runners = new Stack<VariableRunner>();
+                LinkedList<VariableRunner> runners = new LinkedList<VariableRunner>();
                 foreach (VariableRunner runner in _strategy.VariableRunners)
-                    runners.Push(runner);
-                PopRunnersAndRunIterations(runners, new Dictionary<String, double>());
+                    runners.AddFirst(runner);
+
+                TaskCounter taskCounter = new TaskCounter();
+                PopRunnersAndRunIterations(runners, new Dictionary<String, double>(), taskCounter);
+
+                // Wait for all of them to complete
+                lock (_runContextLock) {
+                    while (_taskCompleteCount < taskCounter.TaskCount) {
+                        Monitor.Wait(_runContextLock);
+                    }
+                }
             } else {
                 StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
                 workingRunContext.FilteredDataset = _filteredDataset;
@@ -57,24 +72,42 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         /// <param name="remainingRunners">The list of variables to run.</param>
         /// <param name="runnerValues">A dictionary to keep track of the current value of each. Provide a new dictionary to start.</param>
-        private void PopRunnersAndRunIterations(Stack<VariableRunner> remainingRunners, Dictionary<String, double> runnerValues) {
-            VariableRunner runner = remainingRunners.Pop();
+        private void PopRunnersAndRunIterations(LinkedList<VariableRunner> remainingRunners, Dictionary<String, double> runnerValues, TaskCounter taskCounter) {
+            VariableRunner runner = remainingRunners.First.Value;
+            remainingRunners.RemoveFirst();
             for (double val = runner.Start; val <= runner.End; val += runner.Step) {
                 runnerValues[runner.Variable.GetVariableName()] = val;
                 if (remainingRunners.Count > 0) {
-                    PopRunnersAndRunIterations(remainingRunners, runnerValues);
+                    PopRunnersAndRunIterations(CloneRunners(remainingRunners), runnerValues, taskCounter);
                 } else {
-                    StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
-                    workingRunContext.FilteredDataset = _filteredDataset;
-                    workingRunContext.UserVars[runner.Variable.GetVariableName()].SetValueFromString(workingRunContext, "" + val);
-                    RunIteration(workingRunContext, runnerValues);
+                    taskCounter.Increment();
+                    Dictionary<String, double> clonedValues = new Dictionary<String, double>();
+                    foreach (KeyValuePair<String, double> pair in runnerValues)
+                        clonedValues[pair.Key] = pair.Value;
+                    ThreadPool.QueueUserWorkItem(o => {
+                        StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
+                        workingRunContext.FilteredDataset = _filteredDataset;
+                        workingRunContext.UserVars[runner.Variable.GetVariableName()].SetValueFromString(workingRunContext, "" + val);
+                        RunIteration(workingRunContext, clonedValues);
 
-                    double accountVal = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[workingRunContext.CurrentDatapointIndex - 1].Y);
-                    if (RunContext == null || accountVal > ValueOf(RunContext.Account, RunContext.Dataset.Points[RunContext.CurrentDatapointIndex - 1].Y)) {
-                        RunContext = workingRunContext;
-                    }
+                        double accountVal = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[workingRunContext.CurrentDatapointIndex - 1].Y);
+                        lock (_runContextLock) {
+                            if (RunContext == null || accountVal > ValueOf(RunContext.Account, RunContext.Dataset.Points[RunContext.CurrentDatapointIndex - 1].Y)) {
+                                RunContext = workingRunContext;
+                            }
+                            _taskCompleteCount++;
+                            Monitor.PulseAll(_runContextLock);
+                        }
+                    });
                 }
             }
+        }
+
+        private LinkedList<VariableRunner> CloneRunners(LinkedList<VariableRunner> runners) {
+            LinkedList<VariableRunner> copy = new LinkedList<VariableRunner>();
+            foreach (VariableRunner runner in runners)
+                copy.AddLast(runner.Clone());
+            return copy;
         }
 
         /// <summary>
@@ -84,8 +117,12 @@ namespace CryptoRetriever.Strats {
         /// <param name="workingContext">The context to use when executing.</param>
         /// <param name="runnerValues">A dictionary of variables to set in the context prior to running. The first string is the variable name, the second is its value.</param>
         private void RunIteration(StrategyRuntimeContext workingContext, Dictionary<String, double> runnerValues) {
-            foreach (KeyValuePair<String, double> pair in runnerValues)
+            String debugRunners = "";
+            foreach (KeyValuePair<String, double> pair in runnerValues) {
                 workingContext.UserVars[pair.Key].SetValueFromString(workingContext, "" + pair.Value);
+                debugRunners += pair.Key + "=" + pair.Value + " ";
+            }
+            Debug.WriteLine("Running iteration (Thread " + Thread.CurrentThread.ManagedThreadId + "): " + debugRunners);
 
             for (int i = 0; i < workingContext.Dataset.Count; i++) {
                 Step(workingContext);
@@ -136,6 +173,14 @@ namespace CryptoRetriever.Strats {
         /// <returns></returns>
         private double ValueOf(Account account, double price) {
             return account.CurrencyBalance + account.AssetBalance * price;
+        }
+
+        private class TaskCounter {
+            public int TaskCount { get; private set; } = 0;
+
+            public void Increment() {
+                TaskCount++;
+            }
         }
     }
 }

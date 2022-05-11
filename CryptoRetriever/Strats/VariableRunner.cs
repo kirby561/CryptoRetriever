@@ -38,5 +38,14 @@ namespace CryptoRetriever.Strats {
             obj.Put("Step", Step);
             return obj;
         }
+
+        public VariableRunner Clone() {
+            return new VariableRunner() {
+                Variable = Variable,
+                Start = Start,
+                End = End,
+                Step = Step
+            };
+        }
     }
 }

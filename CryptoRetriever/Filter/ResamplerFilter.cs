@@ -54,6 +54,7 @@ namespace CryptoRetriever.Filter {
 
         public JsonObject ToJson() {
             JsonObject obj = new JsonObject();
+            obj.Put("Type", "ResamplerFilter");
             obj.Put("SampleFrequencyS", _sampleFrequencyS);
             return obj;
         }

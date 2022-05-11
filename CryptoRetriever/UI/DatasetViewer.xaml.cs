@@ -251,6 +251,25 @@ namespace CryptoRetriever.UI {
             SetDataset(_filePath, _originalDataset, output);
         }
 
+        private void OnResampleClicked(object sender, RoutedEventArgs e) {
+            _lastFilter = new ResamplerFilter((long)GetActiveDataset().Granularity);
+            Dataset output = _lastFilter.Filter(GetActiveDataset());
+            SetDataset(_filePath, _originalDataset, output);
+        }
+
+        private void OnDifferentiateClicked(object sender, RoutedEventArgs e) {
+            _lastFilter = new DerivativeFilter();
+
+            // For this filter, launch a new window because the range is going
+            // to be significantly different than the original dataset. In the
+            // future, maybe the renderer could support showing 2 separate ranges
+            // for the original and filtered datasets.
+            Dataset newDataset = _lastFilter.Filter(GetActiveDataset());
+            DatasetViewer viewer = new DatasetViewer(StrategyManager);
+            viewer.SetDataset(_filePath.Replace(".dataset", "_derivative") + ".dataset", newDataset);
+            viewer.Show();
+        }
+
         private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {
             if (_lastFilter != null) {
                 Dataset output = _lastFilter.Filter(GetActiveDataset());

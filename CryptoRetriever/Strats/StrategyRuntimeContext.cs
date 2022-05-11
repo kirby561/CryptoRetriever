@@ -95,11 +95,25 @@ namespace CryptoRetriever.Strats {
             double fee = Strategy.ExchangeAssumptions.TransactionFee;
             double price = Dataset.Points[CurrentDatapointIndex].Y;
             double maxPurchaseAmount = (Account.CurrencyBalance - fee) / price;
+            Purchase(maxPurchaseAmount);
+        }
 
-            if (maxPurchaseAmount > 0) {
+        /// <summary>
+        /// Purchases the given amount of asset or as much as possible if
+        /// the amount is larger than that.
+        /// </summary>
+        /// <param name="amount">The amount of asset to purchase.</param>
+        public void Purchase(double amount) {
+            // Get the current price
+            double fee = Strategy.ExchangeAssumptions.TransactionFee;
+            double price = Dataset.Points[CurrentDatapointIndex].Y;
+            double maxPurchaseAmount = (Account.CurrencyBalance - fee) / price;
+            double purchaseAmount = Math.Min(amount, maxPurchaseAmount);
+
+            if (purchaseAmount > 0) {
                 if (LastTransactionCompleted()) {
-                    double purchaseCost = maxPurchaseAmount * price;
-                    Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, -purchaseCost, maxPurchaseAmount, Account, price);
+                    double purchaseCost = purchaseAmount * price;
+                    Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, -purchaseCost, purchaseAmount, Account, price);
                     PerformTransaction(transaction);
                 } else {
                     Errors.Add(new StrategyError(
@@ -120,11 +134,23 @@ namespace CryptoRetriever.Strats {
             double fee = Strategy.ExchangeAssumptions.TransactionFee;
             double price = Dataset.Points[CurrentDatapointIndex].Y;
             double maxSellAmount = Account.AssetBalance - (fee / price);
+            Sell(maxSellAmount);
+        }
 
-            if (maxSellAmount > 0) {
+        /// <summary>
+        /// Sells the given amount of asset or all of it if the amount remaining is less than this.
+        /// </summary>
+        /// <param name="amount">The amount to sell.</param>
+        public void Sell(double amount) {
+            double fee = Strategy.ExchangeAssumptions.TransactionFee;
+            double price = Dataset.Points[CurrentDatapointIndex].Y;
+            double maxSellAmount = Account.AssetBalance - (fee / price);
+            double sellAmount = Math.Min(amount, maxSellAmount);
+
+            if (sellAmount > 0) {
                 if (LastTransactionCompleted()) {
-                    double sellRevenue = maxSellAmount * price;
-                    Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, sellRevenue, -maxSellAmount, Account, price);
+                    double sellRevenue = sellAmount * price;
+                    Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, sellRevenue, -sellAmount, Account, price);
                     PerformTransaction(transaction);
                 } else {
                     Errors.Add(new StrategyError(

@@ -11,7 +11,9 @@ namespace CryptoRetriever.Strats {
 
     public static class ActionId {
         public static readonly String BuyMax = "BuyMax";
+        public static readonly String BuySmall = "BuySmall";
         public static readonly String SellMax = "SellMax";
+        public static readonly String SellSmall = "SellSmall";
         public static readonly String ChangeVariableTo = "ChangeVariableTo";
         public static readonly String DoNothing = "DoNothing";
         public static readonly String NotSet = "NotSet";
