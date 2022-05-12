@@ -57,7 +57,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Image Source="../Images/play.png" />
+                    <Image Source="Images/play.png" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -66,7 +66,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/play_hover.png" />
+                            <Image Source="Images/play_hover.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -75,7 +75,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/play_click.png" />
+                            <Image Source="Images/play_click.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -91,7 +91,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Image Source="../Images/add.png" />
+                    <Image Source="Images/add.png" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -100,7 +100,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/add_hover.png" />
+                            <Image Source="Images/add_hover.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -109,7 +109,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/add_click.png" />
+                            <Image Source="Images/add_click.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -125,7 +125,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Image Source="../Images/remove.png" />
+                    <Image Source="Images/remove.png" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -134,7 +134,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/remove_hover.png" />
+                            <Image Source="Images/remove_hover.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -143,7 +143,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/remove_click.png" />
+                            <Image Source="Images/remove_click.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -159,7 +159,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Image Source="../Images/up.png" />
+                    <Image Source="Images/up.png" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -168,7 +168,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/up_hover.png" />
+                            <Image Source="Images/up_hover.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -177,7 +177,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/up_click.png" />
+                            <Image Source="Images/up_click.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -193,7 +193,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Image Source="../Images/down.png" />
+                    <Image Source="Images/down.png" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -202,7 +202,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/down_hover.png" />
+                            <Image Source="Images/down_hover.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -211,7 +211,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/down_click.png" />
+                            <Image Source="Images/down_click.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -227,7 +227,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Image Source="../Images/more.png" />
+                    <Image Source="Images/more.png" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -236,7 +236,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/more_hover.png" />
+                            <Image Source="Images/more_hover.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -245,7 +245,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Image Source="../Images/more_click.png" />
+                            <Image Source="Images/more_click.png" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>

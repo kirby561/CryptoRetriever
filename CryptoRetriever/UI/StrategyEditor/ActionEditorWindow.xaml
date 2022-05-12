@@ -1,4 +1,4 @@
-﻿<local:TreeEditorWindow x:Class="CryptoRetriever.UI.ConditionEditorWindow"
+﻿<local:TreeEditorWindow x:Class="CryptoRetriever.UI.ActionEditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,11 +6,12 @@
         xmlns:local="clr-namespace:CryptoRetriever.UI"
         mc:Ignorable="d"
         Background="#00001a"
-        Title="Condition Editor" Height="450" Width="300">
+        Loaded="OnWindowLoaded"
+        Title="Action Editor" Height="450" Width="300">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="CommonStyles.xaml" />
+                <ResourceDictionary Source="../CommonStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -19,9 +20,9 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
+
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Name="_conditionsPanel" Orientation="Vertical" Height="Auto" />
+            <StackPanel Name="_actionsPanel" Orientation="Vertical" Height="Auto" />
         </ScrollViewer>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">

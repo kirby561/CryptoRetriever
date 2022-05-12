@@ -15,30 +15,30 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Images\add.png" />
-    <None Remove="Images\add_click.png" />
-    <None Remove="Images\add_hover.png" />
-    <None Remove="Images\analytics.png" />
-    <None Remove="Images\cross.png" />
-    <None Remove="Images\CryptoRetriever.png" />
-    <None Remove="Images\CryptoRetrieverSocial.png" />
-    <None Remove="Images\data-storage.png" />
-    <None Remove="Images\data-storage.svg" />
-    <None Remove="Images\down.png" />
-    <None Remove="Images\down_click.png" />
-    <None Remove="Images\down_hover.png" />
-    <None Remove="Images\more.png" />
-    <None Remove="Images\more_click.png" />
-    <None Remove="Images\more_hover.png" />
-    <None Remove="Images\play.png" />
-    <None Remove="Images\play_click.png" />
-    <None Remove="Images\play_hover.png" />
-    <None Remove="Images\remove.png" />
-    <None Remove="Images\remove_click.png" />
-    <None Remove="Images\remove_hover.png" />
-    <None Remove="Images\up.png" />
-    <None Remove="Images\up_click.png" />
-    <None Remove="Images\up_hover.png" />
+    <None Remove="UI\Images\add.png" />
+    <None Remove="UI\Images\add_click.png" />
+    <None Remove="UI\Images\add_hover.png" />
+    <None Remove="UI\Images\analytics.png" />
+    <None Remove="UI\Images\cross.png" />
+    <None Remove="UI\Images\CryptoRetriever.png" />
+    <None Remove="UI\Images\CryptoRetrieverSocial.png" />
+    <None Remove="UI\Images\data-storage.png" />
+    <None Remove="UI\Images\data-storage.svg" />
+    <None Remove="UI\Images\down.png" />
+    <None Remove="UI\Images\down_click.png" />
+    <None Remove="UI\Images\down_hover.png" />
+    <None Remove="UI\Images\more.png" />
+    <None Remove="UI\Images\more_click.png" />
+    <None Remove="UI\Images\more_hover.png" />
+    <None Remove="UI\Images\play.png" />
+    <None Remove="UI\Images\play_click.png" />
+    <None Remove="UI\Images\play_hover.png" />
+    <None Remove="UI\Images\remove.png" />
+    <None Remove="UI\Images\remove_click.png" />
+    <None Remove="UI\Images\remove_hover.png" />
+    <None Remove="UI\Images\up.png" />
+    <None Remove="UI\Images\up_click.png" />
+    <None Remove="UI\Images\up_hover.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,98 +51,98 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\add.png">
+    <Resource Include="UI\Images\add.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\add_click.png">
+    <Resource Include="UI\Images\add_click.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\add_hover.png">
+    <Resource Include="UI\Images\add_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\analytics.png">
+    <Resource Include="UI\Images\analytics.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\cross.png">
+    <Resource Include="UI\Images\cross.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\CryptoRetriever.png">
+    <Resource Include="UI\Images\CryptoRetriever.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\CryptoRetrieverSocial.png">
+    <Resource Include="UI\Images\CryptoRetrieverSocial.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\data-storage.png">
+    <Resource Include="UI\Images\data-storage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\data-storage.svg">
+    <Resource Include="UI\Images\data-storage.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\down.png">
+    <Resource Include="UI\Images\down.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\down_click.png">
+    <Resource Include="UI\Images\down_click.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\down_hover.png">
+    <Resource Include="UI\Images\down_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\more.png">
+    <Resource Include="UI\Images\more.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\more_click.png">
+    <Resource Include="UI\Images\more_click.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\more_hover.png">
+    <Resource Include="UI\Images\more_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\play.png">
+    <Resource Include="UI\Images\play.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\play_click.png">
+    <Resource Include="UI\Images\play_click.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\play_hover.png">
+    <Resource Include="UI\Images\play_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\remove.png">
+    <Resource Include="UI\Images\remove.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\remove_click.png">
+    <Resource Include="UI\Images\remove_click.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\remove_hover.png">
+    <Resource Include="UI\Images\remove_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\up.png">
+    <Resource Include="UI\Images\up.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\up_click.png">
+    <Resource Include="UI\Images\up_click.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\up_hover.png">
+    <Resource Include="UI\Images\up_hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UI\VariableRunnerDialog.xaml.cs">
+    <Compile Update="UI\StrategyEditor\VariableRunnerDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\UserVarDialog.xaml.cs">
+    <Compile Update="UI\StrategyEditor\UserVarDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="UI\ConditionEditorWindow.xaml">
+    <Page Update="UI\StrategyEditor\ConditionEditorWindow.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
-    <Page Update="UI\VariableRunnerDialog.xaml">
+    <Page Update="UI\StrategyEditor\VariableRunnerDialog.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UI\UserVarDialog.xaml">
+    <Page Update="UI\StrategyEditor\UserVarDialog.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

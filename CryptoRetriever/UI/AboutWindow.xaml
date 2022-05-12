@@ -31,7 +31,7 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="About" Foreground="White" FontFamily="Arial Black" FontSize="180" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    <Image Grid.Row="1" Source="../Images/CryptoRetriever.png" Width="Auto" Height="Auto" />
+                    <Image Grid.Row="1" Source="Images/CryptoRetriever.png" Width="Auto" Height="Auto" />
                     <TextBlock Visibility="Hidden" Grid.Row="2" Text="About" Foreground="White" FontFamily="Arial Black" FontSize="180" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </Grid>
                 <TextBlock  Text="Retriever" Foreground="White" FontFamily="Arial Black" FontSize="240" VerticalAlignment="Center" HorizontalAlignment="Center" />
