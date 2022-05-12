@@ -42,13 +42,8 @@
                 <MenuItem Header="_Export..." Click="OnExportClicked" />
                 <MenuItem Header="_Close" Click="OnCloseClicked" />
             </MenuItem>
-            <MenuItem Header="_Filter">
-                <MenuItem Header="_Gaussian Blur" Click="OnGaussianBlurClicked" />
-                <MenuItem Header="_Left Gaussian Blur" Click="OnLeftGaussianBlurClicked" />
-                <MenuItem Header="_Resample" Click="OnResampleClicked" />
-                <MenuItem Header="_Differentiate" Click="OnDifferentiateClicked" />
-                <Separator />
-                <MenuItem Header="_Repeat Last" Click="OnRepeatLastFilterClicked" />
+            <MenuItem Header="_Filter" Name="_filterListMenuItem">
+                <!-- Options dynamically added on load -->
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem IsChecked="{Binding IsShown, ElementName=_optionsPanel}" Header="Graph Options" Click="OnShowGraphOptionsPanelClick" />

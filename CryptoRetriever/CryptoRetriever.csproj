@@ -126,6 +126,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="UI\FilterEditors\AverageFilterDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\FilterEditors\GaussianFilterDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\StrategyEditor\VariableRunnerDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -135,6 +141,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="UI\FilterEditors\AverageFilterDialog.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UI\StrategyEditor\ConditionEditorWindow.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>

@@ -18,16 +18,19 @@ namespace CryptoRetriever.Filter {
     /// is O(n*log n)
     /// </summary>
     public class ResamplerFilter : IFilter {
-        private long _sampleFrequencyS;
-
         public String Summary {
             get {
-                return "Resampler: " + _sampleFrequencyS + " (s)";
+                return "Resampler: " + SampleFrequency + " (s)";
             }
         }
 
+        /// <summary>
+        /// The sample frequency in seconds.
+        /// </summary>
+        public long SampleFrequency { get; set; }
+
         public ResamplerFilter(long sampleFrequencyS) {
-            _sampleFrequencyS = sampleFrequencyS;
+            SampleFrequency = sampleFrequencyS;
         }
 
         public Dataset Filter(Dataset input) {
@@ -37,11 +40,11 @@ namespace CryptoRetriever.Filter {
 
             double timeLength = input.Points[input.Count - 1].X - input.Points[0].X;
             double startTime = input.Points[0].X;
-            int numSamples = (int)Math.Round(timeLength / _sampleFrequencyS) + 1;
+            int numSamples = (int)Math.Round(timeLength / SampleFrequency) + 1;
             Dataset filteredData = new Dataset(numSamples);
-            filteredData.Granularity = _sampleFrequencyS;
+            filteredData.Granularity = SampleFrequency;
             for (int i = 0; i < numSamples; i++) {
-                double time = i * _sampleFrequencyS + startTime;
+                double time = i * SampleFrequency + startTime;
                 filteredData.Points.Add(new Point(time, input.ValueAt(time).Result));
             }
 
@@ -49,13 +52,13 @@ namespace CryptoRetriever.Filter {
         }
 
         public void FromJson(JsonObject json) {
-            _sampleFrequencyS = json.GetLong("SampleFrequencyS");
+            SampleFrequency = json.GetLong("SampleFrequencyS");
         }
 
         public JsonObject ToJson() {
             JsonObject obj = new JsonObject();
             obj.Put("Type", "ResamplerFilter");
-            obj.Put("SampleFrequencyS", _sampleFrequencyS);
+            obj.Put("SampleFrequencyS", SampleFrequency);
             return obj;
         }
     }

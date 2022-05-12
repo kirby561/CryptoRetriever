@@ -48,10 +48,27 @@ namespace CryptoRetriever.UI {
         public DatasetViewer(StrategyManager manager) {
             this.InitializeComponent();
 
+            // Setup the dock manager
             StrategyManager = manager;
             _dockManager.UseDockManagerForTree(this);
             _dockPanelSpotLeft.ChildrenChanged += OnStationChildrenChanged;
             _dockPanelSpotRight.ChildrenChanged += OnStationChildrenChanged;
+
+            // Add filter options
+            List<IFilter> filterOptions = FilterUi.GetFilterUiMap().Keys.ToList();
+            foreach (IFilter filter in filterOptions) {
+                MenuItem filterMenuItem = new MenuItem();
+                filterMenuItem.Header = filter.GetType().Name;
+                filterMenuItem.Click += OnFilterClicked;
+                _filterListMenuItem.Items.Add(filterMenuItem);
+            }
+
+            // Add the "Repeat" button
+            _filterListMenuItem.Items.Add(new Separator());
+            MenuItem repeatLastItem = new MenuItem();
+            repeatLastItem.Header = "Repeat Last";
+            repeatLastItem.Click += OnRepeatLastFilterClicked;
+            _filterListMenuItem.Items.Add(repeatLastItem);
         }
 
         public void SetDataset(String filePath, Dataset originalDataset) {
@@ -239,35 +256,57 @@ namespace CryptoRetriever.UI {
             }
         }
 
-        private void OnGaussianBlurClicked(object sender, RoutedEventArgs e) {
-            _lastFilter = new GaussianFilter(1);
+        /// <summary>
+        /// This is a generic filter handler for any type of filter.
+        /// For the moment it assumes the text is the ID of the filter.
+        /// </summary>
+        /// <param name="sender">A MenuItem with its Header a String ID of the filter.</param>
+        /// <param name="e">N/A</param>
+        private void OnFilterClicked(object sender, RoutedEventArgs e) {
+            MenuItem menuItem = (MenuItem)sender;
+            String header = (String)menuItem.Header;
+            KeyValuePair<IFilter, BaseFilterDialog> filterAndDialog = FilterUi.GetDialogByName(header).Value;
+
+            if (filterAndDialog.Value != null) {
+                IFilter filter = filterAndDialog.Key;
+
+                // As a special case, for the ResamplerFilter, set the default
+                // frequency to the frequency of the dataset
+                if (filter is ResamplerFilter) {
+                    ResamplerFilter resampler = (ResamplerFilter)filter;
+                    resampler.SampleFrequency = (long)GetActiveDataset().Granularity;
+                }
+
+                BaseFilterDialog editor = filterAndDialog.Value;
+                editor.SetWorkingFilter(filter);
+                editor.ShowDialog();
+
+                if (editor.GetResult() != null) {
+                    _lastFilter = editor.GetResult();
+                } else {
+                    // If it's null the user cancelled
+                    return;
+                }
+            } else {
+                _lastFilter = filterAndDialog.Key;
+            }
+
             Dataset output = _lastFilter.Filter(GetActiveDataset());
-            SetDataset(_filePath, _originalDataset, output);
-        }
 
-        private void OnLeftGaussianBlurClicked(object sender, RoutedEventArgs e) {
-            _lastFilter = new LeftGaussianFilter(1);
-            Dataset output = _lastFilter.Filter(GetActiveDataset());
-            SetDataset(_filePath, _originalDataset, output);
-        }
-
-        private void OnResampleClicked(object sender, RoutedEventArgs e) {
-            _lastFilter = new ResamplerFilter((long)GetActiveDataset().Granularity);
-            Dataset output = _lastFilter.Filter(GetActiveDataset());
-            SetDataset(_filePath, _originalDataset, output);
-        }
-
-        private void OnDifferentiateClicked(object sender, RoutedEventArgs e) {
-            _lastFilter = new DerivativeFilter();
-
-            // For this filter, launch a new window because the range is going
-            // to be significantly different than the original dataset. In the
-            // future, maybe the renderer could support showing 2 separate ranges
-            // for the original and filtered datasets.
-            Dataset newDataset = _lastFilter.Filter(GetActiveDataset());
-            DatasetViewer viewer = new DatasetViewer(StrategyManager);
-            viewer.SetDataset(_filePath.Replace(".dataset", "_derivative") + ".dataset", newDataset);
-            viewer.Show();
+            // ?? TODO: This could be checked with a method on IFilter or
+            // from the range of the resulting Dataset or something instead
+            if (_lastFilter is DerivativeFilter) {
+                // For this filter, launch a new window because the range is going
+                // to be significantly different than the original dataset. In the
+                // future, maybe the renderer could support showing 2 separate ranges
+                // for the original and filtered datasets.
+                Dataset newDataset = _lastFilter.Filter(GetActiveDataset());
+                DatasetViewer viewer = new DatasetViewer(StrategyManager);
+                viewer.SetDataset(_filePath.Replace(".dataset", "_derivative") + ".dataset", newDataset);
+                viewer.Show();
+            } else {
+                SetDataset(_filePath, _originalDataset, output);
+            }
         }
 
         private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {

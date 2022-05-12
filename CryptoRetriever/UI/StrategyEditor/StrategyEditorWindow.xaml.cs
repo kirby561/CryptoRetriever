@@ -1,19 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using CryptoRetriever.Filter;
 using CryptoRetriever.Strats;
-using CryptoRetriever.Utility.JsonObjects;
-using Utf8Json;
+using System.Linq;
 
 namespace CryptoRetriever.UI {
     /// <summary>
@@ -149,13 +140,30 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnAddFilterClicked(object sender, RoutedEventArgs e) {
-            AddFilterDialog addFilterDialog = new AddFilterDialog();
-            UiHelper.CenterWindowInWindow(addFilterDialog, this);
-            addFilterDialog.ShowDialog();
+            Dictionary<IFilter, BaseFilterDialog> filterDialogs = FilterUi.GetFilterUiMap();
+            List<IFilter> filterOptions = filterDialogs.Keys.ToList();
+            ListBoxDialog filterOptionsDialog = new ListBoxDialog();
+            filterOptionsDialog.SetItemSource((filter) => {
+                return filter.GetType().Name;
+            }, filterDialogs.Keys);
+            filterOptionsDialog.ShowDialog();
 
-            if (addFilterDialog.Filter != null) {
-                _strategy.Filters.Add(addFilterDialog.Filter);
+            IFilter result = null;
+            if (filterOptionsDialog.SelectedIndex >= 0) {
+                IFilter selectedFilter = filterOptions[filterOptionsDialog.SelectedIndex];
+                BaseFilterDialog dialog = filterDialogs[selectedFilter];
+                if (dialog == null) {
+                    // A null dialog means no options so just add the filter
+                    result = selectedFilter;
+                } else {
+                    dialog.SetWorkingFilter(selectedFilter);
+                    dialog.ShowDialog();
+                    result = dialog.GetResult();
+                }
             }
+
+            if (result != null)
+                _strategy.Filters.Add(result);
         }
 
         private void OnRemoveFilterClicked(object sender, RoutedEventArgs e) {
@@ -173,14 +181,17 @@ namespace CryptoRetriever.UI {
         private void OnFiltersDoubleClicked(object sender, MouseButtonEventArgs e) {
             int selectedIndex = _filtersView.SelectedIndex;
             if (selectedIndex >= 0) {
-                AddFilterDialog addFilterDialog = new AddFilterDialog();
-                addFilterDialog.SetWorkingFilter(_strategy.Filters[selectedIndex]);
-                UiHelper.CenterWindowInWindow(addFilterDialog, this);
-                addFilterDialog.ShowDialog();
+                BaseFilterDialog filterDialog = FilterUi.GetDialogFor(_strategy.Filters[selectedIndex]);
+                if (filterDialog == null)
+                    return; // This filter cannot be edited
 
-                if (addFilterDialog.Filter != null) {
+                filterDialog.SetWorkingFilter(_strategy.Filters[selectedIndex]);
+                UiHelper.CenterWindowInWindow(filterDialog, this);
+                filterDialog.ShowDialog();
+
+                if (filterDialog.GetResult() != null) {
                     _strategy.Filters.RemoveAt(selectedIndex);
-                    _strategy.Filters.Insert(selectedIndex, addFilterDialog.Filter);
+                    _strategy.Filters.Insert(selectedIndex, filterDialog.GetResult());
                 }
             }
         }
