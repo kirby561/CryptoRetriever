@@ -91,10 +91,8 @@ namespace CryptoRetriever.Strats {
         /// the current amount of currency in the account.
         /// </summary>
         public void PurchaseMax() {
-            // Get the current price
-            double fee = Strategy.ExchangeAssumptions.TransactionFee;
             double price = Dataset.Points[CurrentDatapointIndex].Y;
-            double maxPurchaseAmount = (Account.CurrencyBalance - fee) / price;
+            double maxPurchaseAmount = GetMaxPurchaseAmount(Account, Strategy.ExchangeAssumptions, price);
             Purchase(maxPurchaseAmount);
         }
 
@@ -105,10 +103,10 @@ namespace CryptoRetriever.Strats {
         /// <param name="amount">The amount of asset to purchase.</param>
         public void Purchase(double amount) {
             // Get the current price
-            double fee = Strategy.ExchangeAssumptions.TransactionFee;
             double price = Dataset.Points[CurrentDatapointIndex].Y;
-            double maxPurchaseAmount = (Account.CurrencyBalance - fee) / price;
+            double maxPurchaseAmount = GetMaxPurchaseAmount(Account, Strategy.ExchangeAssumptions, price);
             double purchaseAmount = Math.Min(amount, maxPurchaseAmount);
+            double fee = Strategy.ExchangeAssumptions.TransactionFee + (Strategy.ExchangeAssumptions.TransactionFeePercentage / 100) * purchaseAmount * price;
 
             if (purchaseAmount > 0) {
                 if (LastTransactionCompleted()) {
@@ -131,9 +129,8 @@ namespace CryptoRetriever.Strats {
         /// Sells all of the currently held asset for currency.
         /// </summary>
         public void SellMax() {
-            double fee = Strategy.ExchangeAssumptions.TransactionFee;
             double price = Dataset.Points[CurrentDatapointIndex].Y;
-            double maxSellAmount = Account.AssetBalance - (fee / price);
+            double maxSellAmount = GetMaxSellAmount(Account, Strategy.ExchangeAssumptions, price);
             Sell(maxSellAmount);
         }
 
@@ -142,10 +139,10 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         /// <param name="amount">The amount to sell.</param>
         public void Sell(double amount) {
-            double fee = Strategy.ExchangeAssumptions.TransactionFee;
             double price = Dataset.Points[CurrentDatapointIndex].Y;
-            double maxSellAmount = Account.AssetBalance - (fee / price);
+            double maxSellAmount = GetMaxSellAmount(Account, Strategy.ExchangeAssumptions, price);
             double sellAmount = Math.Min(amount, maxSellAmount);
+            double fee = Strategy.ExchangeAssumptions.TransactionFee + (Strategy.ExchangeAssumptions.TransactionFeePercentage / 100) * sellAmount * price;
 
             if (sellAmount > 0) {
                 if (LastTransactionCompleted()) {
@@ -164,6 +161,10 @@ namespace CryptoRetriever.Strats {
             }
         }
 
+        /// <summary>
+        /// Performs the given transaction by modifying the account balance, applying the transaction fees, and recording it.
+        /// </summary>
+        /// <param name="transaction">The transaction to perform.</param>
         public void PerformTransaction(Transaction transaction) {
             transaction.Account.CurrencyBalance += transaction.CurrencyTransferred;
             transaction.Account.CurrencyBalance -= transaction.TransactionFee;
@@ -196,6 +197,35 @@ namespace CryptoRetriever.Strats {
             TimeSpan minimumTimespan = TimeSpan.FromSeconds(Strategy.ExchangeAssumptions.TransactionTimeS);
 
             return timeElapsed > minimumTimespan;
+        }
+
+        /// <summary>
+        /// Calculates the amount of an asset you can purchase with the available funds in the given account.
+        /// Takes into account the fixed and variable fees in the ExchangeAssumptions as well.
+        /// </summary>
+        /// <param name="account">The account making the purchase.</param>
+        /// <param name="assumptions">The assumptions of the exchange.</param>
+        /// <param name="assetPrice">The current price of the asset per unit.</param>
+        /// <returns>Returns the amount of the asset that can be purchased (NOT the amount of money that will be spent purchasing it)</returns>
+        private double GetMaxPurchaseAmount(Account account, ExchangeAssumptions assumptions, double assetPrice) {
+            double moneyAvailable = account.CurrencyBalance;
+            double maxPurchaseAmount = (moneyAvailable - assumptions.TransactionFee) / (1 + assumptions.TransactionFeePercentage / 100);
+            return maxPurchaseAmount / assetPrice;
+        }
+
+        /// <summary>
+        /// Calculates the amount of an asset you can sell with the amount available in the given account.
+        /// Takes into account the fixed and variable fees in the ExchangeAssumptions as well.
+        /// </summary>
+        /// <param name="account">The account making the purchase.</param>
+        /// <param name="assumptions">The assumptions of the exchange.</param>
+        /// <param name="assetPrice">The current price of the asset per unit.</param>
+        /// <returns>Returns the amount of the asset that can be sold (NOT the amount of money that will be spent purchasing it)</returns>
+        private double GetMaxSellAmount(Account account, ExchangeAssumptions assumptions, double assetPrice) {
+            double assetValueAvailable = account.AssetBalance * assetPrice;
+            double maxPurchaseAmount = (assetValueAvailable - assumptions.TransactionFee) / (1 + assumptions.TransactionFeePercentage / 100);
+            double maxAssetAmount = maxPurchaseAmount / assetPrice;
+            return maxAssetAmount;
         }
     }
 }

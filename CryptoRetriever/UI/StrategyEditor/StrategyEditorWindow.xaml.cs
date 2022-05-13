@@ -47,7 +47,8 @@ namespace CryptoRetriever.UI {
             _accountStartingFiatTextBox.Text = "" + _strategy.Account.CurrencyBalance;
             _accountStartingAssetsTextBox.Text = "" + _strategy.Account.AssetBalance;
             _exchangeTransactionFeeTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionFee;
-            _exchangeTransationTimeTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionTimeS;
+            _exchangeTransactionFeePercentTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionFeePercentage;
+            _exchangeTransactionTimeTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionTimeS;
             if (_strategy.Start != DateTime.MinValue)
                 _startDatePicker.SelectedDate = _strategy.Start;
             if (_strategy.End != DateTime.MinValue)
@@ -109,12 +110,18 @@ namespace CryptoRetriever.UI {
                 MessageBox.Show("The transaction fee must be a number.");
                 return;
             }
+            double transactionPercentage;
+            if (!Double.TryParse(_exchangeTransactionFeePercentTextBox.Text, out transactionPercentage)) {
+                MessageBox.Show("The transaction fee % must be a number.");
+                return;
+            }
             double transactionTime;
-            if (!Double.TryParse(_exchangeTransationTimeTextBox.Text, out transactionTime)) {
+            if (!Double.TryParse(_exchangeTransactionTimeTextBox.Text, out transactionTime)) {
                 MessageBox.Show("The transaction time must be a number.");
                 return;
             }
             assumptions.TransactionFee = transactionFee;
+            assumptions.TransactionFeePercentage = transactionPercentage;
             assumptions.TransactionTimeS = transactionTime;
 
             // The Filters/States/Triggers are updated

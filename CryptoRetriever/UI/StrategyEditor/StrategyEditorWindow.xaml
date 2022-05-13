@@ -54,11 +54,14 @@
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Transaction Fee ($): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
                     <TextBox Name="_exchangeTransactionFeeTextBox" Grid.Column="1" Margin="5 2 5 2" Text="8" HorizontalAlignment="Stretch" />
-                    <TextBlock Grid.Row="1" Text="Transaction Time (s): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
-                    <TextBox Name="_exchangeTransationTimeTextBox" Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="600" HorizontalAlignment="Stretch" />
+                    <TextBlock Grid.Row="1" Text="Transaction Fee (%): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <TextBox Name="_exchangeTransactionFeePercentTextBox" Grid.Row="1" Grid.Column="1" Margin="5 2 5 2" Text="600" HorizontalAlignment="Stretch" />
+                    <TextBlock Grid.Row="2" Text="Transaction Time (s): " HorizontalAlignment="Right" Style="{StaticResource TbHeader2}" />
+                    <TextBox Name="_exchangeTransactionTimeTextBox" Grid.Row="2" Grid.Column="1" Margin="5 2 5 2" Text="600" HorizontalAlignment="Stretch" />
                 </Grid>
 
                 <!-- Filters -->
