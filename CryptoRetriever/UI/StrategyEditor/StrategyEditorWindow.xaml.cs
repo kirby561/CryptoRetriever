@@ -5,6 +5,7 @@ using System.Windows.Input;
 using CryptoRetriever.Filter;
 using CryptoRetriever.Strats;
 using System.Linq;
+using ValueType = CryptoRetriever.Strats.ValueType;
 
 namespace CryptoRetriever.UI {
     /// <summary>
@@ -57,6 +58,10 @@ namespace CryptoRetriever.UI {
             _userVars.ItemsSource = _strategy.UserVars;
             _triggersView.ItemsSource = _strategy.Triggers;
             _userVarRunners.ItemsSource = _strategy.VariableRunners;
+            if (_strategy.OptimizationVariable != null)
+                _optVariableTb.Text = _strategy.OptimizationVariable.GetVariableName();
+            else
+                _optVariableTb.Text = "Default";
         }
 
         private void OnCancelButtonClicked(object sender, RoutedEventArgs e) {
@@ -124,6 +129,17 @@ namespace CryptoRetriever.UI {
             assumptions.TransactionFeePercentage = transactionPercentage;
             assumptions.TransactionTimeS = transactionTime;
 
+            UserNumberVariable optVariable = null;
+            if (_optVariableTb.Text != "Default") {
+                foreach (IValue val in _strategy.UserVars) {
+                    if (val is UserNumberVariable) {
+                        UserNumberVariable var = (UserNumberVariable)val;
+                        if (var.GetVariableName().Equals(_optVariableTb.Text))
+                            optVariable = var;
+                    }
+                }
+            }
+
             // The Filters/States/Triggers are updated
             // as we go on the working Strategy so no
             // need to do anything for those.
@@ -131,6 +147,7 @@ namespace CryptoRetriever.UI {
             _strategy.Name = name;
             _strategy.Account = new Account(startingFiat, startingAssets);
             _strategy.ExchangeAssumptions = assumptions;
+            _strategy.OptimizationVariable = optVariable;
             _strategy.Start = startDate;
             _strategy.End = endDate;
             _result = _strategy;
@@ -341,6 +358,32 @@ namespace CryptoRetriever.UI {
                     return true;
             }
             return false;
+        }
+
+        private void OnOptVariableTbClicked(object sender, MouseButtonEventArgs e) {
+            List<UserNumberVariable> options = new List<UserNumberVariable>();
+            
+            // Add a "Default" option as well which represents the account value
+            UserNumberVariable defaultOption = new UserNumberVariable("Default", 0);
+            options.Add(defaultOption);
+
+            foreach (IUserVariable var in _strategy.UserVars)
+                if (var.GetValueType().Equals(ValueType.Number))
+                    options.Add((UserNumberVariable)var);
+
+            ListBoxDialog dialog = new ListBoxDialog();
+            dialog.SetItemSource(
+                (UserNumberVariable c) => {
+                    return c.GetLabel();
+                },
+                options);
+            UiHelper.CenterWindowInWindow(dialog, this);
+            dialog.ShowDialog();
+
+            if (dialog.SelectedIndex >= 0) {
+                UserNumberVariable result = options[dialog.SelectedIndex];
+                _optVariableTb.Text = result.GetVariableName();
+            }
         }
     }
 }

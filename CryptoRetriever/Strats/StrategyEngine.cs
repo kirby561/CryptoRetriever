@@ -90,9 +90,10 @@ namespace CryptoRetriever.Strats {
                         workingRunContext.UserVars[runner.Variable.GetVariableName()].SetValueFromString(workingRunContext, "" + val);
                         RunIteration(workingRunContext, clonedValues);
 
-                        double accountVal = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[workingRunContext.CurrentDatapointIndex - 1].Y);
+                        // Check if this scenario was better than the previous best and replace it if so.
+                        double accountOrOptimizationValue = GetOptimizationValueFor(workingRunContext);
                         lock (_runContextLock) {
-                            if (RunContext == null || accountVal > ValueOf(RunContext.Account, RunContext.Dataset.Points[RunContext.CurrentDatapointIndex - 1].Y)) {
+                            if (RunContext == null || accountOrOptimizationValue > GetOptimizationValueFor(RunContext)) {
                                 RunContext = workingRunContext;
                             }
                             _taskCompleteCount++;
@@ -103,6 +104,29 @@ namespace CryptoRetriever.Strats {
             }
         }
 
+        /// <summary>
+        /// Strategies allow the user to optimize a specific variable instead of the overall account value.
+        /// This method checks if one is set and returns the value of it for the given context if so. Otherwise
+        /// it returns the account value of the given context.
+        /// </summary>
+        /// <param name="workingRunContext">The context to check.</param>
+        /// <returns>Returns the value of the optimization variable or the value of the account if it is not set.</returns>
+        private double GetOptimizationValueFor(StrategyRuntimeContext workingRunContext) {
+            // If the user specified a specific variable to optimize, get the value of that
+            if (workingRunContext.Strategy.OptimizationVariable != null) {
+                return ((INumberValue)workingRunContext.UserVars[workingRunContext.Strategy.OptimizationVariable.GetVariableName()]).GetValue(workingRunContext);
+            } else {
+                // Otherwise just use the value of the account
+                double accountValue = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[workingRunContext.CurrentDatapointIndex - 1].Y);
+                return accountValue;
+            }
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the given list of VariableRunners.
+        /// </summary>
+        /// <param name="runners">The list to copy.</param>
+        /// <returns>Returns a deep copy of the given list of VariableRunners.</returns>
         private LinkedList<VariableRunner> CloneRunners(LinkedList<VariableRunner> runners) {
             LinkedList<VariableRunner> copy = new LinkedList<VariableRunner>();
             foreach (VariableRunner runner in runners)
@@ -135,6 +159,7 @@ namespace CryptoRetriever.Strats {
                 if (_isDebugEnabled)
                     workingContext.DebugUserVars.Add(dictCopy);
             }
+            Debug.WriteLine("  -- iteration complete (Thread " + Thread.CurrentThread.ManagedThreadId + "). OptimizationValue: " + GetOptimizationValueFor(workingContext));
         }
 
         /// <summary>

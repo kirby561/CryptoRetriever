@@ -24,6 +24,7 @@ namespace CryptoRetriever.Strats {
         public ObservableCollection<IValue> UserVars { get; set; } = new ObservableCollection<IValue>();
         public ObservableCollection<Trigger> Triggers { get; set; } = new ObservableCollection<Trigger>();
         public ObservableCollection<VariableRunner> VariableRunners { get; set; } = new ObservableCollection<VariableRunner>();
+        public UserNumberVariable OptimizationVariable { get; set; } = null; // Optional variable to optimize when variable runners are set. If not set, account value is used.
         public DateTime Start { get; set; } = DateTime.MinValue; // Min means use the dataset's start
         public DateTime End { get; set; } = DateTime.MinValue; // Min means use the dataset's end
 
@@ -91,9 +92,12 @@ namespace CryptoRetriever.Strats {
                 .Put("Filters", Filters)
                 .Put("UserVars", UserVars)
                 .Put("Triggers", Triggers)
-                .Put("VariableRunners", VariableRunners)
-                .Put("Start", Start)
+                .Put("VariableRunners", VariableRunners);
+            if (OptimizationVariable != null)
+                obj.Put("OptimizationVariable", OptimizationVariable.ToJson());
+            obj.Put("Start", Start)
                 .Put("End", End);
+
             return obj;
         }
 
@@ -146,6 +150,13 @@ namespace CryptoRetriever.Strats {
                     runner.FromJson(runnerObj);
                     VariableRunners.Add(runner);
                 }
+            }
+
+            if (obj.Children.ContainsKey("OptimizationVariable")) {
+                OptimizationVariable = new UserNumberVariable();
+                OptimizationVariable.FromJson(obj.GetObject("OptimizationVariable"));
+            } else {
+                OptimizationVariable = null;
             }
 
             Start = obj.GetDateTime("Start");
