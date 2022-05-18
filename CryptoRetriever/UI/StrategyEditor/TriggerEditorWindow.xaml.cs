@@ -73,6 +73,8 @@ namespace CryptoRetriever.UI {
             if (WorkingTrigger.FalseAction == null)
                 WorkingTrigger.FalseAction = Actions.GetActions()[ActionId.DoNothing];
 
+            _triggerNameTextBox.Text = WorkingTrigger.Name;
+
             UiHelper.AddButtonHoverAndClickGraphics(Color.FromRgb(0x72, 0x9f, 0xcf), _conditionBorder);
             UiHelper.AddButtonHoverAndClickGraphics(Color.FromRgb(0x72, 0x9f, 0xcf), _thenActionBorder);
             UiHelper.AddButtonHoverAndClickGraphics(Color.FromRgb(0x72, 0x9f, 0xcf), _elseActionBorder);
@@ -99,7 +101,6 @@ namespace CryptoRetriever.UI {
         }
 
         private void UpdateUi() {
-            _triggerNameTextBox.Text = WorkingTrigger.Name;
             _conditionTb.Text = WorkingTrigger.Condition.GetLabel();
             _thenActionTb.Text = WorkingTrigger.TrueAction.GetLabel();
             _elseActionTb.Text = WorkingTrigger.FalseAction.GetLabel();

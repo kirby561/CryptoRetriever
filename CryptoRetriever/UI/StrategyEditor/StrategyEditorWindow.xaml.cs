@@ -323,17 +323,20 @@ namespace CryptoRetriever.UI {
         }
 
         private void OnTriggerDoubleClicked(object sender, MouseButtonEventArgs e) {
-            if (_triggersView.SelectedIndex >= 0) {
+            int selectedIndex = _triggersView.SelectedIndex;
+            if (selectedIndex >= 0) {
                 TriggerEditorWindow triggerEditor = new TriggerEditorWindow(_strategy);
                 UiHelper.CenterWindowInWindow(triggerEditor, this);
 
                 // ?? TODO: This should be a deep copy but there's no way to save conditions
                 // right now so it will be a reference until that is implemented.
-                triggerEditor.WorkingTrigger = _strategy.Triggers[_triggersView.SelectedIndex];
+                triggerEditor.WorkingTrigger = _strategy.Triggers[selectedIndex];
                 triggerEditor.ShowDialog();
 
                 if (triggerEditor.Trigger != null) {
-                    _strategy.Triggers[_triggersView.SelectedIndex] = triggerEditor.Trigger;
+                    // Remove/add it again in case it was renamed
+                    _strategy.Triggers.RemoveAt(selectedIndex);
+                    _strategy.Triggers.Insert(selectedIndex, triggerEditor.Trigger);
                 }
             }
         }
