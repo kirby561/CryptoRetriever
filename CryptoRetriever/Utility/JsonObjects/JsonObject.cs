@@ -127,7 +127,7 @@ namespace CryptoRetriever.Utility.JsonObjects {
             object val = Children[key];
             if (val == null)
                 return DateTime.MinValue;
-            long dateTimestamp = (long)(double)Children[key];
+            long dateTimestamp = GetLong(key);
             return DateTimeOffset.FromUnixTimeMilliseconds(dateTimestamp).DateTime;
         }
 

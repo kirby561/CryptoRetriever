@@ -105,7 +105,7 @@ namespace CryptoRetriever.Data {
         /// </summary>
         /// <param name="x">The X value to search for</param>
         /// <returns>Returns the first index with a greater value than x. If you are inserting in order, this would be the index to insert at.</returns>
-        private int BinarySearchForX(double x) {
+        public int BinarySearchForX(double x) {
             int index = Points.Count / 2;
             int left = 0;
             int right = Points.Count - 1;

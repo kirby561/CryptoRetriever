@@ -1,5 +1,6 @@
 ﻿using CryptoRetriever.Data;
 using CryptoRetriever.Filter;
+using CryptoRetriever.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -148,7 +149,27 @@ namespace CryptoRetriever.Strats {
             }
             Debug.WriteLine("Running iteration (Thread " + Thread.CurrentThread.ManagedThreadId + "): " + debugRunners);
 
-            for (int i = 0; i < workingContext.Dataset.Count; i++) {
+            // Adjust the sample range based on the requested
+            // date range if any is set
+            int firstSample = 0;
+            if (workingContext.Strategy.Start != DateTime.MinValue) {
+                double timestamp = DateTimeHelper.GetUnixTimestampSeconds(workingContext.Strategy.Start);
+                int index = workingContext.Dataset.BinarySearchForX(timestamp);
+                while (index - 1 > 0 && workingContext.Dataset.Points[index - 1].X >= timestamp)
+                    index--;
+                firstSample = index;
+            }
+
+            int lastSample = workingContext.Dataset.Count - 1;
+            if (workingContext.Strategy.End != DateTime.MinValue) {
+                double timestamp = DateTimeHelper.GetUnixTimestampSeconds(workingContext.Strategy.End);
+                int index = workingContext.Dataset.BinarySearchForX(timestamp);
+                while (index - 1 > 0 && workingContext.Dataset.Points[index - 1].X >= timestamp)
+                    index--;
+                lastSample = index;
+            }
+
+            for (int i = firstSample; i <= lastSample; i++) {
                 Step(workingContext);
 
                 // Snapshot the user variables
