@@ -38,6 +38,11 @@ namespace CryptoRetriever.Data {
         }
 
         public void OnMouseMoved(Point positionPx) {
+            // Keep the pixel positions integers so that
+            // the sampling is stable when zooming and panning.
+            positionPx.X = Math.Round(positionPx.X);
+            positionPx.Y = Math.Round(positionPx.Y);
+
             if (_mouseInView) {
                 _graphRenderer.SetMouseHoverPoint(positionPx);
             }
@@ -107,6 +112,11 @@ namespace CryptoRetriever.Data {
         /// <param name="delta">Positive for "forward" and negative for backwards. The magnitude is the amount that it moved.</param>
         /// <param name="mousePositionPx">The mouse position in pixels from the top left of the canvas.</param>
         public void OnMouseWheel(int delta, Point mousePositionPx) {
+            // Keep the pixel positions integers so that
+            // the sampling is stable when zooming and panning.
+            mousePositionPx.X = Math.Round(mousePositionPx.X);
+            mousePositionPx.Y = Math.Round(mousePositionPx.Y);
+
             // Zoom in or out depending on the direction
             DateTime before = DateTime.Now;
             if (delta > 0)
@@ -117,6 +127,11 @@ namespace CryptoRetriever.Data {
         }
 
         public void OnMouseUp(Point positionPx) {
+            // Keep the pixel positions integers so that
+            // the sampling is stable when zooming and panning.
+            positionPx.X = Math.Round(positionPx.X);
+            positionPx.Y = Math.Round(positionPx.Y);
+
             // We're no longer panning
             _isPanning = false;
 
@@ -135,6 +150,11 @@ namespace CryptoRetriever.Data {
         }
 
         public void OnMouseDown(Point positionPx) {
+            // Keep the pixel positions integers so that
+            // the sampling is stable when zooming and panning.
+            positionPx.X = Math.Round(positionPx.X);
+            positionPx.Y = Math.Round(positionPx.Y);
+
             _isPanning = true;
             _lastDragPoint = positionPx;
         }

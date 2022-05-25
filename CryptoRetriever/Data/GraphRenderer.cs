@@ -1,4 +1,5 @@
-﻿using CryptoRetriever.Strats;
+﻿using CryptoRetriever.Source;
+using CryptoRetriever.Strats;
 using CryptoRetriever.UI;
 using System;
 using System.Collections.Generic;
@@ -95,26 +96,6 @@ namespace CryptoRetriever.Data {
             _canvas = canvas;
             _originalDataset = originalDataset;
             _filteredDataset = filteredDataset;
-
-            // Initialize a geometry for the dataset
-            Tuple<Geometry, Path> originalGeomAndPath = CalculateGeometryAndPath(_originalDataset.Points);
-            _originalDatasetGeometry = originalGeomAndPath.Item1;
-            _originalDatasetPath = originalGeomAndPath.Item2;
-
-            if (_filteredDataset != null) {
-                Tuple<Geometry, Path> filteredGeomAndPath = CalculateGeometryAndPath(_filteredDataset.Points);
-                _filteredDatasetGeometry = filteredGeomAndPath.Item1;
-                _filteredDatasetPath = filteredGeomAndPath.Item2;
-            }
-
-            SolidColorBrush foregroundBrush = new SolidColorBrush(_renderParams.ForegroundDataLineOptions.Color);
-            SolidColorBrush backgroundBrush = new SolidColorBrush(_renderParams.BackgroundDataLineOptions.Color);
-            if (_filteredDataset != null) {
-                SetPathStroke(_originalDatasetPath, backgroundBrush, _renderParams.BackgroundDataLineOptions.Thickness);
-                SetPathStroke(_filteredDatasetPath, foregroundBrush, _renderParams.ForegroundDataLineOptions.Thickness);
-            } else {
-                SetPathStroke(_originalDatasetPath, foregroundBrush, _renderParams.ForegroundDataLineOptions.Thickness);
-            }
 
             // Start the domain/range to fit the data
             InitializeDomainAndRange();
@@ -484,6 +465,26 @@ namespace CryptoRetriever.Data {
             _pixelToDataSpaceTransform = MatrixUtil.CloneMatrix(layoutTransform);
             if (_pixelToDataSpaceTransform.HasInverse)
                 _pixelToDataSpaceTransform.Invert();
+
+            // Create a geometry for the dataset
+            Tuple<Geometry, Path> originalGeomAndPath = CalculateGeometryAndPath(_originalDataset, _canvas.ActualWidth, _pixelToDataSpaceTransform);
+            _originalDatasetGeometry = originalGeomAndPath.Item1;
+            _originalDatasetPath = originalGeomAndPath.Item2;
+
+            if (_filteredDataset != null) {
+                Tuple<Geometry, Path> filteredGeomAndPath = CalculateGeometryAndPath(_filteredDataset, _canvas.ActualWidth, _pixelToDataSpaceTransform);
+                _filteredDatasetGeometry = filteredGeomAndPath.Item1;
+                _filteredDatasetPath = filteredGeomAndPath.Item2;
+            }
+
+            SolidColorBrush foregroundBrush = new SolidColorBrush(_renderParams.ForegroundDataLineOptions.Color);
+            SolidColorBrush backgroundBrush = new SolidColorBrush(_renderParams.BackgroundDataLineOptions.Color);
+            if (_filteredDataset != null) {
+                SetPathStroke(_originalDatasetPath, backgroundBrush, _renderParams.BackgroundDataLineOptions.Thickness);
+                SetPathStroke(_filteredDatasetPath, foregroundBrush, _renderParams.ForegroundDataLineOptions.Thickness);
+            } else {
+                SetPathStroke(_originalDatasetPath, foregroundBrush, _renderParams.ForegroundDataLineOptions.Thickness);
+            }
 
             _originalDatasetGeometry.Transform = new MatrixTransform(layoutTransform);
 
@@ -1035,30 +1036,45 @@ namespace CryptoRetriever.Data {
         /// Calculates the geometry and path for the given list of points.
         /// </summary>
         /// <param name="dataset">The list to calculate from.</param>
+        /// <param name="screenWidthPx">The current width of the rendering surface in pixels. This is used to optimize the path size for performance reasons.</param>
+        /// <param name="pixelToDataTransform">A matrix that converts pixel space to data space.</param>
         /// <returns>Returns the geometry and the path as a Tuple, respectively.</returns>
-        private Tuple<Geometry, Path> CalculateGeometryAndPath(List<Point> points) {
+        private Tuple<Geometry, Path> CalculateGeometryAndPath(Dataset dataset, double screenWidthPx, Matrix pixelToDataTransform) {
             Path path = null;
             StreamGeometry geometry = new StreamGeometry();
-            using (StreamGeometryContext stream = geometry.Open()) {
-                if (points.Count > 0) {
-                    Point p1 = points[0];
-                    stream.BeginFigure(p1, false, false);
-                } else {
-                    return new Tuple<Geometry, Path>(new RectangleGeometry(), new Path()); // Nothing to draw
-                }
+            if (dataset.Count > 1) {
+                bool started = false;
+                using (StreamGeometryContext stream = geometry.Open()) {
+                    // Adjust the dataset to fit the number of pixels on the screen
+                    Point pixelSpacePoint = new Point();
+                    for (int x = 0; x < screenWidthPx; x++) {
+                        pixelSpacePoint.X = x;
+                        Point dataSpacePoint = pixelToDataTransform.Transform(pixelSpacePoint);
 
-                for (int i = 1; i < points.Count; i++) {
-                    Point p = points[i];
-                    stream.LineTo(p, true, true);
-                }
+                        DataResult result = dataset.ValueAt(dataSpacePoint.X);
+                        if (result.Succeeded)
+                            dataSpacePoint.Y = result.Result;
+                        else
+                            continue;
 
-                path = new Path();
-                path.Data = geometry;
-                Canvas.SetLeft(path, 0);
-                Canvas.SetTop(path, 0);
-                Canvas.SetRight(path, 0);
-                Canvas.SetBottom(path, 0);
+                        if (!started) {
+                            started = true;
+                            stream.BeginFigure(dataSpacePoint, false, false);
+                        } else {
+                            stream.LineTo(dataSpacePoint, true, true);
+                        }
+                    }
+                }
+            } else {
+                return new Tuple<Geometry, Path>(new RectangleGeometry(), new Path()); // Nothing to draw
             }
+
+            path = new Path();
+            path.Data = geometry;
+            Canvas.SetLeft(path, 0);
+            Canvas.SetTop(path, 0);
+            Canvas.SetRight(path, 0);
+            Canvas.SetBottom(path, 0);
 
             return new Tuple<Geometry, Path>(geometry, path);
         }
