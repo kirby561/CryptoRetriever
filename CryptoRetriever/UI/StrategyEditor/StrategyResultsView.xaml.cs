@@ -47,7 +47,7 @@ namespace CryptoRetriever.UI {
             _accountValueTb.Text = _currencyFormatter.Format(currentValue);
 
             double valueChange = currentValue - originalValue;
-            _valueChangeTb.Text = _currencyFormatter.Format(valueChange) + " (" + TrimDouble("" + 100 * valueChange / originalValue) + "%)";
+            _valueChangeTb.Text = _currencyFormatter.Format(valueChange) + " (" + FormatDouble(100 * valueChange / originalValue) + "%)";
             if (valueChange < 0)
                 _valueChangeTb.Foreground = new SolidColorBrush(Colors.Red);
             else
@@ -61,12 +61,12 @@ namespace CryptoRetriever.UI {
                 currency += "+ " + _currencyFormatter.Format(balanceDifference) + ")";
             _currencyTb.Text = currency;
 
-            String assets = TrimDouble("" + _runContext.Account.AssetBalance) + " (";
+            String assets = FormatDouble(_runContext.Account.AssetBalance) + " (";
             double assetDifference = _runContext.Account.AssetBalance - strategy.Account.AssetBalance;
             if (assetDifference < 0)
-                assets += "-" + TrimDouble("" + assetDifference).Replace("-", "") + ")";
+                assets += "-" + FormatDouble(assetDifference).Replace("-", "") + ")";
             else
-                assets += "+" + TrimDouble("" + assetDifference) + ")";
+                assets += "+" + FormatDouble(assetDifference) + ")";
             _assetsTb.Text = assets;
 
             // User Vars
@@ -86,7 +86,7 @@ namespace CryptoRetriever.UI {
             foreach (Transaction transaction in _runContext.Transactions) {
                 TransactionUiEntry uiEntry = new TransactionUiEntry() {
                     Currency = _currencyFormatter.Format(transaction.CurrencyTransferred),
-                    Assets = TrimDouble("" + transaction.AssetTransferred),
+                    Assets = FormatDouble(transaction.AssetTransferred),
                     Fee = _currencyFormatter.Format(transaction.TransactionFee),
                     Price = _currencyFormatter.Format(transaction.CurrentPrice),
                     DatapointIndex = transaction.DatapointIndex,
@@ -101,32 +101,13 @@ namespace CryptoRetriever.UI {
             InitializeComponent();
         }
 
-        private readonly static HashSet<char> _nonzeroDigits = new HashSet<char>(
-            new char[] { '1', '2', '3', '4', '5', '6', '7', '8', '9' }
-        );
-        private readonly static HashSet<char> _digits = new HashSet<char>(
-            new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }
-        );
-        private String TrimDouble(String doubleString) {
-            // Just go until we get 3 non-zero digits or hit the end
-            String trimmedString = "";
-            int count = 0;
-            bool gotNonZero = false;
-            foreach (char c in doubleString) {
-                trimmedString += c;
-
-                if (gotNonZero && _digits.Contains(c)) {
-                    count++;
-                    if (count >= 3)
-                        break;
-                } else if (!gotNonZero) {
-                    gotNonZero = _nonzeroDigits.Contains(c);
-                    if (gotNonZero)
-                        count++;
-                }
-            }
-
-            return trimmedString;
+        /// <summary>
+        /// Formats a given double to display in a table cell.
+        /// </summary>
+        /// <param name="input">The input to format.</param>
+        /// <returns>Returns the formatted double as a string.</returns>
+        private String FormatDouble(double input) {
+            return input.ToString("N2");
         }
     }
 }
