@@ -162,6 +162,15 @@ namespace CryptoRetriever.Strats {
             Start = obj.GetDateTime("Start");
             End = obj.GetDateTime("End");
         }
+
+        /// <returns>
+        /// Creates and returns a deep copy of this strategy.
+        /// </returns>
+        public Strategy Clone() {
+            Strategy newStrategy = new Strategy();
+            newStrategy.FromJson(ToJson());
+            return newStrategy;
+        }
     }
 
     public class ExampleStrategy : Strategy {
@@ -180,10 +189,4 @@ namespace CryptoRetriever.Strats {
             Points.Add(new Point(5, 50));
         }
     }
-
-    //public class ExampleStrategyRunParams : StrategyRuntimeContext {
-    //    public ExampleStrategyRunParams() : base(new ExampleStrategy(), new ExampleDataset()) {
-
-    //    }
-    //}
 }

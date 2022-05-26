@@ -47,19 +47,30 @@ namespace CryptoRetriever.Strats {
         /// Updates the given strategy on disk.
         /// </summary>
         /// <param name="strategy">The strategy to update.</param>
-        /// <returns>Returns true if the strategy was removed or false otherwise.</returns>
-        public bool UpdateStrategy(Strategy strategy) {
-            Strategy strat = GetStrategyByName(strategy.Name);
+        /// <returns>Returns true if the strategy was updated successfullly or false otherwise.</returns>
+        public bool UpdateStrategy(Strategy newStrategy, Strategy oldStrategy) {
+            Strategy strat = GetStrategyByName(oldStrategy.Name);
 
             if (strat == null)
                 return false;
 
+            // Backup the old strategy in case the save fails
+            String path = GetStrategyPath(oldStrategy.Name);
+            String backupPath = GenerateUniqueBackupPath(path);
+            if (File.Exists(path)) {
+                File.Move(path, backupPath);
+            }
+
             // Delete the existing one so if it was renamed
             // the old file gets removed.
-            DeleteStrategy(strategy);
-            AddStrategy(strategy);
+            DeleteStrategy(oldStrategy);
+            if (AddStrategy(newStrategy)) {
+                // Remove the backup since everything succeeded
+                File.Delete(backupPath);
+                return true;
+            }
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -124,7 +135,9 @@ namespace CryptoRetriever.Strats {
         /// <param name="strategy">The strategy to delete.</param>
         public void DeleteStrategy(Strategy strategy) {
             _strategies.Remove(strategy);
-            File.Delete(GetStrategyPath(strategy));
+            String strategyPath = GetStrategyPath(strategy);
+            if (File.Exists(strategyPath))
+                File.Delete(strategyPath);
         }
 
         /// <summary>
@@ -158,6 +171,21 @@ namespace CryptoRetriever.Strats {
         /// <returns>A path to the strategy on disk.</returns>
         private String GetStrategyPath(String strategyName) {
             return _strategyDirectory + "/" + strategyName + _strategyExt;
+        }
+
+        /// <summary>
+        /// Generates a unique filename that can be used as a backup for the given path.
+        /// </summary>
+        /// <param name="originalPath">The original path.</param>
+        /// <returns>Returns a unique filename based on the input.</returns>
+        private String GenerateUniqueBackupPath(String originalPath) {
+            long fileTime = DateTime.Now.ToFileTimeUtc();
+            String newPath = originalPath + "." + fileTime + ".backup";
+            int i = 0;
+            while (File.Exists(newPath)) {
+                newPath = originalPath + "." + fileTime + "." + i + ".backup";
+            }
+            return newPath;
         }
     }
 }

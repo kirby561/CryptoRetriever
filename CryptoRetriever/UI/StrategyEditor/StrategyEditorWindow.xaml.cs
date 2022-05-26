@@ -16,7 +16,8 @@ namespace CryptoRetriever.UI {
         private Strategy _result = null; // This will be set to the strategy when the editing is done
         private StrategyManager _strategyManager;
         private bool _isEditing = false;
-        private String _originalName; // Keep track of the original name if editing so we can remove the old file
+
+        private Strategy _originalStrategy; // Keep track of the original strategy if editing so we can remove the old file
 
         /// <summary>
         /// Gets the strategy modified or created by this editor or
@@ -30,7 +31,7 @@ namespace CryptoRetriever.UI {
 
         public StrategyEditorWindow(StrategyManager manager) {
             InitializeComponent();
-            SetWorkingStrategy(new Strategy());
+            UpdateWorkingStrategy(new Strategy());
 
             _strategyManager = manager;
         }
@@ -42,9 +43,17 @@ namespace CryptoRetriever.UI {
         /// <param name="strategyToEdit">The strategy to edit.</param>
         public void SetWorkingStrategy(Strategy strategyToEdit) {
             _isEditing = true;
-            _originalName = strategyToEdit.Name;
-            _strategy = strategyToEdit;
-            _nameTextBox.Text = strategyToEdit.Name;
+            _originalStrategy = strategyToEdit;
+            UpdateWorkingStrategy(strategyToEdit.Clone());
+        }
+
+        /// <summary>
+        /// Updates the working strategy and sets the UI to reflect it.
+        /// </summary>
+        /// <param name="newStrategy">The new strategy to update to.</param>
+        private void UpdateWorkingStrategy(Strategy newStrategy) {
+            _strategy = newStrategy;
+            _nameTextBox.Text = newStrategy.Name;
             _accountStartingFiatTextBox.Text = "" + _strategy.Account.CurrencyBalance;
             _accountStartingAssetsTextBox.Text = "" + _strategy.Account.AssetBalance;
             _exchangeTransactionFeeTextBox.Text = "" + _strategy.ExchangeAssumptions.TransactionFee;
@@ -155,9 +164,7 @@ namespace CryptoRetriever.UI {
             Close();
 
             if (_isEditing) {
-                if (!_result.Name.Equals(_originalName))
-                    _strategyManager.DeleteStrategyByName(_originalName);
-                _strategyManager.UpdateStrategy(_result);
+                _strategyManager.UpdateStrategy(_strategy, _originalStrategy);
             } else {
                 _strategyManager.AddStrategy(_result);
             }
@@ -328,9 +335,7 @@ namespace CryptoRetriever.UI {
                 TriggerEditorWindow triggerEditor = new TriggerEditorWindow(_strategy);
                 UiHelper.CenterWindowInWindow(triggerEditor, this);
 
-                // ?? TODO: This should be a deep copy but there's no way to save conditions
-                // right now so it will be a reference until that is implemented.
-                triggerEditor.WorkingTrigger = _strategy.Triggers[selectedIndex];
+                triggerEditor.WorkingTrigger = _strategy.Triggers[selectedIndex].Clone();
                 triggerEditor.ShowDialog();
 
                 if (triggerEditor.Trigger != null) {

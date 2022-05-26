@@ -173,12 +173,13 @@ namespace CryptoRetriever.Strats {
                 Step(workingContext);
 
                 // Snapshot the user variables
-                var dictCopy = new Dictionary<String, IValue>();
-                foreach (KeyValuePair<String, IValue> pair in workingContext.UserVars)
-                    dictCopy.Add(pair.Key, pair.Value.Clone());
+                if (_isDebugEnabled) {
+                    var dictCopy = new Dictionary<String, IValue>();
+                    foreach (KeyValuePair<String, IValue> pair in workingContext.UserVars)
+                        dictCopy.Add(pair.Key, pair.Value.Clone());
 
-                if (_isDebugEnabled)
                     workingContext.DebugUserVars.Add(dictCopy);
+                }
             }
             Debug.WriteLine("  -- iteration complete (Thread " + Thread.CurrentThread.ManagedThreadId + "). OptimizationValue: " + GetOptimizationValueFor(workingContext));
         }

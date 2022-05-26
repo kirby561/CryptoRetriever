@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Utf8Json;
@@ -44,7 +45,7 @@ namespace CryptoRetriever.Utility.JsonObjects {
 
         public List<JsonObject> GetObjectArray(String key) {
             if (Children.ContainsKey(key)) {
-                List<object> arrayObjects = (List<object>)Children[key];
+                IEnumerable arrayObjects = (IEnumerable)Children[key];
                 if (arrayObjects != null) {
                     List<JsonObject> result = new List<JsonObject>();
                     foreach (Dictionary<String, object> childCollection in arrayObjects)

@@ -39,5 +39,14 @@ namespace CryptoRetriever.Strats {
             TrueAction = ActionSerializer.ToObject(json.GetObject("TrueAction"));
             FalseAction = ActionSerializer.ToObject(json.GetObject("FalseAction"));
         }
+
+        /// <returns>
+        /// Creates and returns a deep copy of this Trigger.
+        /// </returns>
+        public Trigger Clone() {
+            Trigger result = new Trigger();
+            result.FromJson(ToJson());
+            return result;
+        }
     }
 }
