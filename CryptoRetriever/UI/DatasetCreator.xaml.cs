@@ -124,7 +124,7 @@ namespace CryptoRetriever.UI {
                 Asset currentAsset = _currencySelection.SelectedItem as Asset;
                 _currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).ContinueWith((Task<DatasetResult> taskResult) => {
                     dialog.Dispatcher.InvokeAsync(() => {
-                        DatasetResult result = taskResult.Result;
+                        Result<Dataset> result = taskResult.Result;
 
                         if (result.Succeeded && result.Value.Points.Count > 0) {
                             // Check if the dataset is evenly spaced
@@ -136,7 +136,7 @@ namespace CryptoRetriever.UI {
                                     MessageBoxButton.OKCancel);
                                 if (userWantsEvenSpacingResponse == MessageBoxResult.OK) {
                                     ResamplerFilter filter = new ResamplerFilter((long)Math.Round(result.Value.Granularity));
-                                    result.Value = filter.Filter(result.Value);
+                                    result = filter.Filter(result.Value);
                                 }
                             }
 

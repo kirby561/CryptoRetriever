@@ -39,9 +39,9 @@ namespace CryptoRetriever.Filter {
         /// </summary>
         /// <param name="input">The input to filter.</param>
         /// <returns>Returns a new dataset with the filtered result.</returns>
-        public Dataset Filter(Dataset input) {
+        public Result<Dataset> Filter(Dataset input) {
             if (input.Count < 1)
-                return new Dataset();
+                return new Result<Dataset>(new Dataset());
 
             Dataset result = new Dataset(input.Count);
 
@@ -63,7 +63,7 @@ namespace CryptoRetriever.Filter {
                 result.Points.Add(new Point(input.Points[i].X, sum / KernelSize));
             }
 
-            return result;
+            return new Result<Dataset>(result);
         }
 
         public void FromJson(JsonObject json) {

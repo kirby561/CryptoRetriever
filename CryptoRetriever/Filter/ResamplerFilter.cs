@@ -1,4 +1,5 @@
 ﻿using CryptoRetriever.Data;
+using CryptoRetriever.Source;
 using CryptoRetriever.Utility.JsonObjects;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace CryptoRetriever.Filter {
             SampleFrequency = sampleFrequencyS;
         }
 
-        public Dataset Filter(Dataset input) {
+        public Result<Dataset> Filter(Dataset input) {
             // If it's 1 or 0 length, just return a copy
             if (input.Count < 2)
                 new Dataset(input);
@@ -48,7 +49,7 @@ namespace CryptoRetriever.Filter {
                 filteredData.Points.Add(new Point(time, input.ValueAt(time).Result));
             }
 
-            return filteredData;
+            return new Result<Dataset>(filteredData);
         }
 
         public void FromJson(JsonObject json) {

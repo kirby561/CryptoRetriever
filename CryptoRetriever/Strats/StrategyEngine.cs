@@ -30,6 +30,12 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         public StrategyRuntimeContext RunContext { get; private set; }
 
+        /// <summary>
+        /// Errors that occur outside of the context go here and 
+        /// are combined with the context ones afterwards.
+        /// </summary>
+        private List<StrategyError> Errors { get; } = new List<StrategyError>();
+
         public StrategyEngine(Strategy strategy, Dataset dataset) {
             _strategy = strategy;
             _originalDataset = dataset;
@@ -65,7 +71,10 @@ namespace CryptoRetriever.Strats {
                 workingRunContext.FilteredDataset = _filteredDataset;
                 RunIteration(workingRunContext, new Dictionary<String, double>());
                 RunContext = workingRunContext;
-            }            
+            }
+
+            // Combine the errors the engine threw with the ones in the context (if any)
+            RunContext.Errors.AddRange(Errors);
         }
 
         /// <summary>
@@ -192,7 +201,11 @@ namespace CryptoRetriever.Strats {
         public void FilterDataset(ObservableCollection<IFilter> filters) {
             _filteredDataset = _originalDataset;
             foreach (IFilter filter in filters) {
-                _filteredDataset = filter.Filter(_filteredDataset);
+                Result<Dataset> result = filter.Filter(_filteredDataset);
+                if (result.Succeeded)
+                    _filteredDataset = result.Value;
+                else
+                    Errors.Add(new StrategyError(StrategyErrorCode.FilterError, result.ErrorDetails));
             }
         }
 

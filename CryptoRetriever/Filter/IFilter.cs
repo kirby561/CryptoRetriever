@@ -19,7 +19,7 @@ namespace CryptoRetriever.Filter {
         /// filtered results.
         /// </summary>
         /// <param name="input">The input to filter.</param>
-        /// <returns>A new dataset with the filtered results.</returns>
-        Dataset Filter(Dataset input);
+        /// <returns>A new dataset with the filtered results or an error indicating why it didn't.</returns>
+        Result<Dataset> Filter(Dataset input);
     }
 }

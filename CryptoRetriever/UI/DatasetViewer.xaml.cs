@@ -291,8 +291,6 @@ namespace CryptoRetriever.UI {
                 _lastFilter = filterAndDialog.Key;
             }
 
-            Dataset output = _lastFilter.Filter(GetActiveDataset());
-
             // ?? TODO: This could be checked with a method on IFilter or
             // from the range of the resulting Dataset or something instead
             if (_lastFilter is DerivativeFilter) {
@@ -300,19 +298,33 @@ namespace CryptoRetriever.UI {
                 // to be significantly different than the original dataset. In the
                 // future, maybe the renderer could support showing 2 separate ranges
                 // for the original and filtered datasets.
-                Dataset newDataset = _lastFilter.Filter(GetActiveDataset());
+                Result<Dataset> newDataset = _lastFilter.Filter(GetActiveDataset());
+                if (!newDataset.Succeeded) {
+                    MessageBox.Show("An error occurred filtering: " + newDataset.ErrorDetails);
+                    return;
+                }
                 DatasetViewer viewer = new DatasetViewer(StrategyManager);
-                viewer.SetDataset(_filePath.Replace(".dataset", "_derivative") + ".dataset", newDataset);
+                viewer.SetDataset(_filePath.Replace(".dataset", "_derivative") + ".dataset", newDataset.Value);
                 viewer.Show();
             } else {
-                SetDataset(_filePath, _originalDataset, output);
+                Result<Dataset> output = _lastFilter.Filter(GetActiveDataset());
+                if (!output.Succeeded) {
+                    MessageBox.Show("An error occurred filtering: " + output.ErrorDetails);
+                    return;
+                }
+
+                SetDataset(_filePath, _originalDataset, output.Value);
             }
         }
 
         private void OnRepeatLastFilterClicked(object sender, RoutedEventArgs e) {
             if (_lastFilter != null) {
-                Dataset output = _lastFilter.Filter(GetActiveDataset());
-                SetDataset(_filePath, _originalDataset, output);
+                Result<Dataset> output = _lastFilter.Filter(GetActiveDataset());
+                if (!output.Succeeded) {
+                    MessageBox.Show("An error occurred filtering: " + output.ErrorDetails);
+                    return;
+                }
+                SetDataset(_filePath, _originalDataset, output.Value);
             }
         }
 

@@ -77,32 +77,26 @@ namespace CryptoRetriever.Filter {
                 throw new ArgumentException("The kernel size must be odd.");
         }
 
-        public Dataset Filter(Dataset input) {
+        public Result<Dataset> Filter(Dataset input) {
             // If we have 2 or less points, just return the dataset.
             if (input.Count < 3) {
-                return new Dataset(input);
+                return new Result<Dataset>(new Dataset(input));
             }
 
             Tuple<bool, double> isEvenlySpacedAndSpacing = input.IsEvenlySpaced();
             bool isEvenlySpaced = isEvenlySpacedAndSpacing.Item1;
             double spacing = isEvenlySpacedAndSpacing.Item2;
             if (!isEvenlySpaced)
-                throw new ArgumentException("Non-evenly spaced data is not supported yet.");
+                return new Error<Dataset>("Non-evenly spaced data is not supported.");
 
             Dataset output = new Dataset(input);
-            if (isEvenlySpaced) {
-                double[] kernel = new double[KernelSize];
-                ComputeKernelFixedSpacing(KernelSize, kernel);
-                for (int i = 0; i < input.Count; i++) {
-                    ApplyKernel(kernel, input, output, i);
-                }
-            } else {
-                foreach (Point p in input.Points) {
-                    // ?? TODO
-                }
+            double[] kernel = new double[KernelSize];
+            ComputeKernelFixedSpacing(KernelSize, kernel);
+            for (int i = 0; i < input.Count; i++) {
+                ApplyKernel(kernel, input, output, i);
             }
 
-            return output;
+            return new Result<Dataset>(output);
         }
 
         public JsonObject ToJson() {
@@ -164,10 +158,6 @@ namespace CryptoRetriever.Filter {
             // magnitude of the gaussian at each point.
             for (int i = 0; i < kernelSize; i++)
                 kernelOutput[i] = gaussianAtEachDt[i] / sum;
-        }
-
-        private void ComputeKernelDynamicSpacing(int kernelSize, int index, Dataset dataset, double[] kernelOutput) {
-            // ?? TODO
         }
 
         /// <summary>

@@ -22,6 +22,7 @@ namespace CryptoRetriever.Strats {
         NotEnoughMoneyToMakePurchase,
         NotEnoughAssetsToMakePurchase,
         NoAssetsToCoverTransactionFee,
-        NotEnoughTimeSinceLastTransaction
+        NotEnoughTimeSinceLastTransaction,
+        FilterError
     }
 }

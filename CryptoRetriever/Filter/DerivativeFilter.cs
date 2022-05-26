@@ -1,4 +1,5 @@
 ﻿using CryptoRetriever.Data;
+using CryptoRetriever.Source;
 using CryptoRetriever.Utility.JsonObjects;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,12 @@ namespace CryptoRetriever.Filter {
             }
         }
 
-        public Dataset Filter(Dataset input) {
+        public Result<Dataset> Filter(Dataset input) {
             Dataset result = new Dataset(input.Count);
             result.Granularity = input.Granularity;
 
             if (input.Count < 2)
-                return result;
+                return new Result<Dataset>(result);
 
             for (int i = 1; i < input.Count; i++) {
                 double previousX = input.Points[i - 1].X;
@@ -31,12 +32,12 @@ namespace CryptoRetriever.Filter {
                 // Make sure we have no vertical asymptotes
                 if (dX <= 0) {
                     Console.WriteLine("Dataset must have increasing X values for the DerivativeFilter. Doing nothing.");
-                    return new Dataset(input);
+                    return new DatasetResult(new Dataset(input));
                 }
                 result.Points.Add(new Point(x, dY / dX));
             }
 
-            return result;
+            return new Result<Dataset>(result);
         }
 
         public void FromJson(JsonObject json) {
