@@ -1,6 +1,7 @@
 ﻿using CryptoRetriever.Source;
 using CryptoRetriever.Strats;
 using CryptoRetriever.UI;
+using CryptoRetriever.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -875,62 +876,84 @@ namespace CryptoRetriever.Data {
         /// respect to x-axis.
         /// </summary>
         /// <returns></returns>
-        private Tuple<string, Point[]> GetDomainTickData() {
+        private Tuple<String, Point[]> GetDomainTickData() {
             double seconds = GetDomain().End - GetDomain().Start;
             double minutes = seconds / 60;
             double hours = minutes / 60;
             double days = hours / 24;
-            double weeks = days / 7;
             double months = days / 30;
 
-            string unit;
-            double unitV;
+            String unit;
+            long granularitySeconds;
 
-            Point[] points;
+            const long hoursPerDay = 24;
+            const long minutesPerHour = 60;
+            const long secondsPerMinute = 60;
 
-            if (months > 1)
-            {
+            if (months > 1) {
                 unit = "m";
-                unitV = months;
-            }
-            //else if (weeks >= 3)
-            //{
-            //    unit = "w";
-            //    unitV = weeks;
-            //}
-            else if (days > 1)
-            {
+                granularitySeconds = 0; // NA, months aren't evenly spaced
+            } else if (days > 1) {
                 unit = "d";
-                unitV = days;
-            }
-            else if (hours > 1)
-            {
+                granularitySeconds = hoursPerDay * minutesPerHour * secondsPerMinute;
+            } else if (hours > 1) {
                 unit = "h";
-                unitV = hours;
-            }
-            else if (minutes > 1)
-            {
+                granularitySeconds = minutesPerHour * secondsPerMinute;
+            } else if (minutes > 1) {
                 unit = "mi";
-                unitV = minutes;
-            }
-            else
-            {
+                granularitySeconds = secondsPerMinute;
+            } else {
                 unit = "s";
-                unitV = seconds;
-
+                granularitySeconds = 1;
             }
-            int numTicks = (int)Math.Ceiling(unitV) + 1;
-            points = new Point[numTicks];
-            for (int i = 0; i < numTicks; i++)
-            {
-                double intervalSeconds = GetDomain().Start + ((seconds / unitV) * i);
-                points[i] = new Point(GetUnitBeginning(unit, intervalSeconds), 0);            
-            }
-            //points[points.Length - 2] = new Point(GetBoundingDomain().Start, 0);
-            //points[points.Length - 1] = new Point(GetBoundingDomain().End, 0);
-            //points = points.OrderBy(x => x.X).ToArray();
 
-            return new Tuple<string, Point[]>(unit, points);
+            // Months have uneven spacing so they are a special case
+            List<Point> points = new List<Point>();
+            if (unit == "m") {
+                // Start with the first month after the domain start
+                double domainStart = GetDomain().Start;
+                double domainEnd = GetDomain().End;
+                DateTime dt = DateTimeConstant.UnixStart.AddSeconds(domainStart).ToLocalTime();
+                int dayOffset = dt.Date.Day - 1;
+                DateTime firstMonth = dt.Date.Subtract(TimeSpan.FromDays(dayOffset));
+                if (dt.Date < dt) {
+                    firstMonth = firstMonth.AddMonths(1);
+                }
+
+                // Label the month before/after the domain too to create the fading out effect
+                DateTime previousMonth = firstMonth.AddMonths(-1);
+                points.Add(new Point(DateTimeHelper.GetUnixTimestampSeconds(previousMonth.ToUniversalTime()), 0));
+
+                points.Add(new Point(DateTimeHelper.GetUnixTimestampSeconds(firstMonth.ToUniversalTime()), 0));
+                DateTime nextMonth = firstMonth.AddMonths(1).ToUniversalTime();
+                while (DateTimeHelper.GetUnixTimestampSeconds(nextMonth) < domainEnd) {
+                    points.Add(new Point(DateTimeHelper.GetUnixTimestampSeconds(nextMonth), 0));
+                    nextMonth = nextMonth.AddMonths(1);
+                }
+
+                // Label the month before/after the domain too to create the fading out effect
+                points.Add(new Point(DateTimeHelper.GetUnixTimestampSeconds(nextMonth.ToUniversalTime()), 0));
+            } else {
+                // Get the first tick within range
+                long startInteger = (long)GetDomain().Start;
+                long nextTick = granularitySeconds * (startInteger / granularitySeconds);
+                // If it's not a multiple of the granularity, start at the first tick within the domain
+                if (nextTick != startInteger)
+                    nextTick += granularitySeconds;
+
+                // Label 1 tick before/after too to create the fading out effect
+                points.Add(new Point(nextTick - granularitySeconds, 0));
+
+                while (nextTick < GetDomain().End) {
+                    points.Add(new Point(nextTick, 0));
+                    nextTick += granularitySeconds;
+                }
+
+                // Label 1 tick before/after too to create the fading out effect
+                points.Add(new Point(nextTick, 0));
+            }
+
+            return new Tuple<String, Point[]>(unit, points.ToArray());
         }
 
         private Point[] GetRangeTickData() {
@@ -988,49 +1011,6 @@ namespace CryptoRetriever.Data {
 
             return values;
 		}
-
-        /// <summary>
-        /// Provided the unit type and seconds value, this will calculate the beginning of that unit in seconds.
-        /// For example, supplying unitType = "d" (day) and date "3/11/2022 15:33:41" this function will return
-        /// "3/11/2022 00:00:00" (beginning of the day) as seconds
-        /// </summary>
-        /// <param name="unitType">
-        ///     The ID of the unit type:
-        ///         m - Month
-        ///         d - Day
-        ///         h - Hour
-        ///         mi - Minute
-        /// </param>
-        /// <param name="seconds">The UTC timestamp of a point.</param>
-        /// <returns>Returns the calculated UTC timestamp of the tick at the given granularity.</returns>
-        private double GetUnitBeginning(string unitType, double seconds) {
-            long utcTimestampSeconds = (long)Math.Round(seconds);
-            DateTime utcDateTime = DateTimeConstant.UnixStart.AddSeconds(utcTimestampSeconds);
-            DateTime utcBegin;
-            
-            if (unitType == "m")
-			{
-                utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, 1).ToUniversalTime();
-            }
-            else if (unitType == "d")
-            {
-                utcBegin = new DateTime(utcDateTime.Year, utcDateTime.Month, utcDateTime.Day).ToUniversalTime();
-            }
-            else if (unitType == "h")
-			{
-                utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour);
-            }
-            else if (unitType == "mi")
-            {
-                utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour).AddMinutes(utcDateTime.Minute);
-            }
-            else
-            {
-                utcBegin = utcDateTime.Date.AddHours(utcDateTime.Hour).AddMinutes(utcDateTime.Minute).AddSeconds(utcDateTime.Second);
-            }
-
-            return seconds - (utcDateTime - utcBegin).TotalSeconds;
-        }
 
         /// <summary>
         /// Calculates the geometry and path for the given list of points.
