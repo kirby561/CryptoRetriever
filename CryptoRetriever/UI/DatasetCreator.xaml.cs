@@ -11,6 +11,7 @@ using System.Windows.Media;
 using Utf8Json;
 using CryptoRetriever.Strats;
 using CryptoRetriever.Filter;
+using CryptoRetriever.UI.GenericDialogs;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -118,11 +119,13 @@ namespace CryptoRetriever.UI {
                 return;
             }
 
-            EndlessProgressDialog dialog = new EndlessProgressDialog();
+            ProgressDialog dialog = new ProgressDialog();
+            dialog.CurrentProgress = 0;
+            dialog.Label = "Saving...";
             if (_currentSource != null) {
                 int granularity = _selectedGranularity;
                 Asset currentAsset = _currencySelection.SelectedItem as Asset;
-                _currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity).ContinueWith((Task<DatasetResult> taskResult) => {
+                _currentSource.GetPriceHistoryAsync(currentAsset, new DateRange(startDate, endDate), granularity, new DialogProgressListener(dialog)).ContinueWith((Task<DatasetResult> taskResult) => {
                     dialog.Dispatcher.InvokeAsync(() => {
                         Result<Dataset> result = taskResult.Result;
 

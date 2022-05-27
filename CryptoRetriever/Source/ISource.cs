@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CryptoRetriever.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,8 +43,9 @@ namespace CryptoRetriever.Source {
         /// <param name="asset">The asset to request (see GetAssetsAsync)</param>
         /// <param name="range">A date range to request the assets from in local time.</param>
         /// <param name="secondsPerSample">The number of seconds between samples (Must be one returned from GetGranularityOptions)</param>
+        /// <param name="progressListener">An optional listener for getting progress reports. If null, no progress is reported.</param>
         /// <returns>Returns a task that can be waited on for the result. The result will be a dataset of (UTC timestamp, Asset Value) samples.</returns>
-        Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400);
+        Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange range, int secondsPerSample = 86400, ProgressListener progressListener = null);
 
         /// <summary>
         /// Gets the price history of the given asset within the given date range.
@@ -51,7 +53,8 @@ namespace CryptoRetriever.Source {
         /// <param name="asset">The asset to request (see GetAssetsAsync)</param>
         /// <param name="start">The start of the range to get samples from. The end of the range will be DateTime.Now.</param>
         /// <param name="secondsPerSample">The number of seconds between samples (Must be one returned from GetGranularityOptions)</param>
+        /// <param name="progressListener">An optional listener for getting progress reports. If null, no progress is reported.</param>
         /// <returns>Returns a task that can be waited on for the result. The result will be a dataset of (UTC timestamp, Asset Value) samples.</returns>
-        Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400);
+        Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400, ProgressListener progressListener = null);
     }
 }

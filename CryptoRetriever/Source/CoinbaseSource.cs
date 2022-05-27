@@ -1,6 +1,7 @@
 ﻿using Coinbase;
 using Coinbase.Models;
 using CryptoRetriever.Data;
+using CryptoRetriever.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,7 +67,7 @@ namespace CryptoRetriever.Source {
             return listResultTask;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange fullRangeLocal, int secondsPerSample) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange fullRangeLocal, int secondsPerSample, ProgressListener progressListener) {
             Task<DatasetResult> result = new Task<DatasetResult>(() => {
                 // The coinbase library being used doesn't support coinbase pro
                 // which is the only way to get history. It's no problem though
@@ -87,6 +88,9 @@ namespace CryptoRetriever.Source {
                 // Create an empty dataset (but not null) and result to keep track of the combined result
                 DatasetResult combinedDatasetResult = new DatasetResult(new Dataset());
                 combinedDatasetResult.Value.Granularity = secondsPerSample;
+
+                // Start off with 0 progress
+                ReportProgress(progressListener, 0, numSamples);
 
                 // Run a separate request for each piece of the full date range.
                 for (int i = 0; i < numRequests; i++) {
@@ -129,6 +133,7 @@ namespace CryptoRetriever.Source {
                         // Since the samples are increasing in time, each add should be O(1). The underlying 
                         // array was presized earlier.
                         combinedDatasetResult.Value.Add(datasetResult.Value);
+                        ReportProgress(progressListener, combinedDatasetResult.Value.Count, numSamples);
                     } else {
                         // If any of the subrequests fail, the whole operation is lost. We have
                         // failed our house and our country. We should be ashamed.
@@ -145,9 +150,9 @@ namespace CryptoRetriever.Source {
             return result;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample, ProgressListener progressListener) {
             DateRange range = new DateRange(start, DateTime.Now);
-            return GetPriceHistoryAsync(asset, range, secondsPerSample);
+            return GetPriceHistoryAsync(asset, range, secondsPerSample, progressListener);
         }
 
         /// <summary>
@@ -209,6 +214,17 @@ namespace CryptoRetriever.Source {
             }
 
             return dataSet;
+        }
+
+        /// <summary>
+        /// Helper method to report progress without needing to null check everywhere.
+        /// </summary>
+        /// <param name="listener">The listener to report progress to.</param>
+        /// <param name="currentProgress">The current progress.</param>
+        /// <param name="maxProgress">The max progress.</param>
+        private void ReportProgress(ProgressListener listener, long currentProgress, long maxProgress) {
+            if (listener != null)
+                listener.OnProgress(currentProgress, maxProgress);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace CryptoRetriever {
     public partial class EndlessProgressDialog : Window {
         public EndlessProgressDialog() {
             InitializeComponent();
-            WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
         public void SetText(String text) {

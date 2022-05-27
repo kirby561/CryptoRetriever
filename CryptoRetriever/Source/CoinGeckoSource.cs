@@ -1,4 +1,5 @@
 ﻿using CryptoRetriever.Data;
+using CryptoRetriever.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,7 +67,7 @@ namespace CryptoRetriever.Source {
             return listResultTask;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange rangeLocal, int secondsPerSample = 86400) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateRange rangeLocal, int secondsPerSample = 86400, ProgressListener progressListener = null) {
             Task<DatasetResult> result = new Task<DatasetResult>(() => {
                 // CoinGecko only supports 1 day at a time
                 DatasetResult datasetResult = new DatasetResult();
@@ -74,6 +75,8 @@ namespace CryptoRetriever.Source {
                 DateTime endUtc = rangeLocal.End.ToUniversalTime();
                 TimeSpan span = endUtc - startUtc;
                 int numDays = span.Days + 1;
+
+                ReportProgress(progressListener, 0, numDays);
 
                 bool succeeded = true;
                 String error = "";
@@ -109,6 +112,8 @@ namespace CryptoRetriever.Source {
                     // If any of the requests fail, stop and report the error.
                     if (!succeeded)
                         break;
+
+                    ReportProgress(progressListener, i + 1, numDays);
                 }
 
                 if (succeeded) {
@@ -126,9 +131,9 @@ namespace CryptoRetriever.Source {
             return result;
         }
 
-        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400) {
+        public Task<DatasetResult> GetPriceHistoryAsync(Asset asset, DateTime start, int secondsPerSample = 86400, ProgressListener progressListener = null) {
             DateRange range = new DateRange(start, DateTime.Now);
-            return GetPriceHistoryAsync(asset, range, secondsPerSample);
+            return GetPriceHistoryAsync(asset, range, secondsPerSample, progressListener);
         }
 
         /// <summary>
@@ -217,6 +222,17 @@ namespace CryptoRetriever.Source {
                 Thread.Sleep(timeToSleep * 1000);
             }
             _requestQueue.Enqueue(now);
+        }
+
+        /// <summary>
+        /// Helper method to report progress without needing to null check everywhere.
+        /// </summary>
+        /// <param name="listener">The listener to report progress to.</param>
+        /// <param name="currentProgress">The current progress.</param>
+        /// <param name="maxProgress">The max progress.</param>
+        private void ReportProgress(ProgressListener listener, long currentProgress, long maxProgress) {
+            if (listener != null)
+                listener.OnProgress(currentProgress, maxProgress);
         }
     }
 }
