@@ -2,6 +2,7 @@
 using CryptoRetriever.Filter;
 using CryptoRetriever.Strats;
 using CryptoRetriever.UI;
+using CryptoRetriever.UI.GenericDialogs;
 using KFSO.UI.DockablePanels;
 using Microsoft.Win32;
 using System;
@@ -10,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -401,18 +403,28 @@ namespace CryptoRetriever.UI {
 
             Strategy strategy = StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex];
             StrategyEngine engine = new StrategyEngine(strategy, _originalDataset);
-            engine.Run();
+            ProgressDialog dialog = new ProgressDialog();
+            dialog.Label = "Running...";
 
-            SetDataset(_filePath, _originalDataset, engine.RunContext.FilteredDataset);
-            _renderer.Transactions = engine.RunContext.Transactions;
+            ThreadPool.QueueUserWorkItem(o => {
+                engine.Run(new DialogProgressListener(dialog));
 
-            StrategyResultsView resultsView = new StrategyResultsView();
-            resultsView.RunContext = engine.RunContext;
-            DockablePanel panel = new DockablePanel();
-            panel.TitleText = "Run Results";
-            panel.DockManager = _dockManager;
-            panel.HostedContent = resultsView;
-            panel.Dock(_dockPanelSpotRight);
+                dialog.Dispatcher.Invoke(() => {
+                    SetDataset(_filePath, _originalDataset, engine.RunContext.FilteredDataset);
+                    _renderer.Transactions = engine.RunContext.Transactions;
+
+                    StrategyResultsView resultsView = new StrategyResultsView();
+                    resultsView.RunContext = engine.RunContext;
+                    DockablePanel panel = new DockablePanel();
+                    panel.TitleText = "Run Results";
+                    panel.DockManager = _dockManager;
+                    panel.HostedContent = resultsView;
+                    panel.Dock(_dockPanelSpotRight);
+                    dialog.Close();
+                });
+            });
+
+            dialog.ShowDialog();
         }
 
         /// <summary>

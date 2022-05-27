@@ -43,10 +43,9 @@ namespace CryptoRetriever.Strats {
 
         /// <summary>
         /// Runs the strategy through the full dataset.
-        /// 
-        /// // ?? TODO: Respect the start/end datetime in the strategy if set
         /// </summary>
-        public void Run() {
+        /// <param name="listener">A listener for being notified of progress.</param>
+        public void Run(ProgressListener listener) {
             // Run all the filters first
             FilterDataset(_strategy.Filters);
 
@@ -62,14 +61,21 @@ namespace CryptoRetriever.Strats {
 
                 // Wait for all of them to complete
                 lock (_runContextLock) {
+                    int lastTaskCount = -1;
                     while (_taskCompleteCount < taskCounter.TaskCount) {
+                        if (lastTaskCount != _taskCompleteCount) {
+                            listener.OnProgress(_taskCompleteCount, taskCounter.TaskCount);
+                            lastTaskCount = _taskCompleteCount;
+                        }
                         Monitor.Wait(_runContextLock);
                     }
                 }
             } else {
                 StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
                 workingRunContext.FilteredDataset = _filteredDataset;
+                listener.OnProgress(0, 1);
                 RunIteration(workingRunContext, new Dictionary<String, double>());
+                listener.OnProgress(1, 1);
                 RunContext = workingRunContext;
             }
 
@@ -90,7 +96,9 @@ namespace CryptoRetriever.Strats {
                 if (remainingRunners.Count > 0) {
                     PopRunnersAndRunIterations(CloneRunners(remainingRunners), runnerValues, taskCounter);
                 } else {
-                    taskCounter.Increment();
+                    lock (_runContextLock) {
+                        taskCounter.Increment();
+                    }
                     Dictionary<String, double> clonedValues = new Dictionary<String, double>();
                     foreach (KeyValuePair<String, double> pair in runnerValues)
                         clonedValues[pair.Key] = pair.Value;
