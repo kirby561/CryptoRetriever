@@ -29,6 +29,13 @@ namespace CryptoRetriever.Strats {
         public DateTime End { get; set; } = DateTime.MinValue; // Min means use the dataset's end
 
         /// <summary>
+        /// This can be set to have a custom engine run rather than the default one.
+        /// The ID needs to match a loaded engine which can vary. The list can be retrieved
+        /// with StrategyManager.Get
+        /// </summary>
+        public String EngineId { get; set; } = StrategyManager.DefaultEngineId;
+
+        /// <summary>
         /// Used for displaying in list views.
         /// </summary>
         public String Summary {
@@ -97,6 +104,7 @@ namespace CryptoRetriever.Strats {
                 obj.Put("OptimizationVariable", OptimizationVariable.ToJson());
             obj.Put("Start", Start)
                 .Put("End", End);
+            obj.Put("EngineId", EngineId);
 
             return obj;
         }
@@ -161,6 +169,13 @@ namespace CryptoRetriever.Strats {
 
             Start = obj.GetDateTime("Start");
             End = obj.GetDateTime("End");
+
+            // Try/catch for backwards compatibility
+            try {
+                EngineId = obj.GetString("EngineId");
+            } catch (Exception) {
+                EngineId = StrategyManager.DefaultEngineId;
+            }
         }
 
         /// <returns>

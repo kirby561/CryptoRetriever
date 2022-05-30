@@ -402,12 +402,21 @@ namespace CryptoRetriever.UI {
             }
 
             Strategy strategy = StrategyManager.GetStrategies()[_strategiesListView.SelectedIndex];
-            StrategyEngine engine = new StrategyEngine(strategy, _originalDataset);
+            IStrategyEngineFactory engineFactory = StrategyManager.GetEngineFactoryById(strategy.EngineId);
+            if (engineFactory == null) {
+                MessageBox.Show("No engine by the ID '" + strategy.EngineId + "' exists. Please check that it has been loaded or pick a different one.");
+                return;
+            }
+            StrategyEngine engine = engineFactory.CreateInstance();
+            // Use the original instead of the Active since when you run strategies the filtered
+            // one is set to the filtered dataset from the strategy's filters and we don't want to
+            // use that set if you rerun it.
+            Dataset dataset = _originalDataset; 
             ProgressDialog dialog = new ProgressDialog();
             dialog.Label = "Running...";
 
             ThreadPool.QueueUserWorkItem(o => {
-                engine.Run(new DialogProgressListener(dialog));
+                engine.Run(strategy, dataset, new DialogProgressListener(dialog));
 
                 dialog.Dispatcher.Invoke(() => {
                     SetDataset(_filePath, _originalDataset, engine.RunContext.FilteredDataset);

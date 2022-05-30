@@ -137,6 +137,10 @@
                 <TextBlock Margin="0 20 0 0" Text="Optimization Variable" Style="{StaticResource TbHeader}" />
                 <TextBlock Margin="0 5 0 0" Name="_optVariableTb" MouseUp="OnOptVariableTbClicked" Text="None" Style="{StaticResource TbValue2}" />
 
+                <!-- Engine -->
+                <TextBlock Margin="0 20 0 0" Text="Engine" Style="{StaticResource TbHeader}" />
+                <TextBlock Margin="0 5 0 0" Name="_engineTb" MouseUp="OnEngineTbClicked" Text="Default" Style="{StaticResource TbValue2}" />
+
                 <!-- Triggers -->
                 <Grid Margin="0 20 0 0">
                     <Grid.ColumnDefinitions>

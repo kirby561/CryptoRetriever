@@ -18,6 +18,7 @@ namespace CryptoRetriever.Strats {
         private Dataset _originalDataset;
         private Dataset _filteredDataset;
 
+        // This can be enabled to log all user variable values at each step
         private bool _isDebugEnabled = false;
 
         // Used to keep track of how many tasks are still running
@@ -36,16 +37,25 @@ namespace CryptoRetriever.Strats {
         /// </summary>
         private List<StrategyError> Errors { get; } = new List<StrategyError>();
 
-        public StrategyEngine(Strategy strategy, Dataset dataset) {
-            _strategy = strategy;
-            _originalDataset = dataset;
+        public StrategyEngine() { 
+            // Nothign to do
+        }
+
+        /// <returns>
+        /// Returns a unique ID for this type of engine.
+        /// </returns>
+        public virtual String GetId() {
+            return StrategyManager.DefaultEngineId;
         }
 
         /// <summary>
         /// Runs the strategy through the full dataset.
         /// </summary>
         /// <param name="listener">A listener for being notified of progress.</param>
-        public void Run(ProgressListener listener) {
+        public virtual void Run(Strategy strategy, Dataset dataset, ProgressListener listener) {
+            _strategy = strategy;
+            _originalDataset = dataset;
+
             // Run all the filters first
             FilterDataset(_strategy.Filters);
 
@@ -206,7 +216,7 @@ namespace CryptoRetriever.Strats {
         /// The filters are run in the order they appear in the strategy.
         /// The original dataset is unmodified.
         /// </summary>
-        public void FilterDataset(ObservableCollection<IFilter> filters) {
+        public virtual void FilterDataset(ObservableCollection<IFilter> filters) {
             _filteredDataset = _originalDataset;
             foreach (IFilter filter in filters) {
                 Result<Dataset> result = filter.Filter(_filteredDataset);
@@ -220,7 +230,7 @@ namespace CryptoRetriever.Strats {
         /// <summary>
         /// Move to the next datapoint in the dataset.
         /// </summary>
-        public void Step(StrategyRuntimeContext context) {
+        public virtual void Step(StrategyRuntimeContext context) {
             foreach (Trigger trigger in context.Strategy.Triggers) {
                 if (trigger.Condition.IsTrue(context)) {
                     if (trigger.TrueAction != null)

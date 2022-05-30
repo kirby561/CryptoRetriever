@@ -31,9 +31,8 @@ namespace CryptoRetriever.UI {
 
         public StrategyEditorWindow(StrategyManager manager) {
             InitializeComponent();
-            UpdateWorkingStrategy(new Strategy());
-
             _strategyManager = manager;
+            UpdateWorkingStrategy(new Strategy());
         }
 
         /// <summary>
@@ -71,6 +70,12 @@ namespace CryptoRetriever.UI {
                 _optVariableTb.Text = _strategy.OptimizationVariable.GetVariableName();
             else
                 _optVariableTb.Text = "Default";
+            _engineTb.Text = _strategy.EngineId;
+
+            // Take this opportunity to check if the engine ID exists and
+            // warn the user if it does not.
+            if (_strategyManager.GetEngineFactoryById(_strategy.EngineId) == null)
+                MessageBox.Show("Warning: The selected engine ID '" + _strategy.EngineId + "' is not currently loaded. Please check that the selected engine is correct.");
         }
 
         private void OnCancelButtonClicked(object sender, RoutedEventArgs e) {
@@ -148,6 +153,8 @@ namespace CryptoRetriever.UI {
                     }
                 }
             }
+
+            _strategy.EngineId = _engineTb.Text;
 
             // The Filters/States/Triggers are updated
             // as we go on the working Strategy so no
@@ -391,6 +398,24 @@ namespace CryptoRetriever.UI {
             if (dialog.SelectedIndex >= 0) {
                 UserNumberVariable result = options[dialog.SelectedIndex];
                 _optVariableTb.Text = result.GetVariableName();
+            }
+        }
+
+        private void OnEngineTbClicked(object sender, MouseButtonEventArgs e) {
+            List<String> options = _strategyManager.GetEngines().Select(x => x.GetId()).ToList();
+
+            ListBoxDialog dialog = new ListBoxDialog();
+            dialog.SetItemSource(
+                (String c) => {
+                    return c;
+                },
+                options);
+            UiHelper.CenterWindowInWindow(dialog, this);
+            dialog.ShowDialog();
+
+            if (dialog.SelectedIndex >= 0) {
+                String selectedId = options[dialog.SelectedIndex];
+                _engineTb.Text = selectedId;
             }
         }
     }

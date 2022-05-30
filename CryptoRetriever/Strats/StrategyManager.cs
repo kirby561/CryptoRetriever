@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CryptoRetriever.Strats {
@@ -15,8 +16,35 @@ namespace CryptoRetriever.Strats {
         private String _strategyDirectory;
         private String _strategyExt = ".strat";
 
+        // Strategies can specify which engine they want to run them by a string ID of the engine.
+        // It is possible for an ID to not match any engines if they are not loaded or don't exist.
+        // "Default" is the ID of the default engine.
+        private Dictionary<String, IStrategyEngineFactory> _engines = new Dictionary<String, IStrategyEngineFactory>();
+        public static String DefaultEngineId = "Default";
+
         public StrategyManager(String strategyDirectory) {
             _strategyDirectory = strategyDirectory;
+
+            // We always have the default engine
+            _engines.Add(DefaultEngineId, new DefaultStrategyEngineFactory());
+        }
+
+        /// <returns>
+        /// Returns the list of engine factories that have been loaded.
+        /// </returns>
+        public List<IStrategyEngineFactory> GetEngines() {
+            return _engines.Values.ToList();
+        }
+
+        /// <summary>
+        /// Gets a factory that creates engines with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the engine to check for.</param>
+        /// <returns>Returns the engine factory or null if no engine by that ID is loaded.</returns>
+        public IStrategyEngineFactory GetEngineFactoryById(String id) {
+            if (!_engines.ContainsKey(id))
+                return null;
+            return _engines[id];
         }
 
         /// <returns>
