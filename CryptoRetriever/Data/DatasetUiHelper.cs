@@ -1,7 +1,5 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 
 namespace CryptoRetriever.Data {

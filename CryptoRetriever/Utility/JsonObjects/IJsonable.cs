@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CryptoRetriever.Utility.JsonObjects {
+﻿namespace CryptoRetriever.Utility.JsonObjects {
     public interface IJsonable {
         /// <summary>
         /// Stores the data of this object as a JsonObject so

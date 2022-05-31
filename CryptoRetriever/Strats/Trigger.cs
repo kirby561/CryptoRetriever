@@ -1,8 +1,5 @@
 ﻿using CryptoRetriever.Utility.JsonObjects;
 using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
 
 namespace CryptoRetriever.Strats {
     public class Trigger : IJsonable {

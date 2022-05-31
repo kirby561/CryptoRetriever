@@ -2,9 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.Win32;
 using System;
-using CryptoRetriever.Source;
 using System.IO;
 using CryptoRetriever.UI;
 using CryptoRetriever.Data;

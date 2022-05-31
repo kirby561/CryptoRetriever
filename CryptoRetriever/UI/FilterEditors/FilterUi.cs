@@ -1,7 +1,6 @@
 ﻿using CryptoRetriever.Filter;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CryptoRetriever.UI {
     public static class FilterUi {

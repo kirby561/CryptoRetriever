@@ -1,9 +1,5 @@
-﻿using CryptoRetriever.Strats;
-using CryptoRetriever.Utility.JsonObjects;
+﻿using CryptoRetriever.Utility.JsonObjects;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using ValueType = CryptoRetriever.Strats.ValueType;
 
 namespace CryptoRetriever.Strats {
     public interface IVariable {

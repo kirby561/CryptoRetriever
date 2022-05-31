@@ -1,10 +1,6 @@
 ﻿using CryptoRetriever.Data;
 using CryptoRetriever.Utility.JsonObjects;
 using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
-using Utf8Json;
 
 namespace CryptoRetriever.Filter {
     public interface IFilter : IJsonable {

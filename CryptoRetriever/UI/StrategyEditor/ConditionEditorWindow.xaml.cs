@@ -1,15 +1,8 @@
 ﻿using CryptoRetriever.Strats;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
 using Trigger = CryptoRetriever.Strats.Trigger;
 using Condition = CryptoRetriever.Strats.Condition;
-using System.Linq;
-using ValueType = CryptoRetriever.Strats.ValueType;
 
 namespace CryptoRetriever.UI {
     /// <summary>

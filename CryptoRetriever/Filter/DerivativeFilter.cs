@@ -2,8 +2,6 @@
 using CryptoRetriever.Source;
 using CryptoRetriever.Utility.JsonObjects;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 
 namespace CryptoRetriever.Filter {

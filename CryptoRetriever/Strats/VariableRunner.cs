@@ -1,7 +1,5 @@
 ﻿using CryptoRetriever.Utility.JsonObjects;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CryptoRetriever.Strats {
     /// <summary>

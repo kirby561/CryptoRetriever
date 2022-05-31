@@ -1,8 +1,4 @@
-﻿using CryptoRetriever.Source;
-using CryptoRetriever.Utility.JsonObjects;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CryptoRetriever.Utility.JsonObjects;
 
 namespace CryptoRetriever.Strats {
     public class Account : IJsonable {

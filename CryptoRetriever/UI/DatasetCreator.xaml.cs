@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using CryptoRetriever.Source;
+﻿using CryptoRetriever.Source;
 using System;
 using System.Collections.Generic;
 using System.IO;

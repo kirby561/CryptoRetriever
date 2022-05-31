@@ -2,12 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Condition = CryptoRetriever.Strats.Condition;
-using Trigger = CryptoRetriever.Strats.Trigger;
 using ValueType = CryptoRetriever.Strats.ValueType;
 
 namespace CryptoRetriever.UI {
