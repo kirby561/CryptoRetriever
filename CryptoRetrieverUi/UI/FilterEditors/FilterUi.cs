@@ -13,6 +13,10 @@ namespace CryptoRetriever.UI {
             result[new AverageFilter()] = new AverageFilterDialog();
             result[new DerivativeFilter()] = null; // No options, don't show a dialog
 
+            // Take this opportunity to make sure that all filter types are present
+            if (result.Count != Filters.GetFilters().Count)
+                throw new ApplicationException("Mismatch between UI dialogs and possible filters.");
+
             return result;
         }
 

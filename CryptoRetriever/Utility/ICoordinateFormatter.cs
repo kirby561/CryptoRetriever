@@ -5,13 +5,13 @@ namespace CryptoRetriever {
         String Format(double coordinate);
     }
 
-    class DollarFormatter : ICoordinateFormatter {
+    public class DollarFormatter : ICoordinateFormatter {
         public string Format(double coordinate) {
             return "$" + ((decimal)coordinate).ToString("N");
         }
     }
 
-    class TimestampToDateFormatter : ICoordinateFormatter {
+    public class TimestampToDateFormatter : ICoordinateFormatter {
         public string Format(double coordinate) {
             long utcTimestampSeconds = (long)Math.Round(coordinate);
             DateTime unixStart = DateTimeConstant.UnixStart;

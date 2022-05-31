@@ -11,7 +11,7 @@ using System.Windows;
 using Utf8Json;
 
 namespace CryptoRetriever.Source {
-    class CoinGeckoSource : ISource {
+    public class CoinGeckoSource : ISource {
         // GoinGecko only supports daily 
         private List<int> _granularityOptions = new int[] { 86400 }.ToList<int>();
 

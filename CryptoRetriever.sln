@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoRetriever", "CryptoRetriever\CryptoRetriever.csproj", "{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoRetrieverUi", "CryptoRetrieverUi\CryptoRetrieverUi.csproj", "{5E6CB8CA-F3F7-45D7-9D89-C6CE7753B759}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{02944ABB-5DE6-4A4B-9EF2-5D4A8B883A87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase", "CryptoRetriever\Libraries\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj", "{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase", "Libraries\Coinbase-6.0.1\Source\Coinbase\Coinbase.csproj", "{E389D31B-5D51-4BFA-9F4E-41D89CC4B0CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockablePanels", "CryptoRetriever\Libraries\KFSO.UI-1.1.1\DockablePanels\DockablePanels.csproj", "{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockablePanels", "Libraries\KFSO.UI-1.1.1\DockablePanels\DockablePanels.csproj", "{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoRetriever", "CryptoRetriever\CryptoRetriever.csproj", "{BEF1F33B-FABD-4DA0-B8F5-CBC5D5B077C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4064C6A-CA2E-4DC1-862D-9241D4E46B67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEF1F33B-FABD-4DA0-B8F5-CBC5D5B077C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEF1F33B-FABD-4DA0-B8F5-CBC5D5B077C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEF1F33B-FABD-4DA0-B8F5-CBC5D5B077C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEF1F33B-FABD-4DA0-B8F5-CBC5D5B077C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,5 @@
 ﻿using CryptoRetriever.Data;
 using CryptoRetriever.Filter;
-using CryptoRetriever.UI;
 using CryptoRetriever.Utility.JsonObjects;
 using System;
 using System.Collections.Generic;
@@ -117,18 +116,14 @@ namespace CryptoRetriever.Strats {
             if (filters != null) {
                 foreach (JsonObject filterObj in filters) {
                     String filterType = filterObj.GetString("Type");
-                    bool found = false;
-                    // ?? TODO: Make this not necessary - both the for loop and the UI dependency
-                    foreach (IFilter filter in FilterUi.GetFilterUiMap().Keys) {
-                        if (filter.GetType().Name.Equals(filterType)) {
-                            filter.FromJson(filterObj);
-                            Filters.Add(filter);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
+                    IFilter filter = Filter.Filters.GetFilters()[filterType];
+
+                    if (filter == null)
                         throw new InvalidOperationException("Unsupported filter type in strategy: " + filterType);
+                    else {
+                        filter.FromJson(filterObj);
+                        Filters.Add(filter);
+                    }
                 }
             }
 
