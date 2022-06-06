@@ -99,6 +99,10 @@ namespace CryptoRetriever.Data {
 
         /// <summary>
         /// Finds the insertion point for the given x value assuming ascending order of Points by X value.
+        /// 
+        /// Note: The index returned can be equal to the size of the dataset (one passed the last index) indicating
+        /// that the insertion point is after the last element. If you're using this to find the closest index, you have
+        /// to check that it is not passed the end!
         /// </summary>
         /// <param name="x">The X value to search for</param>
         /// <returns>Returns the first index with a greater value than x. If you are inserting in order, this would be the index to insert at.</returns>
@@ -186,7 +190,9 @@ namespace CryptoRetriever.Data {
 
             // BinarySearchForX gets the closest value to the right of the point
             // so the closest will be the returned point or the one to the left.
-            int right = BinarySearchForX(xValue);
+            // BinarySearchForX can return the index passed the end so right can
+            // potentially be out of bounds without the Math.Min
+            int right = Math.Min(Count - 1, BinarySearchForX(xValue));
             int left = right - 1;
 
             if (left < 0)

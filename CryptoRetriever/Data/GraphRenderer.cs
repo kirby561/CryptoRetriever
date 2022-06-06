@@ -344,6 +344,16 @@ namespace CryptoRetriever.Data {
         /// Updates all the graphics to reflect the current state
         /// </summary>
         public void UpdateAll() {
+            // Check that there is enough room to render something
+            if (_renderParams.CanvasSizePx.Width <= Y_AXIS_X_OFFSET || _renderParams.CanvasSizePx.Height < X_AXIS_Y_OFFSET)
+                return;
+
+            if (_filteredDataset != null && _filteredDataset.Count <= 1)
+                return; // Not enough data to show
+
+            if (_originalDataset == null || _originalDataset.Count <= 1)
+                return; // Not enough data to show
+
             UpdateAxis();
             UpdateData();
             UpdateTransactions();
