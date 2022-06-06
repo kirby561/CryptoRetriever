@@ -12,9 +12,9 @@ using System.Threading;
 /// </summary>
 namespace CryptoRetriever.Strats {
     public class StrategyEngine {
-        private Strategy _strategy;
-        private Dataset _originalDataset;
-        private Dataset _filteredDataset;
+        protected Strategy _strategy;
+        protected Dataset _originalDataset;
+        protected Dataset _filteredDataset;
 
         // This can be enabled to log all user variable values at each step
         private bool _isDebugEnabled = false;
@@ -33,7 +33,7 @@ namespace CryptoRetriever.Strats {
         /// Errors that occur outside of the context go here and 
         /// are combined with the context ones afterwards.
         /// </summary>
-        private List<StrategyError> Errors { get; } = new List<StrategyError>();
+        protected List<StrategyError> Errors { get; } = new List<StrategyError>();
 
         public StrategyEngine() { 
             // Nothign to do
@@ -82,7 +82,7 @@ namespace CryptoRetriever.Strats {
                 StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
                 workingRunContext.FilteredDataset = _filteredDataset;
                 listener.OnProgress(0, 1);
-                RunIteration(workingRunContext, new Dictionary<String, double>());
+                PrepareAndRunIteration(workingRunContext, new Dictionary<String, double>());
                 listener.OnProgress(1, 1);
                 RunContext = workingRunContext;
             }
@@ -114,7 +114,7 @@ namespace CryptoRetriever.Strats {
                         StrategyRuntimeContext workingRunContext = new StrategyRuntimeContext(_strategy, _originalDataset);
                         workingRunContext.FilteredDataset = _filteredDataset;
                         workingRunContext.UserVars[runner.Variable.GetVariableName()].SetValueFromString(workingRunContext, "" + val);
-                        RunIteration(workingRunContext, clonedValues);
+                        PrepareAndRunIteration(workingRunContext, clonedValues);
 
                         // Check if this scenario was better than the previous best and replace it if so.
                         double accountOrOptimizationValue = GetOptimizationValueFor(workingRunContext);
@@ -143,7 +143,8 @@ namespace CryptoRetriever.Strats {
                 return ((INumberValue)workingRunContext.UserVars[workingRunContext.Strategy.OptimizationVariable.GetVariableName()]).GetValue(workingRunContext);
             } else {
                 // Otherwise just use the value of the account
-                double accountValue = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[workingRunContext.CurrentDatapointIndex - 1].Y);
+                int index = Math.Min(_originalDataset.Count - 1, workingRunContext.CurrentDatapointIndex);
+                double accountValue = ValueOf(workingRunContext.Account, workingRunContext.Dataset.Points[index].Y);
                 return accountValue;
             }
         }
@@ -161,12 +162,14 @@ namespace CryptoRetriever.Strats {
         }
 
         /// <summary>
-        /// Runs through the dataset executing the conditions/triggers for each point for the given context.
+        /// Sets up for the run by setting all the user variables to the runner values for this iteration,
+        /// calculates the start and end samples based on the configured start/end times in the strategy and
+        /// runs through the dataset executing the conditions/triggers for each point for the given context.
         /// Variable values can be passed in to change variables prior to running.
         /// </summary>
         /// <param name="workingContext">The context to use when executing.</param>
         /// <param name="runnerValues">A dictionary of variables to set in the context prior to running. The first string is the variable name, the second is its value.</param>
-        private void RunIteration(StrategyRuntimeContext workingContext, Dictionary<String, double> runnerValues) {
+        private void PrepareAndRunIteration(StrategyRuntimeContext workingContext, Dictionary<String, double> runnerValues) {
             String debugRunners = "";
             foreach (KeyValuePair<String, double> pair in runnerValues) {
                 workingContext.UserVars[pair.Key].SetValueFromString(workingContext, "" + pair.Value);
@@ -194,19 +197,34 @@ namespace CryptoRetriever.Strats {
                 lastSample = index;
             }
 
-            for (int i = firstSample; i <= lastSample; i++) {
-                Step(workingContext);
+            RunIteration(firstSample, lastSample, workingContext);
+            
+            Debug.WriteLine("  -- iteration complete (Thread " + Thread.CurrentThread.ManagedThreadId + "). OptimizationValue: " + GetOptimizationValueFor(workingContext));
+        }
+
+        /// <summary>
+        /// Runs an iteration between the given sample indices and for the given context.
+        /// This can be overriden to manage the whole iteration rather than each individual step.
+        /// 
+        /// Note: Each iteration can be run on a separate thread.
+        ///       There is no reason to call the base implementation if overriden.
+        /// </summary>
+        /// <param name="firstSampleIndex">The first sample in the iteration.</param>
+        /// <param name="lastSampleIndex">The last sample in the iteration.</param>
+        /// <param name="context">The context for this iteration.</param>
+        protected virtual void RunIteration(int firstSampleIndex, int lastSampleIndex, StrategyRuntimeContext context) {
+            for (int i = firstSampleIndex; i <= lastSampleIndex; i++) {
+                Step(context);
 
                 // Snapshot the user variables
                 if (_isDebugEnabled) {
                     var dictCopy = new Dictionary<String, IValue>();
-                    foreach (KeyValuePair<String, IValue> pair in workingContext.UserVars)
+                    foreach (KeyValuePair<String, IValue> pair in context.UserVars)
                         dictCopy.Add(pair.Key, pair.Value.Clone());
 
-                    workingContext.DebugUserVars.Add(dictCopy);
+                    context.DebugUserVars.Add(dictCopy);
                 }
             }
-            Debug.WriteLine("  -- iteration complete (Thread " + Thread.CurrentThread.ManagedThreadId + "). OptimizationValue: " + GetOptimizationValueFor(workingContext));
         }
 
         /// <summary>
@@ -214,7 +232,7 @@ namespace CryptoRetriever.Strats {
         /// The filters are run in the order they appear in the strategy.
         /// The original dataset is unmodified.
         /// </summary>
-        public virtual void FilterDataset(ObservableCollection<IFilter> filters) {
+        protected virtual void FilterDataset(ObservableCollection<IFilter> filters) {
             _filteredDataset = _originalDataset;
             foreach (IFilter filter in filters) {
                 Result<Dataset> result = filter.Filter(_filteredDataset);
@@ -227,8 +245,17 @@ namespace CryptoRetriever.Strats {
 
         /// <summary>
         /// Move to the next datapoint in the dataset.
+        /// 
+        /// This can be overriden to provide custom functionality rather
+        /// than triggers. Note however that steps can be run on different
+        /// threads since each iteration can be on a different thread so
+        /// any state between steps will have to be stored in a synchronized way
+        /// or in the context.
+        /// 
+        /// Custom engines should call the base class if they want triggers to still function
+        /// or increment context.CurrentDatapointIndex if not.
         /// </summary>
-        public virtual void Step(StrategyRuntimeContext context) {
+        protected virtual void Step(StrategyRuntimeContext context) {
             foreach (Trigger trigger in context.Strategy.Triggers) {
                 if (trigger.Condition.IsTrue(context)) {
                     if (trigger.TrueAction != null)

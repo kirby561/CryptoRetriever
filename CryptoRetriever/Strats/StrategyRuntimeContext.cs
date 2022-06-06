@@ -88,10 +88,11 @@ namespace CryptoRetriever.Strats {
         /// Purchases as much of the asset as possible with 
         /// the current amount of currency in the account.
         /// </summary>
-        public void PurchaseMax() {
+        /// <returns>True if the purchase succeeded or false if there was an error. Errors are reported in the Errors list.</returns>
+        public bool PurchaseMax() {
             double price = Dataset.Points[CurrentDatapointIndex].Y;
             double maxPurchaseAmount = GetMaxPurchaseAmount(Account, Strategy.ExchangeAssumptions, price);
-            Purchase(maxPurchaseAmount);
+            return Purchase(maxPurchaseAmount);
         }
 
         /// <summary>
@@ -99,7 +100,8 @@ namespace CryptoRetriever.Strats {
         /// the amount is larger than that.
         /// </summary>
         /// <param name="amount">The amount of asset to purchase.</param>
-        public void Purchase(double amount) {
+        /// <returns>True if the purchase succeeded or false if there was an error. Errors are reported in the Errors list.</returns>
+        public bool Purchase(double amount) {
             // Get the current price
             double price = Dataset.Points[CurrentDatapointIndex].Y;
             double maxPurchaseAmount = GetMaxPurchaseAmount(Account, Strategy.ExchangeAssumptions, price);
@@ -111,6 +113,7 @@ namespace CryptoRetriever.Strats {
                     double purchaseCost = purchaseAmount * price;
                     Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, -purchaseCost, purchaseAmount, Account, price);
                     PerformTransaction(transaction);
+                    return true;
                 } else {
                     Errors.Add(new StrategyError(
                         StrategyErrorCode.NotEnoughTimeSinceLastTransaction,
@@ -121,22 +124,26 @@ namespace CryptoRetriever.Strats {
                     StrategyErrorCode.NotEnoughMoneyToMakePurchase,
                     "Max purchase amount was " + maxPurchaseAmount + " so there was not enough money in the account to make a purchase."));
             }
+
+            return false;
         }
 
         /// <summary>
         /// Sells all of the currently held asset for currency.
         /// </summary>
-        public void SellMax() {
+        /// <returns>True if the sell succeeded or false if there was an error. Errors are reported in the Errors list.</returns>
+        public bool SellMax() {
             double price = Dataset.Points[CurrentDatapointIndex].Y;
             double maxSellAmount = GetMaxSellAmount(Account, Strategy.ExchangeAssumptions, price);
-            Sell(maxSellAmount);
+            return Sell(maxSellAmount);
         }
 
         /// <summary>
         /// Sells the given amount of asset or all of it if the amount remaining is less than this.
         /// </summary>
         /// <param name="amount">The amount to sell.</param>
-        public void Sell(double amount) {
+        /// <returns>True if the sell succeeded or false if there was an error. Errors are reported in the Errors list.</returns>
+        public bool Sell(double amount) {
             double price = Dataset.Points[CurrentDatapointIndex].Y;
             double maxSellAmount = GetMaxSellAmount(Account, Strategy.ExchangeAssumptions, price);
             double sellAmount = Math.Min(amount, maxSellAmount);
@@ -147,6 +154,7 @@ namespace CryptoRetriever.Strats {
                     double sellRevenue = sellAmount * price;
                     Transaction transaction = new Transaction(CurrentDatapointIndex, CurrentDateTime, fee, sellRevenue, -sellAmount, Account, price);
                     PerformTransaction(transaction);
+                    return true;
                 } else {
                     Errors.Add(new StrategyError(
                         StrategyErrorCode.NotEnoughTimeSinceLastTransaction,
@@ -157,6 +165,8 @@ namespace CryptoRetriever.Strats {
                     StrategyErrorCode.NotEnoughMoneyToMakePurchase,
                     "Max sell amount was " + maxSellAmount + " so there was not enough assets to be worth more than the transaction fee."));
             }
+
+            return false;
         }
 
         /// <summary>
